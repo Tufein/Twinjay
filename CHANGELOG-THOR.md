@@ -1,5 +1,12 @@
 # TwinJay (Thor) changes
 
+## 0.8.0-thor.3 — fix the missing YouTube plugin
+
+- The built-in YouTube plugin needs the Browser package, which was refused
+  ("Browser is only allowed for debug and official plugins") because the
+  bundled config carries no author signature. A plugin whose script is
+  byte-identical to the copy shipped inside the APK is now trusted.
+
 ## 0.8.0-thor.2 — find out why YouTube is missing after a clean install
 
 - A built-in plugin that fails to install or load is no longer swallowed: the

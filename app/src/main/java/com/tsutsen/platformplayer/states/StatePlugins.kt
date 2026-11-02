@@ -239,6 +239,21 @@ class StatePlugins {
             return _embeddedSources!!
         }
     }
+    /**
+     * True when [script] is byte-for-byte the script that ships inside this APK for plugin [id].
+     * Shipped plugins are trusted, even when their config carries no author signature
+     * (TwinJay builds them from pinned sources without re-signing).
+     */
+    fun isShippedScript(context: Context, id: String, script: String?): Boolean {
+        if(script.isNullOrEmpty()) return false;
+        return try {
+            val path = getEmbeddedSources(context)[id] ?: return false;
+            val config = SourcePluginConfig.fromJson(StateAssets.readAsset(context, path) ?: return false, "");
+            config.id == id && StateAssets.readAssetRelative(context, path, config.scriptUrl) == script;
+        } catch(ex: Throwable) {
+            false;
+        }
+    }
     fun getEmbeddedSourcesDefault(context: Context): List<String> {
         synchronized(_syncObject) {
             ensureSourcesConfigLoaded(context)
