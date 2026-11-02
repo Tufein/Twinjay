@@ -134,6 +134,12 @@ class Settings {
     var dualScreenFeedSources: List<String> = emptyList()
     // Second screen goes dark while a video plays and it is not touched.
     var dualScreenSleepWhilePlaying: Boolean = BuildConfig.IS_THOR_BUILD
+    // Seconds without touch before the second screen dims.
+    var dualScreenSleepSeconds: Int = 20
+    // How far it dims: 0 = black with the backlight off, otherwise the backlight percentage.
+    var dualScreenSleepLevel: Int = 0
+    // Second screen look: same | dark | black
+    var dualScreenLook: String = "same"
     // Skip sponsor segments of YouTube videos (SponsorBlock).
     var sponsorBlock: Boolean = BuildConfig.IS_THOR_BUILD
 
@@ -292,6 +298,12 @@ class Settings {
 
         // UI rounding as a percent (100 = shipped radii, 0 = sharp)
         var uiRounding: Int = 100
+
+        // Text size in percent of the system size
+        var fontScalePercent: Int = 100
+
+        // Pure black backgrounds in dark mode
+        var pureBlack: Boolean = false
 
         // User-created themes (key colors → generated scheme)
         var customThemes: List<CustomTheme> = emptyList()

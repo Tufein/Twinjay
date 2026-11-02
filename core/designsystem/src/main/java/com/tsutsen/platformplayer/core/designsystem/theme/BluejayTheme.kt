@@ -80,6 +80,10 @@ fun BluejayTheme(
     uiRounding: Int = 100,
     /** M3 expressive motion physics for every animation in the app. */
     motionScheme: MotionScheme = safeExpressiveMotionScheme,
+    /** Text size multiplier on top of the system font scale (Settings > Appearance). */
+    fontScale: Float = 1f,
+    /** Black backgrounds and surfaces (OLED look); only applied in dark mode. */
+    pureBlack: Boolean = false,
     content: @Composable () -> Unit,
 ) {
     val tokens = remember(uiRounding) {
@@ -87,8 +91,13 @@ fun BluejayTheme(
     }
     val view = LocalView.current
     val configuration = LocalConfiguration.current
-    val resolvedScheme = remember(view.context, configuration, darkTheme, dynamicColor, colorScheme) {
-        resolveBluejayColorScheme(view.context, darkTheme, dynamicColor, colorScheme)
+    val resolvedScheme = remember(view.context, configuration, darkTheme, dynamicColor, colorScheme, pureBlack) {
+        val base = resolveBluejayColorScheme(view.context, darkTheme, dynamicColor, colorScheme)
+        if (pureBlack && darkTheme) base.toPureBlack() else base
+    }
+    val baseDensity = androidx.compose.ui.platform.LocalDensity.current
+    val density = remember(baseDensity, fontScale) {
+        androidx.compose.ui.unit.Density(baseDensity.density, baseDensity.fontScale * fontScale.coerceIn(0.7f, 1.6f))
     }
     if (!view.isInEditMode) {
         SideEffect {
@@ -110,6 +119,7 @@ fun BluejayTheme(
                 LocalSemanticColors provides
                     if (darkTheme) SemanticColorsDark else SemanticColorsLight,
                 LocalBluejayTokens provides tokens,
+                androidx.compose.ui.platform.LocalDensity provides density,
             ) {
                 // Surface (not Box) so LocalContentColor resolves to onSurface —
                 // bare Text/Icons would otherwise default to hardcoded Color.Black.
@@ -122,5 +132,22 @@ fun BluejayTheme(
                 }
             }
         },
+    )
+}
+
+/** Pure-black variant of a dark scheme: backgrounds go black, containers near-black. */
+fun ColorScheme.toPureBlack(): ColorScheme {
+    val black = androidx.compose.ui.graphics.Color.Black
+    fun shade(v: Int) = androidx.compose.ui.graphics.Color(v, v, v)
+    return copy(
+        background = black,
+        surface = black,
+        surfaceDim = black,
+        surfaceContainerLowest = black,
+        surfaceContainerLow = shade(0x0A),
+        surfaceContainer = shade(0x12),
+        surfaceContainerHigh = shade(0x1A),
+        surfaceContainerHighest = shade(0x22),
+        surfaceBright = shade(0x26),
     )
 }

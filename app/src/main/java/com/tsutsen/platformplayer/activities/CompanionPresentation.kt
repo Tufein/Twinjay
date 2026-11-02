@@ -125,11 +125,15 @@ class CompanionPresentation(
             // default→saved and overshoot into negative corner radii.
             val prefsState by settingsRepository.preferences.collectAsState(initial = null)
             val prefs = prefsState ?: return@setContent
+            // Settings > Dual screen > Look: follow the main screen, or
+            // force dark / pure black on the second screen only.
+            val systemDark = isSystemInDarkTheme()
             val darkTheme =
-                when (prefs.appearance.themeMode) {
-                    ThemeMode.LIGHT -> false
-                    ThemeMode.DARK -> true
-                    ThemeMode.AUTO -> isSystemInDarkTheme()
+                when {
+                    prefs.dualScreenLook == "dark" || prefs.dualScreenLook == "black" -> true
+                    prefs.appearance.themeMode == ThemeMode.LIGHT -> false
+                    prefs.appearance.themeMode == ThemeMode.DARK -> true
+                    else -> systemDark
                 }
             val appearance = prefs.appearance
             val activeTheme =
@@ -153,6 +157,9 @@ class CompanionPresentation(
                 dynamicColor = appearance.dynamicColor,
                 uiRounding = appearance.uiRounding,
                 colorScheme = customSchemes?.let { if (darkTheme) it.dark else it.light },
+                fontScale = appearance.fontSizeScale,
+                pureBlack = prefs.dualScreenLook == "black" ||
+                    (prefs.dualScreenLook == "same" && appearance.pureBlack),
             ) {
                 CompanionContent(
                     playerRepository = playerRepository,

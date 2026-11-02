@@ -39,6 +39,8 @@ class SettingsRepositoryImpl
                                 .getOrDefault(ThemeMode.AUTO),
                         dynamicColor = s.appearance.dynamicColor,
                         uiRounding = s.appearance.uiRounding,
+                        fontSizeScale = s.appearance.fontScalePercent / 100f,
+                        pureBlack = s.appearance.pureBlack,
                         customThemes = s.appearance.customThemes,
                         activeThemeId = s.appearance.activeThemeId,
                     ),
@@ -90,6 +92,9 @@ class SettingsRepositoryImpl
                 dualScreenDashPageOrder = s.dualScreenDashPageOrder,
                 dualScreenFeedSources = s.dualScreenFeedSources,
                 dualScreenSleepWhilePlaying = s.dualScreenSleepWhilePlaying,
+                dualScreenSleepSeconds = s.dualScreenSleepSeconds,
+                dualScreenSleepLevel = s.dualScreenSleepLevel,
+                dualScreenLook = s.dualScreenLook,
                 sponsorBlock = s.sponsorBlock,
                 dualScreenLibrarySlots = s.dualScreenLibrarySlots,
                 librarySectionOrder = s.librarySectionOrder,
@@ -134,6 +139,11 @@ class SettingsRepositoryImpl
                 "enableDeveloperOptions" -> s.advancedSettings = value as Boolean
                 "dualScreen" -> s.dualScreen = value as Boolean
                 "dualScreenSleepWhilePlaying" -> s.dualScreenSleepWhilePlaying = value as Boolean
+                "dualScreenSleepSeconds" -> s.dualScreenSleepSeconds = (value as Number).toInt()
+                "dualScreenSleepLevel" -> s.dualScreenSleepLevel = (value as Number).toInt()
+                "dualScreenLook" -> s.dualScreenLook = value as String
+                "fontScalePercent" -> s.appearance.fontScalePercent = (value as Number).toInt()
+                "pureBlack" -> s.appearance.pureBlack = value as Boolean
                 "sponsorBlock" -> s.sponsorBlock = value as Boolean
                 "dynamicColor" -> s.appearance.dynamicColor = value as Boolean
                 "uiRounding" -> s.appearance.uiRounding = (value as Number).toInt()
@@ -306,6 +316,9 @@ class SettingsRepositoryImpl
             s.dualScreenDashPageOrder = listOf("stats", "top_creators", "continue")
             s.dualScreenFeedSources = emptyList()
             s.dualScreenSleepWhilePlaying = false
+            s.dualScreenSleepSeconds = 20
+            s.dualScreenSleepLevel = 0
+            s.dualScreenLook = "same"
             s.sponsorBlock = false
             s.dualScreenLibrarySlots =
                 listOf("watch_later", "liked", "favourite", "history")

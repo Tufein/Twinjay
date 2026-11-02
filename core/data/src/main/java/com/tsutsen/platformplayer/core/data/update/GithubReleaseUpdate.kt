@@ -8,6 +8,10 @@ data class ReleaseInfo(
     val tag: String,
     val pageUrl: String,
     val apkUrl: String?,
+    /** Release notes as plain text (markdown stripped); empty when none. */
+    val notes: String = "",
+    /** Size of the APK asset in bytes, when GitHub reports it. */
+    val apkSizeBytes: Long? = null,
 )
 
 /**
@@ -46,7 +50,68 @@ object GithubReleaseUpdate {
         val apk = Regex("\"browser_download_url\"\\s*:\\s*\"([^\"]+\\.apk)\"").findAll(json)
             .map { it.groupValues[1] }
             .let { all -> all.firstOrNull { it.contains("arm64") } ?: all.firstOrNull() }
-        return ReleaseInfo(tag, page, apk)
+        val body = Regex("\"body\"\\s*:\\s*\"((?:[^\"\\\\]|\\\\.)*)\"").find(json)?.groupValues?.get(1)
+        val notes = body?.let { plainNotes(unescapeJson(it)) } ?: ""
+        val size = apk?.let { url ->
+            // The asset object holds "size" before its "browser_download_url".
+            val idx = json.indexOf(url)
+            if (idx < 0) null
+            else Regex("\"size\"\\s*:\\s*(\\d+)").findAll(json.substring(0, idx)).lastOrNull()
+                ?.groupValues?.get(1)?.toLongOrNull()
+        }
+        return ReleaseInfo(tag, page, apk, notes, size)
+    }
+
+    private fun unescapeJson(s: String): String {
+        val out = StringBuilder()
+        var i = 0
+        while (i < s.length) {
+            val c = s[i]
+            if (c == '\\' && i + 1 < s.length) {
+                when (val n = s[i + 1]) {
+                    'n' -> out.append('\n')
+                    'r' -> {}
+                    't' -> out.append(' ')
+                    'u' -> if (i + 5 < s.length) {
+                        s.substring(i + 2, i + 6).toIntOrNull(16)?.let { out.append(it.toChar()) }
+                        i += 4
+                    }
+                    else -> out.append(n)
+                }
+                i += 2
+            } else {
+                out.append(c)
+                i++
+            }
+        }
+        return out.toString()
+    }
+
+    /**
+     * Turns GitHub release markdown into short plain text for a dialog:
+     * headings and emphasis lose their markers, links keep their label,
+     * bullets become "•", and the auto-generated "Full Changelog" line goes.
+     */
+    fun plainNotes(markdown: String, maxLines: Int = 14): String {
+        val lines = markdown.lines()
+            .map { line ->
+                var l = line.trim()
+                l = l.replace(Regex("^#{1,6}\\s*"), "")
+                l = l.replace(Regex("^[-*]\\s+"), "• ")
+                l = l.replace(Regex("\\[([^\\]]+)]\\([^)]*\\)"), "$1")
+                l = l.replace("**", "").replace("__", "").replace("`", "")
+                l
+            }
+            .filterNot { it.startsWith("Full Changelog", ignoreCase = true) }
+        // Collapse runs of blank lines and trim the ends.
+        val collapsed = mutableListOf<String>()
+        for (l in lines) {
+            if (l.isEmpty() && (collapsed.isEmpty() || collapsed.last().isEmpty())) continue
+            collapsed += l
+        }
+        while (collapsed.isNotEmpty() && collapsed.last().isEmpty()) collapsed.removeAt(collapsed.size - 1)
+        return if (collapsed.size > maxLines) collapsed.take(maxLines).joinToString("\n") + "\n…"
+        else collapsed.joinToString("\n")
     }
 
     /** Blocking; call off the main thread. Returns null when offline or unparseable. */

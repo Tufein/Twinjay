@@ -424,7 +424,8 @@ fun PluginDetailScene(
                     // Action-button state — the buttons themselves are
                     // rendered at the top, right under the description card.
                     val descriptor = StatePlugins.instance.getPlugin(config!!.id)
-                    val hasAuth = descriptor?.getAuth() != null
+                    var signedOut by remember(config!!.id) { mutableStateOf(false) }
+                    val hasAuth = !signedOut && descriptor?.getAuth() != null
                     var showImportSheet by remember { mutableStateOf(false) }
                     var importType by remember { mutableStateOf<String?>(null) }
                     var importGeneration by remember { mutableIntStateOf(0) }
@@ -539,6 +540,18 @@ fun PluginDetailScene(
                     if (config!!.authentication != null) {
                         val context = LocalContext.current
 
+                        // Account status, so it is clear whether this source
+                        // uses your account before you tap anything.
+                        Text(
+                            text =
+                                if (hasAuth) "Signed in: ${config!!.name} uses your account"
+                                else "Not signed in: sign in for your subscriptions, playlists and age-restricted videos",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color =
+                                if (hasAuth) MaterialTheme.colorScheme.primary
+                                else MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+
                         Button(
                             shape = RoundedCornerShape(BluejayTokens().radius.md),
                             onClick = {
@@ -592,7 +605,30 @@ fun PluginDetailScene(
                                     containerColor = MaterialTheme.colorScheme.primary,
                                 ),
                         ) {
-                            Text("Login")
+                            Text(if (hasAuth) "Sign in again" else "Sign in to ${config!!.name}")
+                        }
+
+                        if (hasAuth) {
+                            OutlinedButton(
+                                shape = RoundedCornerShape(BluejayTokens().radius.md),
+                                onClick = {
+                                    val id = config!!.id
+                                    try {
+                                        StatePlugins.instance.setPluginAuth(id, null)
+                                        signedOut = true
+                                        StateApp.instance.scope.launch(Dispatchers.IO) {
+                                            StatePlatform.instance.reloadClient(context, id)
+                                        }
+                                        UIDialogs.toast(context, "Signed out of ${config!!.name}")
+                                    } catch (e: Exception) {
+                                        Logger.e(TAG, "Failed to sign out", e)
+                                        UIDialogs.toast(context, "Could not sign out: ${e.message}")
+                                    }
+                                },
+                                modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                            ) {
+                                Text("Sign out")
+                            }
                         }
 
                         // Show login warning if present

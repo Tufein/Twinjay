@@ -49,6 +49,7 @@ import androidx.compose.material.icons.filled.Forward30
 import androidx.compose.material.icons.filled.Games
 import androidx.compose.material.icons.filled.Gesture
 import androidx.compose.material.icons.filled.GridOn
+import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.Launch
 import androidx.compose.material.icons.filled.Layers
@@ -613,6 +614,66 @@ fun SettingsSectionScreen(
             }
         }
 
+        Choice.DUAL_SLEEP_DELAY -> {
+            loaded?.let {
+                ChoiceDialog(
+                    title = "Dim second screen after",
+                    options = dualSleepDelayOptions,
+                    selected = it.dualScreenSleepSeconds.toString(),
+                    onSelected = { value ->
+                        viewModel.updateGeneral("dualScreenSleepSeconds", value.toInt())
+                        selectedChoice = null
+                    },
+                    onDismiss = { selectedChoice = null },
+                )
+            }
+        }
+
+        Choice.DUAL_LOOK -> {
+            loaded?.let {
+                ChoiceDialog(
+                    title = "Second screen look",
+                    options = dualLookOptions,
+                    selected = it.dualScreenLook,
+                    onSelected = { value ->
+                        viewModel.updateGeneral("dualScreenLook", value)
+                        selectedChoice = null
+                    },
+                    onDismiss = { selectedChoice = null },
+                )
+            }
+        }
+
+        Choice.FONT_SCALE -> {
+            loaded?.let {
+                ChoiceDialog(
+                    title = "Text size",
+                    options = fontScaleOptions,
+                    selected = (it.appearance.fontSizeScale * 100).roundToInt().toString(),
+                    onSelected = { value ->
+                        viewModel.updateGeneral("fontScalePercent", value.toInt())
+                        selectedChoice = null
+                    },
+                    onDismiss = { selectedChoice = null },
+                )
+            }
+        }
+
+        Choice.DUAL_SLEEP_LEVEL -> {
+            loaded?.let {
+                ChoiceDialog(
+                    title = "How far to dim",
+                    options = dualSleepLevelOptions,
+                    selected = it.dualScreenSleepLevel.toString(),
+                    onSelected = { value ->
+                        viewModel.updateGeneral("dualScreenSleepLevel", value.toInt())
+                        selectedChoice = null
+                    },
+                    onDismiss = { selectedChoice = null },
+                )
+            }
+        }
+
         Choice.JUMP_STEP -> {
             loaded?.let {
                 ChoiceDialog(
@@ -949,6 +1010,24 @@ private fun SectionItems(
                         onCheckedChange = { viewModel.updateGeneral("dynamicColor", it) },
                         groupPosition = GroupPosition.Middle,
                     )
+                    SettingsSwitchCard(
+                        icon = Icons.Filled.DarkMode,
+                        title = "Pure black",
+                        subtitle = "Black backgrounds in dark mode, easy on OLED screens",
+                        checked = state.appearance.pureBlack,
+                        onCheckedChange = { viewModel.updateGeneral("pureBlack", it) },
+                        groupPosition = GroupPosition.Middle,
+                    )
+                    SettingsOptionCard(
+                        icon = Icons.Filled.TextFields,
+                        title = "Text size",
+                        subtitle =
+                            fontScaleOptions.firstOrNull {
+                                it.second == (state.appearance.fontSizeScale * 100).roundToInt().toString()
+                            }?.first ?: "${(state.appearance.fontSizeScale * 100).roundToInt()}%",
+                        onClick = { onChoiceSelected(Choice.FONT_SCALE) },
+                        groupPosition = GroupPosition.Middle,
+                    )
                     SettingsSliderCard(
                         icon = Icons.Filled.RoundedCorner,
                         title = "UI rounding",
@@ -972,6 +1051,10 @@ private fun SectionItems(
                         onClick = { onChoiceSelected(Choice.GRID_COLUMNS) },
                         groupPosition = GroupPosition.Last,
                     )
+                }
+                Column(verticalArrangement = Arrangement.spacedBy(Tokens.SpaceXs)) {
+                    SettingsHeader("Ready-made themes")
+                    ThemePresetsRow(state.appearance, viewModel)
                 }
                 Column(verticalArrangement = Arrangement.spacedBy(Tokens.SpaceXs)) {
                     SettingsHeader("Custom themes")
@@ -1311,11 +1394,38 @@ private fun SectionItems(
                     SettingsSwitchCard(
                         icon = Icons.Filled.Timer,
                         title = "Dim second screen while playing",
-                        subtitle = "Turns the second screen black after 20 s without touch; touch wakes it",
+                        subtitle =
+                            if (state.dualScreenSleepWhilePlaying) "On: touch the screen to wake it"
+                            else "Off: the second screen stays at normal brightness",
                         checked = state.dualScreenSleepWhilePlaying,
                         onCheckedChange = { viewModel.updateGeneral("dualScreenSleepWhilePlaying", it) },
                         groupPosition = GroupPosition.Middle,
                     )
+                    SettingsOptionCard(
+                        icon = Icons.Filled.DarkMode,
+                        title = "Look",
+                        subtitle = dualLookOptions.firstOrNull { it.second == state.dualScreenLook }?.first ?: "Same as main screen",
+                        onClick = { onChoiceSelected(Choice.DUAL_LOOK) },
+                        groupPosition = GroupPosition.Middle,
+                    )
+                    if (state.dualScreenSleepWhilePlaying) {
+                        SettingsOptionCard(
+                            icon = Icons.Filled.Timer,
+                            title = "Dim after",
+                            subtitle = dualSleepDelayOptions.firstOrNull { it.second == state.dualScreenSleepSeconds.toString() }?.first
+                                ?: "${state.dualScreenSleepSeconds} s without touch",
+                            onClick = { onChoiceSelected(Choice.DUAL_SLEEP_DELAY) },
+                            groupPosition = GroupPosition.Middle,
+                        )
+                        SettingsOptionCard(
+                            icon = Icons.Filled.Timer,
+                            title = "How far to dim",
+                            subtitle = dualSleepLevelOptions.firstOrNull { it.second == state.dualScreenSleepLevel.toString() }?.first
+                                ?: "${state.dualScreenSleepLevel}% brightness",
+                            onClick = { onChoiceSelected(Choice.DUAL_SLEEP_LEVEL) },
+                            groupPosition = GroupPosition.Middle,
+                        )
+                    }
                     SettingsOptionCard(
                         icon = Icons.Filled.Layers,
                         title = "Pages",
@@ -1731,6 +1841,24 @@ private fun AboutItems(viewModel: SettingsViewModel) {
                 .versionName
         }.getOrNull() ?: "unknown"
 
+    var updateRelease by remember { mutableStateOf<com.tsutsen.platformplayer.core.data.update.ReleaseInfo?>(null) }
+    var checkingUpdate by remember { mutableStateOf(false) }
+    updateRelease?.let { r ->
+        UpdateDialog(
+            release = r,
+            currentVersion = version,
+            onDownload = {
+                UpdatePrompt.download(context, r)
+                updateRelease = null
+            },
+            onLater = {
+                // Same as the startup prompt: skip this version until a newer one.
+                UpdatePrompt.dismiss(context, r.tag)
+                updateRelease = null
+            },
+        )
+    }
+
     Column(verticalArrangement = Arrangement.spacedBy(Tokens.SpaceLg)) {
         Card(
             shape = RoundedCornerShape(BluejayTokens().radius.card),
@@ -1803,22 +1931,23 @@ private fun AboutItems(viewModel: SettingsViewModel) {
                 SettingsOptionCard(
                     icon = Icons.Filled.SystemUpdateAlt,
                     title = "Check for updates",
-                    subtitle = "Looks for a newer $applicationLabel release on GitHub",
+                    subtitle = if (checkingUpdate) "Checking GitHub…" else "Looks for a newer $applicationLabel release on GitHub",
                     onClick = {
-                        scope.launch {
-                            val release =
-                                withContext(Dispatchers.IO) {
-                                    runCatching { GithubReleaseUpdate.fetchLatest() }.getOrNull()
+                        if (!checkingUpdate) {
+                            checkingUpdate = true
+                            scope.launch {
+                                val release =
+                                    withContext(Dispatchers.IO) {
+                                        runCatching { GithubReleaseUpdate.fetchLatest() }.getOrNull()
+                                    }
+                                checkingUpdate = false
+                                when {
+                                    release == null ->
+                                        Toast.makeText(context, "Could not check for updates. Are you online?", Toast.LENGTH_LONG).show()
+                                    GithubReleaseUpdate.isNewer(release.tag, version) -> updateRelease = release
+                                    else ->
+                                        Toast.makeText(context, "You are on the latest version ($version)", Toast.LENGTH_LONG).show()
                                 }
-                            when {
-                                release == null ->
-                                    Toast.makeText(context, "Could not check for updates", Toast.LENGTH_LONG).show()
-                                GithubReleaseUpdate.isNewer(release.tag, version) -> {
-                                    Toast.makeText(context, "Update ${release.tag} available", Toast.LENGTH_LONG).show()
-                                    openUrl(context, release.apkUrl ?: release.pageUrl)
-                                }
-                                else ->
-                                    Toast.makeText(context, "You are on the latest version", Toast.LENGTH_LONG).show()
                             }
                         }
                     },
@@ -1981,6 +2110,10 @@ private enum class Choice {
     PLAYBACK_SPEED,
     SPEEDUP_SENSITIVITY,
     JUMP_STEP,
+    DUAL_SLEEP_DELAY,
+    DUAL_SLEEP_LEVEL,
+    DUAL_LOOK,
+    FONT_SCALE,
     CONTROLLER_SEEK_BACK,
     CONTROLLER_SEEK_FORWARD,
     VIDEO_RESOLUTION,
@@ -2152,6 +2285,39 @@ private fun SettingsHeader(
 
 /** Canonical defaults — used to decide which subsections deviate. */
 private val defaults = AppPreferences()
+
+private val dualSleepDelayOptions =
+    listOf(
+        "10 seconds" to "10",
+        "20 seconds" to "20",
+        "30 seconds" to "30",
+        "1 minute" to "60",
+        "2 minutes" to "120",
+        "5 minutes" to "300",
+    )
+
+private val dualLookOptions =
+    listOf(
+        "Same as main screen" to "same",
+        "Always dark" to "dark",
+        "Pure black (OLED)" to "black",
+    )
+
+private val fontScaleOptions =
+    listOf(
+        "Small (90%)" to "90",
+        "Normal (100%)" to "100",
+        "Large (115%)" to "115",
+        "Extra large (130%)" to "130",
+    )
+
+private val dualSleepLevelOptions =
+    listOf(
+        "Black (backlight off)" to "0",
+        "Very dim (5%)" to "5",
+        "Dim (15%)" to "15",
+        "Slightly dim (35%)" to "35",
+    )
 
 /**
  * Configure the four 2x2 second-screen library slots. Tapping a slot opens a

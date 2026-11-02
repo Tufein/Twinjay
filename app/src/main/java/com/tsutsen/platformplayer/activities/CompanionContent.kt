@@ -317,6 +317,8 @@ internal fun CompanionContent(
         enabled = prefs.dualScreenSleepWhilePlaying,
         isPlaying = playerState.isPlaying,
         window = companionWindow,
+        delayMs = prefs.dualScreenSleepSeconds.coerceAtLeast(5) * 1000L,
+        levelPercent = prefs.dualScreenSleepLevel,
     ) {
     BottomSheetScaffold(
         scaffoldState = scaffoldState,

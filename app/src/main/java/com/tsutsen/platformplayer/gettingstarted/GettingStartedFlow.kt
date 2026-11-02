@@ -40,6 +40,7 @@ import androidx.compose.material.icons.outlined.SportsEsports
 import androidx.compose.material.icons.outlined.StayCurrentPortrait
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -126,8 +127,10 @@ fun GettingStartedFlow(
     // hosted inside the overlay, because navigating the main graph (as the
     // plugin browser does) would land on the hidden screen underneath.
     var loginConfig by remember { mutableStateOf<SourcePluginConfig?>(null) }
+    var loadingSources by remember { mutableStateOf(true) }
     LaunchedEffect(step) {
         if (step == 1 && sources.isEmpty()) {
+            loadingSources = true
             // Built-in plugins load shortly after start; poll briefly.
             var waited = 0
             while (sources.isEmpty() && waited < 40) {
@@ -141,6 +144,7 @@ fun GettingStartedFlow(
             // ones and check them.
             checkedSources = StatePlatform.instance.getEnabledClients().map { it.id }.toSet()
         }
+        if (step == 1) loadingSources = false
         // A default plugin (YouTube) that is missing from the list was not
         // installed at startup: retry once and remember why it failed.
         if (step == 1) {
@@ -228,6 +232,7 @@ fun GettingStartedFlow(
                 when (step) {
                     0 -> WelcomeStep()
                     1 -> SourcesStep(
+                            loading = loadingSources && availableSources.isEmpty(),
                             missingDefaults = missingDefaults,
                             sources = availableSources,
                             checked = checkedSources,
@@ -285,8 +290,8 @@ fun GettingStartedFlow(
                 },
             primary =
                 when (step) {
-                    0 -> Pair("First setup", { step = 1 })
-                    4 -> Pair("Done", onFinished)
+                    0 -> Pair("Get started", { step = 1 })
+                    4 -> Pair("Start watching", onFinished)
                     else ->
                         Pair("Next", {
                             scope.launch {
@@ -311,6 +316,17 @@ fun GettingStartedFlow(
                 repeat(4) { i ->
                     Dot(active = i < step || step == 4)
                 }
+            }
+            if (step in 1..3) {
+                Text(
+                    "Step $step of 3",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier =
+                        Modifier
+                            .align(Alignment.TopCenter)
+                            .padding(top = Tokens.SpaceLg + Tokens.SpaceMd),
+                )
             }
         }
 
@@ -504,11 +520,84 @@ private fun WelcomeStep(modifier: Modifier = Modifier) {
         )
         Spacer(Modifier.height(Tokens.SpaceLg))
         Text(
-            "Welcome to TwinJay the media app!",
-            style = MaterialTheme.typography.headlineSmall,
+            "Welcome to TwinJay",
+            style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.SemiBold,
             textAlign = TextAlign.Center,
         )
+        Spacer(Modifier.height(Tokens.SpaceXs))
+        Text(
+            "Your videos on two screens, made for the AYN Thor.",
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+        )
+        Spacer(Modifier.height(Tokens.SpaceXl))
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(Tokens.SpaceMd),
+        ) {
+            WelcomeFeature(
+                Icons.Outlined.StayCurrentPortrait,
+                "Two screens",
+                "The video plays on top, controls, comments and up next sit on the bottom screen.",
+            )
+            WelcomeFeature(
+                Icons.Filled.Extension,
+                "Your sources",
+                "YouTube and other sources through plugins, with your own account if you like.",
+            )
+            WelcomeFeature(
+                Icons.Outlined.SportsEsports,
+                "Built-in controls",
+                "Play, pause and seek with the Thor's buttons.",
+            )
+        }
+        Spacer(Modifier.height(Tokens.SpaceLg))
+        Text(
+            "Setup takes about a minute.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+        )
+    }
+}
+
+@Composable
+private fun WelcomeFeature(icon: ImageVector, title: String, body: String) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
+        shape = RoundedCornerShape(BluejayTokens().radius.md),
+    ) {
+        Row(
+            modifier = Modifier.padding(Tokens.SpaceLg),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Box(
+                modifier =
+                    Modifier
+                        .size(Tokens.AvatarMd)
+                        .background(MaterialTheme.colorScheme.primaryContainer, RoundedCornerShape(50)),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    icon,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                    modifier = Modifier.size(Tokens.IconMd),
+                )
+            }
+            Spacer(Modifier.width(Tokens.SpaceLg))
+            Column {
+                Text(title, style = MaterialTheme.typography.titleMedium)
+                Text(
+                    body,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
     }
 }
 
@@ -518,6 +607,7 @@ private fun WelcomeStep(modifier: Modifier = Modifier) {
  */
 @Composable
 private fun SourcesStep(
+    loading: Boolean,
     missingDefaults: List<Pair<String, String>>,
     sources: List<IPlatformClient>,
     checked: Set<String>,
@@ -529,7 +619,8 @@ private fun SourcesStep(
         StepHeader(Icons.Default.Extension, "Choose your sources")
         Spacer(Modifier.height(Tokens.SpaceSm))
         Text(
-            "Pick the sources you want to watch. You can change this later in Settings.",
+            "Pick the sources you want to watch. Tap a card to sign in or change its settings; " +
+                "you can always change this later in Settings > Sources.",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -544,7 +635,17 @@ private fun SourcesStep(
             )
             Spacer(Modifier.height(Tokens.SpaceLg))
         }
-        if (sources.isEmpty()) {
+        if (loading) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                CircularProgressIndicator(modifier = Modifier.size(Tokens.IconMd), strokeWidth = 2.dp)
+                Spacer(Modifier.width(Tokens.SpaceMd))
+                Text(
+                    "Loading the built-in sources…",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        } else if (sources.isEmpty()) {
             Text(
                 "No sources available yet — you can continue and enable them later.",
                 style = MaterialTheme.typography.bodyMedium,
@@ -851,14 +952,17 @@ private fun DoneStep(modifier: Modifier = Modifier) {
         )
         Spacer(Modifier.height(Tokens.SpaceLg))
         Text(
-            "All set up!",
+            "You're all set",
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.SemiBold,
             textAlign = TextAlign.Center,
         )
         Spacer(Modifier.height(Tokens.SpaceMd))
         Text(
-            "You can log into your sources and start browsing.\nAnd do look around in the settings tab, there are many more things to customize!",
+            "Everything you picked is saved. A few handy places for later:\n\n" +
+                "Settings > Sources: sign in or add more sources\n" +
+                "Settings > Dual screen: pages and dimming of the bottom screen\n" +
+                "Settings > About: check for updates and run this setup again",
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,

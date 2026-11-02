@@ -1,5 +1,29 @@
 # TwinJay (Thor) changes
 
+## 0.8.1-thor.1 — nicer updates, setup and sign-in; adjustable dimming
+
+- Updates: TwinJay now checks GitHub once at start and shows a dialog with the
+  new version, its size and the release notes. "Download" fetches the APK with
+  the system download manager (tap the finished notification to install);
+  "Later" skips that version until the next one. Settings > About > "Check for
+  updates" shows the same dialog.
+- Setup wizard: a proper welcome page (what TwinJay does), a "Step x of 3"
+  label, a loading indicator while the built-in sources load, and a final page
+  that points to the most useful settings.
+- Plugin sign-in: the sign-in screen shows the site you are on, a load
+  progress bar, reload, back-within-the-page, a note that it closes by itself,
+  and a "Signed in" toast. A source's page shows whether you are signed in and
+  has a "Sign out" button.
+- Look and feel, adjustable yourself: Settings > Appearance has ready-made
+  themes (TwinJay, Sunset, Forest, Grape, Ruby, Mono; one tap, editable later),
+  "Pure black" for dark mode and "Text size" (90 to 130%). Settings > Dual screen
+  > "Look" lets the second screen follow the main screen or stay dark / pure
+  black. Text size applies to both screens.
+- Second screen dimming: Settings > Dual screen now has "Dim after" (10 s to
+  5 min) and "How far to dim" (black, 5%, 15%, 35%). Waking the screen always
+  restores normal brightness, also when the brightness was captured while
+  already dimmed.
+
 ## 0.8.0-thor.3 — fix the missing YouTube plugin
 
 - The built-in YouTube plugin needs the Browser package, which was refused

@@ -37,6 +37,12 @@ data class AppPreferences(
     val dualScreenFeedSources: List<String> = emptyList(),
     /** Black out the second screen while a video plays and it is not touched. */
     val dualScreenSleepWhilePlaying: Boolean = false,
+    /** Seconds without touch before the second screen dims. */
+    val dualScreenSleepSeconds: Int = 20,
+    /** 0 = black with the backlight off, otherwise the dimmed backlight in percent. */
+    val dualScreenSleepLevel: Int = 0,
+    /** Second screen look: "same" as the main screen, "dark" or "black" (OLED). */
+    val dualScreenLook: String = "same",
     /** Skip sponsor / intro / outro segments marked on sponsor.ajay.app. */
     val sponsorBlock: Boolean = false,
     val dualScreenLibrarySlots: List<String> =
