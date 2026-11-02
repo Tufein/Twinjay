@@ -116,6 +116,7 @@ class MainActivity :
 
     /** Jetpack PiP delegate (androidx.core:core-pip), used canonically below. */
     private lateinit var pip: VideoPlaybackPictureInPicture
+    private val pipControls by lazy { PipControls(this, playerRepository, lifecycleScope) }
 
     /** System picture-in-picture active (video-only window). */
     internal val pipActive = MutableStateFlow(false)
@@ -343,6 +344,7 @@ class MainActivity :
         super.onPictureInPictureModeChanged(isInPipMode, newConfig)
         pipLog("modeChanged($isInPipMode)")
         pipActive.value = isInPipMode
+        if (isInPipMode) pipControls.start() else pipControls.stop()
         if (!isInPipMode) {
             ensureCompanion()
             // PiP closed: pause so the video doesn't keep playing after
@@ -380,6 +382,7 @@ class MainActivity :
     }
 
     override fun onDestroy() {
+        pipControls.stop()
         companionStarted = false
         companionRetryJob?.cancel()
         companionDisplays.unregisterDisplayListener(companionDisplayListener)

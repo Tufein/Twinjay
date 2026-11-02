@@ -272,11 +272,11 @@ fun BluejayNavGraph(
             }
 
             is NavDestination.SubscriptionGroupDetail -> {
-                PlaceholderScreen("Subscription Group", "Coming soon")
+                SubscriptionGroupsScreen(focusId = destination.id)
             }
 
             is NavDestination.SubscriptionGroupList -> {
-                PlaceholderScreen("Subscription Groups", "Coming soon")
+                SubscriptionGroupsScreen()
             }
 
             is NavDestination.LibraryAlbums -> {
@@ -357,7 +357,7 @@ fun BluejayNavGraph(
             }
 
             is NavDestination.ImportPlaylists -> {
-                PlaceholderScreen("Import Playlists", "Coming soon")
+                ImportPlaylistsScreen()
             }
 
             is NavDestination.Browser -> {
