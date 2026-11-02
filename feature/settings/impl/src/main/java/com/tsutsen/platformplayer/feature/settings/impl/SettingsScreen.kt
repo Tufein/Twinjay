@@ -1851,7 +1851,11 @@ private fun AboutItems(viewModel: SettingsViewModel) {
                 UpdatePrompt.download(context, r)
                 updateRelease = null
             },
-            onLater = { updateRelease = null },
+            onLater = {
+                // Same as the startup prompt: skip this version until a newer one.
+                UpdatePrompt.dismiss(context, r.tag)
+                updateRelease = null
+            },
         )
     }
 
