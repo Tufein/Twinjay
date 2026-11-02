@@ -624,7 +624,10 @@ class PlayerRepositoryImpl(
                 val sbId = com.tsutsen.platformplayer.core.data.sponsorblock.SponsorBlock.videoId(videoId)
                 if (sbId != null) {
                     extrasScope.launch(Dispatchers.IO) {
-                        val found = com.tsutsen.platformplayer.core.data.sponsorblock.SponsorBlock.fetch(sbId)
+                        val wanted = prefs?.sponsorCategories.orEmpty().split(',').map { it.trim() }.filter { it.isNotEmpty() }.toSet()
+                        val found =
+                            com.tsutsen.platformplayer.core.data.sponsorblock.SponsorBlock.fetch(sbId)
+                                .filter { it.category in wanted }
                         if (generation == playGeneration.get()) {
                             sponsorSegments = found
                             val ranges = found.map { it.startMs..it.endMs }

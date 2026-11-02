@@ -43,6 +43,15 @@ fun DiagnosticsScreen() {
     val enabled = remember0 { StatePlatform.instance.getEnabledClients() }
     val available = remember0 { StatePlatform.instance.getAvailableClients() }
 
+    val usage =
+        remember0 {
+            com.tsutsen.platformplayer.states.StateDownloads.instance.getDownloadedVideos()
+                .groupBy { it.author.name }
+                .map { (name, vids) ->
+                    name to vids.sumOf { v -> v.videoSource.sumOf { it.fileSize } + v.audioSource.sumOf { it.fileSize } }
+                }.sortedByDescending { it.second }
+        }
+
     LazyColumn(
         modifier = Modifier.fillMaxSize().padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -87,6 +96,17 @@ fun DiagnosticsScreen() {
             )
         }
         item { HorizontalDivider() }
+        item {
+            val total = usage.sumOf { it.second }
+            Text("Downloads: ${formatBytes(total)}", style = MaterialTheme.typography.titleMedium)
+        }
+        items0(usage) { (name, bytes) ->
+            Row(Modifier.fillMaxWidth()) {
+                Text(name, modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)
+                Text(formatBytes(bytes), style = MaterialTheme.typography.bodySmall)
+            }
+        }
+        item { HorizontalDivider() }
         item { Text("Controller buttons (defaults)", style = MaterialTheme.typography.titleMedium) }
         items0(PlayerControllerActions.ALL) { action ->
             Row(Modifier.fillMaxWidth()) {
@@ -115,3 +135,10 @@ private fun <T> androidx.compose.foundation.lazy.LazyListScope.items0(
 ) {
     items(list.size) { content(list[it]) }
 }
+
+internal fun formatBytes(bytes: Long): String =
+    when {
+        bytes >= 1L shl 30 -> String.format(java.util.Locale.US, "%.1f GB", bytes / (1L shl 30).toDouble())
+        bytes >= 1L shl 20 -> String.format(java.util.Locale.US, "%.0f MB", bytes / (1L shl 20).toDouble())
+        else -> "${bytes / 1024} KB"
+    }

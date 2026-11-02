@@ -96,6 +96,7 @@ class SettingsRepositoryImpl
                 dualScreenSleepLevel = s.dualScreenSleepLevel,
                 dualScreenLook = s.dualScreenLook,
                 sponsorBlock = s.sponsorBlock,
+                sponsorCategories = s.sponsorCategories,
                 autoDownload = s.autoDownload,
                 hiddenWords = s.hiddenWords,
                 downloadOnlyCharging = s.downloadOnlyCharging,
@@ -151,6 +152,7 @@ class SettingsRepositoryImpl
                 "fontScalePercent" -> s.appearance.fontScalePercent = (value as Number).toInt()
                 "pureBlack" -> s.appearance.pureBlack = value as Boolean
                 "sponsorBlock" -> s.sponsorBlock = value as Boolean
+                "sponsorCategories" -> s.sponsorCategories = value as String
                 "autoDownload" -> s.autoDownload = value as Boolean
                 "hiddenWords" -> s.hiddenWords = value as String
                 "downloadOnlyCharging" -> s.downloadOnlyCharging = value as Boolean
@@ -332,6 +334,7 @@ class SettingsRepositoryImpl
             s.dualScreenSleepLevel = 0
             s.dualScreenLook = "same"
             s.sponsorBlock = false
+            s.sponsorCategories = "sponsor,selfpromo,interaction,intro,outro"
             s.autoDownload = false
             s.hiddenWords = ""
             s.downloadOnlyCharging = false
