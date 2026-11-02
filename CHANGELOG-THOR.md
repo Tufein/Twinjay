@@ -1,5 +1,14 @@
 # TwinJay (Thor) changes
 
+## 0.11.0-thor.1 — the wish-list, part two
+
+- Subscription groups (Settings > Subscription groups): make groups of channels
+  and tick which channels belong in each.
+- Import playlists (Settings): paste playlist links, one per line.
+- Picture-in-picture window now has back 10 s, play/pause and forward 10 s buttons.
+- Swapping the two screens is not included: it could leave the app stuck on the
+  wrong display and cannot be tested safely.
+
 ## 0.10.0-thor.1 — the wish-list, part one
 
 - Player options sheet: sleep timer (15, 30, 60 min or end of video), repeat a

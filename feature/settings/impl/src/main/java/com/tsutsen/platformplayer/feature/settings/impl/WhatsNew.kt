@@ -19,6 +19,10 @@ object WhatsNew {
 
     private val notes: Map<String, String> =
         mapOf(
+            "0.11.0-thor.1" to
+                "- Subscription groups (Settings)\n" +
+                "- Import playlists by link (Settings)\n" +
+                "- Picture-in-picture buttons: back, play/pause, forward",
             "0.10.0-thor.1" to
                 "- Options sheet: sleep timer, repeat a part (A-B), audio only\n" +
                 "- Playback speed is remembered per channel\n" +

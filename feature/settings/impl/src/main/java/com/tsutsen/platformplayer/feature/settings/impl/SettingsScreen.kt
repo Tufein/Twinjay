@@ -280,6 +280,24 @@ fun SettingsScreen(
                     }
                     item {
                         SettingsOptionCard(
+                            icon = Icons.Filled.Upload,
+                            title = "Import playlists",
+                            subtitle = "Paste playlist links",
+                            onClick = { navigator.navigateToImportPlaylists() },
+                            groupPosition = GroupPosition.Middle,
+                        )
+                    }
+                    item {
+                        SettingsOptionCard(
+                            icon = Icons.Filled.Info,
+                            title = "Subscription groups",
+                            subtitle = "Group your channels",
+                            onClick = { navigator.navigateToSubscriptionGroups() },
+                            groupPosition = GroupPosition.Middle,
+                        )
+                    }
+                    item {
+                        SettingsOptionCard(
                             icon = Icons.Filled.Info,
                             title = "About",
                             subtitle = "Version, license, support the original project",
