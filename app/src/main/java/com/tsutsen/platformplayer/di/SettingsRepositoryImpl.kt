@@ -101,6 +101,8 @@ class SettingsRepositoryImpl
                 hiddenWords = s.hiddenWords,
                 downloadOnlyCharging = s.downloadOnlyCharging,
                 offlineMode = s.offlineMode,
+                autoPresetByNetwork = s.autoPresetByNetwork,
+                bigSleepClock = s.bigSleepClock,
                 downloadCleanupDays = s.downloadCleanupDays,
                 batterySaver = s.batterySaver,
                 dualScreenLibrarySlots = s.dualScreenLibrarySlots,
@@ -157,6 +159,8 @@ class SettingsRepositoryImpl
                 "hiddenWords" -> s.hiddenWords = value as String
                 "downloadOnlyCharging" -> s.downloadOnlyCharging = value as Boolean
                 "offlineMode" -> s.offlineMode = value as Boolean
+                "autoPresetByNetwork" -> s.autoPresetByNetwork = value as Boolean
+                "bigSleepClock" -> s.bigSleepClock = value as Boolean
                 "downloadCleanupDays" -> s.downloadCleanupDays = (value as Number).toInt()
                 "batterySaver" -> s.batterySaver = value as Boolean
                 "dynamicColor" -> s.appearance.dynamicColor = value as Boolean
@@ -339,6 +343,8 @@ class SettingsRepositoryImpl
             s.hiddenWords = ""
             s.downloadOnlyCharging = false
             s.offlineMode = false
+            s.autoPresetByNetwork = false
+            s.bigSleepClock = false
             s.downloadCleanupDays = 0
             s.batterySaver = false
             s.dualScreenLibrarySlots =
