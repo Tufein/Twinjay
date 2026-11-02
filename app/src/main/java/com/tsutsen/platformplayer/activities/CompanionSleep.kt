@@ -44,8 +44,16 @@ internal object CompanionSleepPolicy {
      * already dimmed) or "unset" goes back to the system brightness, so the
      * screen can never stay stuck dark.
      */
-    fun wakeBrightness(saved: Float?): Float =
-        if (saved == null || saved <= 0.01f) WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE else saved
+    fun wakeBrightness(saved: Float?, userSet: Float? = null): Float =
+        userSet?.takeIf { it > 0.01f }
+            ?: if (saved == null || saved <= 0.01f) WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE else saved
+
+    /**
+     * Darkness of the overlay on the dimmed screen: fully black at level 0,
+     * lighter as the slider goes up (the backlight follows the same level).
+     */
+    fun scrimAlpha(levelPercent: Int): Float =
+        if (levelPercent <= 0) 1f else (0.85f * (1f - levelPercent.coerceIn(0, 100) / 100f)).coerceIn(0f, 0.85f)
 }
 
 /**
@@ -81,7 +89,7 @@ internal fun CompanionSleepLayer(
         }
         onDispose {
             if (asleep && w != null) {
-                w.attributes = w.attributes.apply { screenBrightness = CompanionSleepPolicy.wakeBrightness(saved) }
+                w.attributes = w.attributes.apply { screenBrightness = CompanionSleepPolicy.wakeBrightness(saved, com.tsutsen.platformplayer.feature.player.impl.SystemControls.brightness.value) }
             }
         }
     }
@@ -107,7 +115,7 @@ internal fun CompanionSleepLayer(
                         .fillMaxSize()
                         // Black hides everything; a dim level keeps the
                         // page faintly visible under a translucent scrim.
-                        .background(if (levelPercent <= 0) Color.Black else Color.Black.copy(alpha = 0.55f))
+                        .background(Color.Black.copy(alpha = CompanionSleepPolicy.scrimAlpha(levelPercent)))
                         .pointerInput(Unit) {
                             detectTapGestures {
                                 lastTouch = SystemClock.elapsedRealtime()

@@ -1732,20 +1732,24 @@ private fun SectionItems(
                         groupPosition = GroupPosition.Middle,
                     )
                     if (state.dualScreenSleepWhilePlaying) {
-                        SettingsOptionCard(
+                        SettingsSliderCard(
                             icon = Icons.Filled.Timer,
                             title = "Dim after",
-                            subtitle = dualSleepDelayOptions.firstOrNull { it.second == state.dualScreenSleepSeconds.toString() }?.first
-                                ?: "${state.dualScreenSleepSeconds} s without touch",
-                            onClick = { onChoiceSelected(Choice.DUAL_SLEEP_DELAY) },
+                            subtitle = "${state.dualScreenSleepSeconds} s without touch",
+                            value = state.dualScreenSleepSeconds.toFloat(),
+                            valueRange = 5f..300f,
+                            onValueChange = { viewModel.updateGeneral("dualScreenSleepSeconds", (it / 5f).roundToInt() * 5) },
                             groupPosition = GroupPosition.Middle,
                         )
-                        SettingsOptionCard(
-                            icon = Icons.Filled.Timer,
-                            title = "How far to dim",
-                            subtitle = dualSleepLevelOptions.firstOrNull { it.second == state.dualScreenSleepLevel.toString() }?.first
-                                ?: "${state.dualScreenSleepLevel}% brightness",
-                            onClick = { onChoiceSelected(Choice.DUAL_SLEEP_LEVEL) },
+                        SettingsSliderCard(
+                            icon = Icons.Filled.DarkMode,
+                            title = "Brightness while dimmed",
+                            subtitle =
+                                if (state.dualScreenSleepLevel <= 0) "0%: black, backlight off"
+                                else "${state.dualScreenSleepLevel}% of the screen's brightness",
+                            value = state.dualScreenSleepLevel.toFloat(),
+                            valueRange = 0f..100f,
+                            onValueChange = { viewModel.updateGeneral("dualScreenSleepLevel", (it / 5f).roundToInt() * 5) },
                             groupPosition = GroupPosition.Middle,
                         )
                     }
