@@ -450,7 +450,7 @@ class PlayerRepositoryImpl(
                     when {
                         minutes < 0 -> "End of video"
                         minutes > 0 -> "$minutes min"
-                        else -> "",
+                        else -> ""
                     },
             )
         }
@@ -831,7 +831,7 @@ class PlayerRepositoryImpl(
                 _exoPlayer?.playWhenReady = true
                 // Per-channel speed: a saved speed applies; leaving such a
                 // channel puts the speed back to normal.
-                val savedSpeed = ChannelSpeedStore.get(context, channelSpeedKey(currentVideo))
+                val savedSpeed = ChannelSpeedStore.get(context, channelSpeedKey(resolution.videoDetails?.let { mapVideoDetailsToContentItem(it) } ?: initial))
                 if (savedSpeed != null) {
                     _exoPlayer?.playbackParameters = androidx.media3.common.PlaybackParameters(savedSpeed)
                     speedFromChannel = true
