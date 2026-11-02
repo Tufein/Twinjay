@@ -21,6 +21,9 @@ import kotlin.math.abs
  * Instant actions (double-tap) receive a single [InstantActionEvent].
  */
 interface GestureActionHandler {
+    /** How readily touch gestures trigger (1 = normal). */
+    val sensitivity: Float get() = 1f
+
     fun handleGestureFrame(frame: GestureFrame)
     fun handleInstantAction(event: InstantActionEvent)
 }
@@ -222,7 +225,7 @@ class PlayerGestureActionHandler(
     }
 
     /** Jump step from the settings (Settings > Gestures > Time jump step). */
-    val sensitivity: Float get() = viewModel.gestureSensitivity.coerceIn(0.5f, 2f)
+    override val sensitivity: Float get() = viewModel.gestureSensitivity.coerceIn(0.5f, 2f)
 
     private fun jumpStepMs(): Long = viewModel.jumpStepSeconds * 1000L
 
