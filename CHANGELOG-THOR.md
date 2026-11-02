@@ -14,6 +14,11 @@
   progress bar, reload, back-within-the-page, a note that it closes by itself,
   and a "Signed in" toast. A source's page shows whether you are signed in and
   has a "Sign out" button.
+- Look and feel, adjustable yourself: Settings > Appearance has ready-made
+  themes (TwinJay, Sunset, Forest, Grape, Ruby, Mono; one tap, editable later),
+  "Pure black" for dark mode and "Text size" (90 to 130%). Settings > Dual screen
+  > "Look" lets the second screen follow the main screen or stay dark / pure
+  black. Text size applies to both screens.
 - Second screen dimming: Settings > Dual screen now has "Dim after" (10 s to
   5 min) and "How far to dim" (black, 5%, 15%, 35%). Waking the screen always
   restores normal brightness, also when the brightness was captured while

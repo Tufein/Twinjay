@@ -39,6 +39,8 @@ class SettingsRepositoryImpl
                                 .getOrDefault(ThemeMode.AUTO),
                         dynamicColor = s.appearance.dynamicColor,
                         uiRounding = s.appearance.uiRounding,
+                        fontSizeScale = s.appearance.fontScalePercent / 100f,
+                        pureBlack = s.appearance.pureBlack,
                         customThemes = s.appearance.customThemes,
                         activeThemeId = s.appearance.activeThemeId,
                     ),
@@ -92,6 +94,7 @@ class SettingsRepositoryImpl
                 dualScreenSleepWhilePlaying = s.dualScreenSleepWhilePlaying,
                 dualScreenSleepSeconds = s.dualScreenSleepSeconds,
                 dualScreenSleepLevel = s.dualScreenSleepLevel,
+                dualScreenLook = s.dualScreenLook,
                 sponsorBlock = s.sponsorBlock,
                 dualScreenLibrarySlots = s.dualScreenLibrarySlots,
                 librarySectionOrder = s.librarySectionOrder,
@@ -138,6 +141,9 @@ class SettingsRepositoryImpl
                 "dualScreenSleepWhilePlaying" -> s.dualScreenSleepWhilePlaying = value as Boolean
                 "dualScreenSleepSeconds" -> s.dualScreenSleepSeconds = (value as Number).toInt()
                 "dualScreenSleepLevel" -> s.dualScreenSleepLevel = (value as Number).toInt()
+                "dualScreenLook" -> s.dualScreenLook = value as String
+                "fontScalePercent" -> s.appearance.fontScalePercent = (value as Number).toInt()
+                "pureBlack" -> s.appearance.pureBlack = value as Boolean
                 "sponsorBlock" -> s.sponsorBlock = value as Boolean
                 "dynamicColor" -> s.appearance.dynamicColor = value as Boolean
                 "uiRounding" -> s.appearance.uiRounding = (value as Number).toInt()
@@ -312,6 +318,7 @@ class SettingsRepositoryImpl
             s.dualScreenSleepWhilePlaying = false
             s.dualScreenSleepSeconds = 20
             s.dualScreenSleepLevel = 0
+            s.dualScreenLook = "same"
             s.sponsorBlock = false
             s.dualScreenLibrarySlots =
                 listOf("watch_later", "liked", "favourite", "history")

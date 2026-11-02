@@ -576,6 +576,8 @@ private fun BluejayMainActivity(
         dynamicColor = appearance.dynamicColor,
         uiRounding = appearance.uiRounding,
         colorScheme = customSchemes?.let { if (darkTheme) it.dark else it.light },
+        fontScale = appearance.fontSizeScale,
+        pureBlack = appearance.pureBlack,
     ) {
         if (pip) {
             PlayerView(isPip = true)

@@ -5,6 +5,9 @@ import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -807,3 +810,80 @@ private val PaletteStyle.label: String
         }
 
 private fun Int.toColor(): Color = Color(this)
+
+/** One-tap themes; tapping one saves it as a custom theme (editable later) and turns it on. */
+private val themePresets =
+    listOf(
+        CustomTheme(id = "preset_twinjay", name = "TwinJay", primary = 0xFF3D7BFF.toInt(), tertiary = 0xFF8C6CFF.toInt()),
+        CustomTheme(id = "preset_sunset", name = "Sunset", primary = 0xFFFF7A45.toInt(), tertiary = 0xFFFF4D8D.toInt(), paletteStyle = PaletteStyle.VIBRANT),
+        CustomTheme(id = "preset_forest", name = "Forest", primary = 0xFF2E9E6A.toInt(), tertiary = 0xFFB5C94A.toInt()),
+        CustomTheme(id = "preset_grape", name = "Grape", primary = 0xFF9B4DFF.toInt(), tertiary = 0xFFFF6FD8.toInt(), paletteStyle = PaletteStyle.EXPRESSIVE),
+        CustomTheme(id = "preset_ruby", name = "Ruby", primary = 0xFFE5394B.toInt(), tertiary = 0xFFFFA24C.toInt()),
+        CustomTheme(id = "preset_mono", name = "Mono", primary = 0xFF8A8F98.toInt(), background = 0xFF6B6F76.toInt()),
+    )
+
+@Composable
+fun ThemePresetsRow(
+    appearance: AppearancePreferences,
+    viewModel: SettingsViewModel,
+) {
+    Row(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState()),
+        horizontalArrangement = Arrangement.spacedBy(Tokens.SpaceMd),
+    ) {
+        Column(
+            modifier =
+                Modifier
+                    .width(64.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .clickable { viewModel.setActiveTheme(null) }
+                    .padding(vertical = 6.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            PresetSwatch(
+                colors = listOf(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.tertiary),
+                selected = appearance.activeThemeId == null,
+            )
+            Text("Default", style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(top = 4.dp))
+        }
+        themePresets.forEach { preset ->
+            Column(
+                modifier =
+                    Modifier
+                        .width(64.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .clickable {
+                            if (appearance.customThemes.none { it.id == preset.id }) viewModel.saveTheme(preset)
+                            viewModel.setActiveTheme(preset.id)
+                        }
+                        .padding(vertical = 6.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                PresetSwatch(
+                    colors = listOf(Color(preset.primary), Color(preset.tertiary ?: preset.primary)),
+                    selected = appearance.activeThemeId == preset.id,
+                )
+                Text(preset.name, style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(top = 4.dp))
+            }
+        }
+    }
+}
+
+@Composable
+private fun PresetSwatch(colors: List<Color>, selected: Boolean) {
+    Box(
+        modifier =
+            Modifier
+                .size(48.dp)
+                .clip(CircleShape)
+                .background(androidx.compose.ui.graphics.Brush.linearGradient(colors)),
+        contentAlignment = Alignment.Center,
+    ) {
+        if (selected) {
+            Icon(Icons.Filled.Check, contentDescription = "Selected", tint = Color.White)
+        }
+    }
+}

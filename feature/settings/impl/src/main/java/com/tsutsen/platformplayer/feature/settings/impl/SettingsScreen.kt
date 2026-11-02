@@ -49,6 +49,7 @@ import androidx.compose.material.icons.filled.Forward30
 import androidx.compose.material.icons.filled.Games
 import androidx.compose.material.icons.filled.Gesture
 import androidx.compose.material.icons.filled.GridOn
+import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.Launch
 import androidx.compose.material.icons.filled.Layers
@@ -628,6 +629,36 @@ fun SettingsSectionScreen(
             }
         }
 
+        Choice.DUAL_LOOK -> {
+            loaded?.let {
+                ChoiceDialog(
+                    title = "Second screen look",
+                    options = dualLookOptions,
+                    selected = it.dualScreenLook,
+                    onSelected = { value ->
+                        viewModel.updateGeneral("dualScreenLook", value)
+                        selectedChoice = null
+                    },
+                    onDismiss = { selectedChoice = null },
+                )
+            }
+        }
+
+        Choice.FONT_SCALE -> {
+            loaded?.let {
+                ChoiceDialog(
+                    title = "Text size",
+                    options = fontScaleOptions,
+                    selected = (it.appearance.fontSizeScale * 100).roundToInt().toString(),
+                    onSelected = { value ->
+                        viewModel.updateGeneral("fontScalePercent", value.toInt())
+                        selectedChoice = null
+                    },
+                    onDismiss = { selectedChoice = null },
+                )
+            }
+        }
+
         Choice.DUAL_SLEEP_LEVEL -> {
             loaded?.let {
                 ChoiceDialog(
@@ -979,6 +1010,24 @@ private fun SectionItems(
                         onCheckedChange = { viewModel.updateGeneral("dynamicColor", it) },
                         groupPosition = GroupPosition.Middle,
                     )
+                    SettingsSwitchCard(
+                        icon = Icons.Filled.DarkMode,
+                        title = "Pure black",
+                        subtitle = "Black backgrounds in dark mode, easy on OLED screens",
+                        checked = state.appearance.pureBlack,
+                        onCheckedChange = { viewModel.updateGeneral("pureBlack", it) },
+                        groupPosition = GroupPosition.Middle,
+                    )
+                    SettingsOptionCard(
+                        icon = Icons.Filled.TextFields,
+                        title = "Text size",
+                        subtitle =
+                            fontScaleOptions.firstOrNull {
+                                it.second == (state.appearance.fontSizeScale * 100).roundToInt().toString()
+                            }?.first ?: "${(state.appearance.fontSizeScale * 100).roundToInt()}%",
+                        onClick = { onChoiceSelected(Choice.FONT_SCALE) },
+                        groupPosition = GroupPosition.Middle,
+                    )
                     SettingsSliderCard(
                         icon = Icons.Filled.RoundedCorner,
                         title = "UI rounding",
@@ -1002,6 +1051,10 @@ private fun SectionItems(
                         onClick = { onChoiceSelected(Choice.GRID_COLUMNS) },
                         groupPosition = GroupPosition.Last,
                     )
+                }
+                Column(verticalArrangement = Arrangement.spacedBy(Tokens.SpaceXs)) {
+                    SettingsHeader("Ready-made themes")
+                    ThemePresetsRow(state.appearance, viewModel)
                 }
                 Column(verticalArrangement = Arrangement.spacedBy(Tokens.SpaceXs)) {
                     SettingsHeader("Custom themes")
@@ -1346,6 +1399,13 @@ private fun SectionItems(
                             else "Off: the second screen stays at normal brightness",
                         checked = state.dualScreenSleepWhilePlaying,
                         onCheckedChange = { viewModel.updateGeneral("dualScreenSleepWhilePlaying", it) },
+                        groupPosition = GroupPosition.Middle,
+                    )
+                    SettingsOptionCard(
+                        icon = Icons.Filled.DarkMode,
+                        title = "Look",
+                        subtitle = dualLookOptions.firstOrNull { it.second == state.dualScreenLook }?.first ?: "Same as main screen",
+                        onClick = { onChoiceSelected(Choice.DUAL_LOOK) },
                         groupPosition = GroupPosition.Middle,
                     )
                     if (state.dualScreenSleepWhilePlaying) {
@@ -2048,6 +2108,8 @@ private enum class Choice {
     JUMP_STEP,
     DUAL_SLEEP_DELAY,
     DUAL_SLEEP_LEVEL,
+    DUAL_LOOK,
+    FONT_SCALE,
     CONTROLLER_SEEK_BACK,
     CONTROLLER_SEEK_FORWARD,
     VIDEO_RESOLUTION,
@@ -2228,6 +2290,21 @@ private val dualSleepDelayOptions =
         "1 minute" to "60",
         "2 minutes" to "120",
         "5 minutes" to "300",
+    )
+
+private val dualLookOptions =
+    listOf(
+        "Same as main screen" to "same",
+        "Always dark" to "dark",
+        "Pure black (OLED)" to "black",
+    )
+
+private val fontScaleOptions =
+    listOf(
+        "Small (90%)" to "90",
+        "Normal (100%)" to "100",
+        "Large (115%)" to "115",
+        "Extra large (130%)" to "130",
     )
 
 private val dualSleepLevelOptions =

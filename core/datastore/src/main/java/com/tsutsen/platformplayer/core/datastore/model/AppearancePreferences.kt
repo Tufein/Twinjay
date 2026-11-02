@@ -8,6 +8,8 @@ data class AppearancePreferences(
     val dynamicColor: Boolean = true,
     /** 0..100 — 100 is the shipped rounding, 0 is sharp. */
     val uiRounding: Int = 100,
+    /** Pure black backgrounds in dark mode (main screen). */
+    val pureBlack: Boolean = false,
     /** User-created themes (Settings > Appearance > Custom themes). */
     val customThemes: List<CustomTheme> = emptyList(),
     /** Active custom theme id; null = default (Material You / brand). */
