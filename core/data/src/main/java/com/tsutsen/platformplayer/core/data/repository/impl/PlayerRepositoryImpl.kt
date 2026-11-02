@@ -415,6 +415,61 @@ class PlayerRepositoryImpl(
         android.widget.Toast.makeText(context, "Skipped ${hit.category}", android.widget.Toast.LENGTH_SHORT).show()
     }
 
+    private var sleepJob: Job? = null
+    @Volatile private var audioOnly = false
+
+    private fun repeatAbIfNeeded(player: ExoPlayer, position: Long) {
+        val s = _playerState.value
+        if (s.abStartMs >= 0 && s.abEndMs > s.abStartMs && position >= s.abEndMs) {
+            player.seekTo(s.abStartMs)
+        }
+    }
+
+    override fun markAbPoint(isStart: Boolean) {
+        val position = _exoPlayer?.currentPosition ?: return
+        _playerState.update {
+            when {
+                isStart -> it.copy(abStartMs = position, abEndMs = if (it.abEndMs > position) it.abEndMs else -1L)
+                it.abStartMs in 0 until position -> it.copy(abEndMs = position)
+                else -> it
+            }
+        }
+    }
+
+    override fun clearAbRepeat() {
+        _playerState.update { it.copy(abStartMs = -1L, abEndMs = -1L) }
+    }
+
+    override fun setSleepTimer(minutes: Int) {
+        sleepJob?.cancel()
+        sleepJob = null
+        _exoPlayer?.pauseAtEndOfMediaItems = minutes < 0
+        _playerState.update {
+            it.copy(
+                sleepTimerLabel =
+                    when {
+                        minutes < 0 -> "End of video"
+                        minutes > 0 -> "$minutes min"
+                        else -> "",
+                    },
+            )
+        }
+        if (minutes > 0) {
+            sleepJob =
+                positionScope.launch {
+                    kotlinx.coroutines.delay(minutes * 60_000L)
+                    _exoPlayer?.playWhenReady = false
+                    _playerState.update { it.copy(isPlaying = false, sleepTimerLabel = "") }
+                }
+        }
+    }
+
+    override fun setAudioOnly(enabled: Boolean) {
+        audioOnly = enabled
+        _playerState.update { it.copy(audioOnly = enabled) }
+        applyTrackSelectionParameters()
+    }
+
     private fun startPositionTicker() {
         positionTickerJob?.cancel()
         positionTickerJob =
@@ -426,6 +481,7 @@ class PlayerRepositoryImpl(
                         _playerState.update { it.copy(currentPositionMs = position) }
                         stallReporter.onTick(player)
                         skipSponsorIfNeeded(player, position)
+                        repeatAbIfNeeded(player, position)
                     }
                     kotlinx.coroutines.delay(100) // 10fps for smooth UI
                 }
@@ -563,7 +619,7 @@ class PlayerRepositoryImpl(
 
             sponsorSegments = emptyList()
             sponsorSkipped.clear()
-            _playerState.update { it.copy(sponsorRanges = emptyList()) }
+            _playerState.update { it.copy(sponsorRanges = emptyList(), abStartMs = -1L, abEndMs = -1L) }
             if (prefs?.sponsorBlock == true) {
                 val sbId = com.tsutsen.platformplayer.core.data.sponsorblock.SponsorBlock.videoId(videoId)
                 if (sbId != null) {
@@ -773,6 +829,16 @@ class PlayerRepositoryImpl(
                 _exoPlayer?.prepare()
                 Log.i(TAG, "Setting playWhenReady to true...")
                 _exoPlayer?.playWhenReady = true
+                // Per-channel speed: a saved speed applies; leaving such a
+                // channel puts the speed back to normal.
+                val savedSpeed = ChannelSpeedStore.get(context, channelSpeedKey(currentVideo))
+                if (savedSpeed != null) {
+                    _exoPlayer?.playbackParameters = androidx.media3.common.PlaybackParameters(savedSpeed)
+                    speedFromChannel = true
+                } else if (speedFromChannel) {
+                    _exoPlayer?.playbackParameters = androidx.media3.common.PlaybackParameters(1f)
+                    speedFromChannel = false
+                }
                 // Re-arm the once-replay for the new video and re-apply the
                 // repeat mode (repeatMode normally persists across prepares).
                 loopOnceArmed = _loopMode.value == PlayerRepository.LOOP_ONCE
@@ -1038,7 +1104,13 @@ class PlayerRepositoryImpl(
                 ?: androidx.media3.common.PlaybackParameters(speed)
         }
         _playerState.update { it.copy(playbackSpeed = speed) }
+        speedFromChannel = false
+        ChannelSpeedStore.put(context, channelSpeedKey(_playerState.value.currentVideo), speed)
     }
+
+    @Volatile private var speedFromChannel = false
+
+    private fun channelSpeedKey(video: ContentItem?): String? = video?.author?.url ?: video?.author?.id
 
     override suspend fun setVideoQuality(quality: String) {
         // Unmuxed streams: a resolution is a URL swap, not an ABR band.
@@ -1196,6 +1268,7 @@ class PlayerRepositoryImpl(
     private fun applyTrackSelectionParameters() {
         val player = _exoPlayer ?: return
         val builder = TrackSelectionParameters.Builder()
+        builder.setTrackTypeDisabled(C.TRACK_TYPE_VIDEO, audioOnly)
         val height = selectedQuality.removeSuffix("p").toIntOrNull()
         if (height != null && height > 0) {
             // Constrain a narrow band around the selected height so the exact

@@ -30,6 +30,13 @@ data class PlayerState(
     val playingHeight: Int = 0,
     /** SponsorBlock segments (start..end in ms) of the current video, for the timeline. */
     val sponsorRanges: List<LongRange> = emptyList(),
+    /** A-B repeat: start / end in ms of the looped part (-1 = not set). */
+    val abStartMs: Long = -1L,
+    val abEndMs: Long = -1L,
+    /** Sleep timer label ("15 min", "End of video") or empty when off. */
+    val sleepTimerLabel: String = "",
+    /** Audio only: the video track is switched off. */
+    val audioOnly: Boolean = false,
     /** UI label of the selected subtitle ("Auto", "Off" or a language code). */
     val selectedSubtitle: String = "Off",
     /** Audio tracks of the current media, in manifest order (empty when none). */

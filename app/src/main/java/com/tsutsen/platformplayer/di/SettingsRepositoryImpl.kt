@@ -97,6 +97,9 @@ class SettingsRepositoryImpl
                 dualScreenLook = s.dualScreenLook,
                 sponsorBlock = s.sponsorBlock,
                 autoDownload = s.autoDownload,
+                hiddenWords = s.hiddenWords,
+                downloadOnlyCharging = s.downloadOnlyCharging,
+                downloadCleanupDays = s.downloadCleanupDays,
                 batterySaver = s.batterySaver,
                 dualScreenLibrarySlots = s.dualScreenLibrarySlots,
                 librarySectionOrder = s.librarySectionOrder,
@@ -148,6 +151,9 @@ class SettingsRepositoryImpl
                 "pureBlack" -> s.appearance.pureBlack = value as Boolean
                 "sponsorBlock" -> s.sponsorBlock = value as Boolean
                 "autoDownload" -> s.autoDownload = value as Boolean
+                "hiddenWords" -> s.hiddenWords = value as String
+                "downloadOnlyCharging" -> s.downloadOnlyCharging = value as Boolean
+                "downloadCleanupDays" -> s.downloadCleanupDays = (value as Number).toInt()
                 "batterySaver" -> s.batterySaver = value as Boolean
                 "dynamicColor" -> s.appearance.dynamicColor = value as Boolean
                 "uiRounding" -> s.appearance.uiRounding = (value as Number).toInt()
@@ -325,6 +331,9 @@ class SettingsRepositoryImpl
             s.dualScreenLook = "same"
             s.sponsorBlock = false
             s.autoDownload = false
+            s.hiddenWords = ""
+            s.downloadOnlyCharging = false
+            s.downloadCleanupDays = 0
             s.batterySaver = false
             s.dualScreenLibrarySlots =
                 listOf("watch_later", "liked", "favourite", "history")

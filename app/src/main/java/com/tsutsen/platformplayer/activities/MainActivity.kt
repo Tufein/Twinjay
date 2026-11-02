@@ -602,6 +602,7 @@ private fun BluejayMainActivity(
                 } else {
                     // Offers a newer GitHub release once per app start.
                     UpdatePromptHost()
+                    com.tsutsen.platformplayer.feature.settings.impl.WhatsNewHost()
                 }
             }
         }

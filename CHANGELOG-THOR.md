@@ -1,5 +1,18 @@
 # TwinJay (Thor) changes
 
+## 0.10.0-thor.1 — the wish-list, part one
+
+- Player options sheet: sleep timer (15, 30, 60 min or end of video), repeat a
+  part (A-B) and audio only.
+- Playback speed is remembered per channel.
+- Search box in every library list (history, watch later, ...).
+- Hide videos in the home feed by word or channel (Settings > Playback).
+- Presets for the second screen: at home, on the go, gaming (Settings > Dual
+  screen), and a faint clock and battery level while it is dimmed.
+- Downloads: optional "only while charging" and automatic deletion after N days.
+- A playback problem shows a "Share log" button.
+- "What's new" dialog after an update; search box in the settings.
+
 ## 0.9.0-thor.1 — more control, less waiting
 
 - Controller: new bindable actions "Fullscreen on / off" (default Y) and

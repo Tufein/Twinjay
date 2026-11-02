@@ -77,6 +77,10 @@ sealed interface PlayerUiState {
         val selectedQuality: String = "Auto",
         val playingHeight: Int = 0,
         val sponsorRanges: List<LongRange> = emptyList(),
+        val abStartMs: Long = -1L,
+        val abEndMs: Long = -1L,
+        val sleepTimerLabel: String = "",
+        val audioOnly: Boolean = false,
         val selectedSubtitle: String = "Off",
         val subtitleText: String = "",
         val chapters: List<VideoChapter> = emptyList(),
@@ -431,6 +435,10 @@ class PlayerViewModel
                                 selectedQuality = playerState.selectedQuality,
                                 playingHeight = playerState.playingHeight,
                                 sponsorRanges = playerState.sponsorRanges,
+                                abStartMs = playerState.abStartMs,
+                                abEndMs = playerState.abEndMs,
+                                sleepTimerLabel = playerState.sleepTimerLabel,
+                                audioOnly = playerState.audioOnly,
                                 selectedSubtitle = playerState.selectedSubtitle,
                                 subtitleText = playerState.subtitleText,
                                 chapters = playerState.chapters,
@@ -947,6 +955,14 @@ class PlayerViewModel
 
         /** "Stats for nerds" overlay (resolution, bitrate, buffer). */
         val statsVisible: kotlinx.coroutines.flow.StateFlow<Boolean> = _statsVisible
+
+        fun markAbPoint(isStart: Boolean) = playerRepository.markAbPoint(isStart)
+
+        fun clearAbRepeat() = playerRepository.clearAbRepeat()
+
+        fun setSleepTimer(minutes: Int) = playerRepository.setSleepTimer(minutes)
+
+        fun setAudioOnly(enabled: Boolean) = playerRepository.setAudioOnly(enabled)
 
         fun toggleStats() {
             _statsVisible.value = !_statsVisible.value

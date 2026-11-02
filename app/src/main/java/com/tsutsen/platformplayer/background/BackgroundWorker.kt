@@ -187,8 +187,25 @@ class BackgroundWorker(
 
         manager.cancel(12)
 
+        // Delete downloads older than the user's limit (Settings > Playback).
+        val cleanupDays = Settings.instance.downloadCleanupDays
+        if (cleanupDays > 0) {
+            try {
+                val limit = OffsetDateTime.now().minusDays(cleanupDays.toLong())
+                val downloads = com.tsutsen.platformplayer.states.StateDownloads.instance
+                downloads.getDownloadedVideos()
+                    .filter { it.downloadDate?.isBefore(limit) == true }
+                    .forEach { downloads.deleteCachedVideo(it.id) }
+            } catch (ex: Throwable) {
+                Logger.w("BackgroundWorker", "Download cleanup failed: ${ex.message}")
+            }
+        }
+
         if (Settings.instance.autoDownload &&
-            com.tsutsen.platformplayer.core.data.power.BatterySaver.isChargingOrHigh(appContext)
+            com.tsutsen.platformplayer.core.data.power.BatterySaver.isChargingOrHigh(
+                appContext,
+                minPercent = if (Settings.instance.downloadOnlyCharging) 101 else 50,
+            )
         ) {
             val def =
                 com.tsutsen.platformplayer.core.model.DownloadQuality.fromLabel(

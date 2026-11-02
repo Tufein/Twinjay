@@ -1228,6 +1228,9 @@ fun PlayerView(
                     }
                 }
 
+                state.error?.let { message ->
+                    PlayerErrorBanner(message = message)
+                }
                 val statsVisible by viewModel.statsVisible.collectAsState()
                 if (statsVisible) {
                     StatsOverlay(player = player, selectedQuality = state.selectedQuality)
@@ -1248,6 +1251,14 @@ fun PlayerView(
                         playingHeight = state.playingHeight,
                         statsVisible = viewModel.statsVisible.collectAsState().value,
                         onToggleStats = { viewModel.toggleStats() },
+                        abStartMs = state.abStartMs,
+                        abEndMs = state.abEndMs,
+                        onMarkAb = { viewModel.markAbPoint(it) },
+                        onClearAb = { viewModel.clearAbRepeat() },
+                        sleepTimerLabel = state.sleepTimerLabel,
+                        onSleepTimer = { viewModel.setSleepTimer(it) },
+                        audioOnly = state.audioOnly,
+                        onAudioOnly = { viewModel.setAudioOnly(it) },
                         qualities = state.videoQualities,
                         subtitle = state.selectedSubtitle,
                         subtitles = state.subtitleLanguages,
@@ -1477,5 +1488,39 @@ private fun CurrentVideoOptionsSheet(
                 TextButton(onClick = { showNewPlaylistDialog = false }) { Text("Cancel") }
             },
         )
+    }
+}
+
+/** Playback error with a one-tap way to share the app log. */
+@Composable
+private fun PlayerErrorBanner(message: String) {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val scope = rememberCoroutineScope()
+    Box(modifier = Modifier.fillMaxSize().padding(16.dp), contentAlignment = Alignment.BottomCenter) {
+        Row(
+            modifier =
+                Modifier
+                    .background(Color.Black.copy(alpha = 0.8f), RoundedCornerShape(12.dp))
+                    .padding(horizontal = 12.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = "Playback problem: $message",
+                color = Color.White,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.weight(1f, fill = false),
+            )
+            TextButton(
+                onClick = {
+                    scope.launch {
+                        val uri =
+                            kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+                                com.tsutsen.platformplayer.core.data.log.AppLogShare.save(context)
+                            }
+                        if (uri != null) context.startActivity(com.tsutsen.platformplayer.core.data.log.AppLogShare.shareIntent(uri))
+                    }
+                },
+            ) { Text("Share log") }
+        }
     }
 }

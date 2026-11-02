@@ -47,6 +47,9 @@ import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Extension
 import androidx.compose.material.icons.filled.BatteryAlert
 import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.filled.SportsEsports
 import androidx.compose.material.icons.filled.Forward30
 import androidx.compose.material.icons.filled.Games
 import androidx.compose.material.icons.filled.Gesture
@@ -181,6 +184,28 @@ fun SettingsScreen(
                     // member, so the spacing reads as one stacked group.
                     verticalArrangement = Arrangement.spacedBy(Tokens.SpaceXs),
                 ) {
+                    item {
+                        var query by remember { mutableStateOf("") }
+                        Column(verticalArrangement = Arrangement.spacedBy(Tokens.SpaceXs)) {
+                            androidx.compose.material3.OutlinedTextField(
+                                value = query,
+                                onValueChange = { query = it },
+                                singleLine = true,
+                                placeholder = { Text("Search settings") },
+                                modifier = Modifier.fillMaxWidth(),
+                            )
+                            val hits = SettingsIndex.search(query)
+                            hits.forEachIndexed { index, entry ->
+                                SettingsOptionCard(
+                                    icon = Icons.Filled.Info,
+                                    title = entry.title,
+                                    subtitle = "In " + entry.sectionName,
+                                    onClick = { navigator.navigateToSettingsFragment(entry.section) },
+                                    groupPosition = GroupPosition.fromIndex(index, hits.size),
+                                )
+                            }
+                        }
+                    }
                     item {
                         SettingsOptionCard(
                             icon = Icons.Filled.BrightnessAuto,
@@ -381,6 +406,49 @@ fun SettingsSectionScreen(
                     selected = it.subtitle.font,
                     onSelected = { value ->
                         viewModel.updateGeneral("subtitleFont", value)
+                        selectedChoice = null
+                    },
+                    onDismiss = { selectedChoice = null },
+                )
+            }
+        }
+
+        Choice.HIDDEN_WORDS -> {
+            loaded?.let {
+                var draft by remember(it.hiddenWords) { mutableStateOf(it.hiddenWords) }
+                AlertDialog(
+                    onDismissRequest = { selectedChoice = null },
+                    title = { Text("Hide videos with these words") },
+                    text = {
+                        androidx.compose.material3.OutlinedTextField(
+                            value = draft,
+                            onValueChange = { v -> draft = v },
+                            label = { Text("Words, separated by commas") },
+                            supportingText = { Text("Matches the title or channel name. Takes effect when the feed refreshes.") },
+                        )
+                    },
+                    confirmButton = {
+                        TextButton(onClick = {
+                            viewModel.updateGeneral("hiddenWords", draft)
+                            selectedChoice = null
+                        }) { Text("OK") }
+                    },
+                    dismissButton = { TextButton(onClick = { selectedChoice = null }) { Text("Cancel") } },
+                )
+            }
+        }
+
+        Choice.CLEANUP_DAYS -> {
+            loaded?.let {
+                StepperDialog(
+                    title = "Delete downloads after (0 = never)",
+                    value = it.downloadCleanupDays,
+                    step = 7,
+                    min = 0,
+                    max = 365,
+                    suffix = " days",
+                    onSelected = { value ->
+                        viewModel.updateGeneral("downloadCleanupDays", value)
                         selectedChoice = null
                     },
                     onDismiss = { selectedChoice = null },
@@ -1167,7 +1235,7 @@ private fun SectionItems(
                         onCheckedChange = { viewModel.updateGeneral("sponsorBlock", it) },
                         groupPosition = GroupPosition.Single,
                     )
-                    SettingsHeader("Battery and downloads")
+                    SettingsHeader("Battery, downloads and filters")
                     SettingsSwitchCard(
                         icon = Icons.Filled.BatteryAlert,
                         title = "Battery saver",
@@ -1182,6 +1250,28 @@ private fun SectionItems(
                         subtitle = "On Wi-Fi in the background: new videos of channels with notifications on (max 5 per run)",
                         checked = state.autoDownload,
                         onCheckedChange = { viewModel.updateGeneral("autoDownload", it) },
+                        groupPosition = GroupPosition.Middle,
+                    )
+                    SettingsSwitchCard(
+                        icon = Icons.Filled.BatteryAlert,
+                        title = "Auto-download only while charging",
+                        subtitle = "Otherwise it also runs above 50% battery",
+                        checked = state.downloadOnlyCharging,
+                        onCheckedChange = { viewModel.updateGeneral("downloadOnlyCharging", it) },
+                        groupPosition = GroupPosition.Middle,
+                    )
+                    SettingsOptionCard(
+                        icon = Icons.Filled.Download,
+                        title = "Delete old downloads",
+                        subtitle = if (state.downloadCleanupDays == 0) "Never" else "After ${state.downloadCleanupDays} days",
+                        onClick = { onChoiceSelected(Choice.CLEANUP_DAYS) },
+                        groupPosition = GroupPosition.Middle,
+                    )
+                    SettingsOptionCard(
+                        icon = Icons.Filled.Forward30,
+                        title = "Hide videos with these words",
+                        subtitle = state.hiddenWords.ifBlank { "Nothing hidden" },
+                        onClick = { onChoiceSelected(Choice.HIDDEN_WORDS) },
                         groupPosition = GroupPosition.Last,
                     )
                     SettingsHeader(
@@ -1397,6 +1487,43 @@ private fun SectionItems(
                         ActivityResultContracts.StartActivityForResult(),
                     ) { }
                 Column(verticalArrangement = Arrangement.spacedBy(Tokens.SpaceXs)) {
+                    SettingsHeader("Presets")
+                    SettingsOptionCard(
+                        icon = Icons.Filled.Home,
+                        title = "At home",
+                        subtitle = "Second screen always on, follows the theme",
+                        onClick = {
+                            viewModel.updateGeneral("dualScreenSleepWhilePlaying", false)
+                            viewModel.updateGeneral("dualScreenLook", "same")
+                            viewModel.updateGeneral("batterySaver", true)
+                        },
+                        groupPosition = GroupPosition.First,
+                    )
+                    SettingsOptionCard(
+                        icon = Icons.Filled.Place,
+                        title = "On the go",
+                        subtitle = "Second screen black after 10 s, battery saver on",
+                        onClick = {
+                            viewModel.updateGeneral("dualScreenSleepWhilePlaying", true)
+                            viewModel.updateGeneral("dualScreenSleepSeconds", 10)
+                            viewModel.updateGeneral("dualScreenSleepLevel", 0)
+                            viewModel.updateGeneral("dualScreenLook", "black")
+                            viewModel.updateGeneral("batterySaver", true)
+                        },
+                        groupPosition = GroupPosition.Middle,
+                    )
+                    SettingsOptionCard(
+                        icon = Icons.Filled.SportsEsports,
+                        title = "Gaming",
+                        subtitle = "Dark second screen, dims to 15% after 60 s",
+                        onClick = {
+                            viewModel.updateGeneral("dualScreenSleepWhilePlaying", true)
+                            viewModel.updateGeneral("dualScreenSleepSeconds", 60)
+                            viewModel.updateGeneral("dualScreenSleepLevel", 15)
+                            viewModel.updateGeneral("dualScreenLook", "dark")
+                        },
+                        groupPosition = GroupPosition.Last,
+                    )
                     SettingsHeader("General")
                     SettingsSwitchCard(
                         icon = DualScreen,
@@ -2139,6 +2266,8 @@ private enum class Choice {
     SPEEDUP_SENSITIVITY,
     JUMP_STEP,
     DUAL_SLEEP_DELAY,
+    HIDDEN_WORDS,
+    CLEANUP_DAYS,
     DUAL_SLEEP_LEVEL,
     DUAL_LOOK,
     FONT_SCALE,

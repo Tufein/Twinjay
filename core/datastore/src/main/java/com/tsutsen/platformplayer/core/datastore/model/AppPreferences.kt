@@ -47,6 +47,12 @@ data class AppPreferences(
     val sponsorBlock: Boolean = false,
     /** Download new videos of notified channels on Wi-Fi in the background. */
     val autoDownload: Boolean = false,
+    /** Comma separated words: home videos whose title or channel contain one are hidden. */
+    val hiddenWords: String = "",
+    /** Only auto-download while charging. */
+    val downloadOnlyCharging: Boolean = false,
+    /** Delete downloads older than this many days (0 = never). */
+    val downloadCleanupDays: Int = 0,
     /** On low battery: dim the second screen fast and cap video at 720p. */
     val batterySaver: Boolean = false,
     val dualScreenLibrarySlots: List<String> =

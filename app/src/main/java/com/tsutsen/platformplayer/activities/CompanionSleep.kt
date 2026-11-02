@@ -15,7 +15,11 @@ import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.material3.Text
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
@@ -110,7 +114,33 @@ internal fun CompanionSleepLayer(
                                 asleep = false
                             }
                         },
-            )
+                contentAlignment = Alignment.Center,
+            ) {
+                SleepClock()
+            }
         }
     }
+}
+
+/** Faint clock and battery level on the dark second screen (only visible when the backlight is not fully off). */
+@Composable
+private fun SleepClock() {
+    val context = LocalContext.current
+    var text by remember { mutableStateOf("") }
+    LaunchedEffect(Unit) {
+        val format = java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault())
+        while (true) {
+            val battery =
+                context.applicationContext
+                    .registerReceiver(null, android.content.IntentFilter(android.content.Intent.ACTION_BATTERY_CHANGED))
+                    ?.let {
+                        val level = it.getIntExtra(android.os.BatteryManager.EXTRA_LEVEL, -1)
+                        val scale = it.getIntExtra(android.os.BatteryManager.EXTRA_SCALE, -1)
+                        if (level >= 0 && scale > 0) " \u00b7 ${level * 100 / scale}%" else ""
+                    }.orEmpty()
+            text = format.format(java.util.Date()) + battery
+            delay(30_000)
+        }
+    }
+    Text(text, color = Color.White.copy(alpha = 0.3f), fontSize = 28.sp)
 }

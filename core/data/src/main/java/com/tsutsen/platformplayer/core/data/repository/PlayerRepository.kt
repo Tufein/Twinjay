@@ -79,6 +79,17 @@ interface PlayerRepository {
      */
     fun prefetch(url: String) {}
 
+    /** A-B repeat: marks the start (A) or end (B) at the current position. */
+    fun markAbPoint(isStart: Boolean) {}
+
+    fun clearAbRepeat() {}
+
+    /** Sleep timer: [minutes] > 0 pauses after that long, -1 at the end of the video, 0 turns it off. */
+    fun setSleepTimer(minutes: Int) {}
+
+    /** Audio only: switches the video track off (saves data and battery). */
+    fun setAudioOnly(enabled: Boolean) {}
+
     companion object {
         const val LOOP_OFF = 0
         const val LOOP_ONCE = 1

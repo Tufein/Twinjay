@@ -51,6 +51,14 @@ internal fun OptionsModal(
     quality: String,
     playingHeight: Int = 0,
     statsVisible: Boolean = false,
+    abStartMs: Long = -1L,
+    abEndMs: Long = -1L,
+    onMarkAb: (Boolean) -> Unit = {},
+    onClearAb: () -> Unit = {},
+    sleepTimerLabel: String = "",
+    onSleepTimer: (Int) -> Unit = {},
+    audioOnly: Boolean = false,
+    onAudioOnly: (Boolean) -> Unit = {},
     onToggleStats: () -> Unit = {},
     qualities: List<Int>,
     subtitle: String,
@@ -123,6 +131,47 @@ internal fun OptionsModal(
                     )
                     Spacer(modifier = Modifier.width(Tokens.SpaceSm))
                 }
+            }
+            OptionCard(title = "Repeat a part (A-B)") {
+                FilterChip(
+                    selected = abStartMs >= 0,
+                    onClick = { onMarkAb(true) },
+                    label = { Text(if (abStartMs >= 0) "A at ${abStartMs / 1000} s" else "Set A here") },
+                    shapes = tokenizedChipShapes(),
+                )
+                Spacer(modifier = Modifier.width(Tokens.SpaceSm))
+                FilterChip(
+                    selected = abEndMs >= 0,
+                    onClick = { onMarkAb(false) },
+                    label = { Text(if (abEndMs >= 0) "B at ${abEndMs / 1000} s" else "Set B here") },
+                    shapes = tokenizedChipShapes(),
+                )
+                Spacer(modifier = Modifier.width(Tokens.SpaceSm))
+                FilterChip(
+                    selected = false,
+                    onClick = onClearAb,
+                    label = { Text("Clear") },
+                    shapes = tokenizedChipShapes(),
+                )
+            }
+            OptionCard(title = "Sleep timer") {
+                listOf("Off" to 0, "15 min" to 15, "30 min" to 30, "60 min" to 60, "End of video" to -1).forEach { (label, minutes) ->
+                    FilterChip(
+                        selected = (minutes == 0 && sleepTimerLabel.isEmpty()) || (minutes != 0 && sleepTimerLabel == label),
+                        onClick = { onSleepTimer(minutes) },
+                        label = { Text(label) },
+                        shapes = tokenizedChipShapes(),
+                    )
+                    Spacer(modifier = Modifier.width(Tokens.SpaceSm))
+                }
+            }
+            OptionCard(title = "Audio only") {
+                FilterChip(
+                    selected = audioOnly,
+                    onClick = { onAudioOnly(!audioOnly) },
+                    label = { Text(if (audioOnly) "On (no video)" else "Off") },
+                    shapes = tokenizedChipShapes(),
+                )
             }
             OptionCard(title = "Stats for nerds") {
                 FilterChip(

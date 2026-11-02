@@ -4,6 +4,7 @@ import com.tsutsen.platformplayer.core.designsystem.theme.Tokens
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -58,6 +59,18 @@ fun LibrarySectionDetailScreen(
     val section by viewModel.section.collectAsState()
     val items by viewModel.items.collectAsState()
     val isWide = rememberIsWide()
+    var query by remember { mutableStateOf("") }
+    val shown =
+        remember(items, query) {
+            if (query.isBlank()) {
+                items
+            } else {
+                items.filter { c ->
+                    c.title.contains(query, ignoreCase = true) ||
+                        (c as? CoreVideoCard)?.author?.contains(query, ignoreCase = true) == true
+                }
+            }
+        }
     var optionsCard by remember { mutableStateOf<CoreVideoCard?>(null) }
     var optionsPlaylist by remember { mutableStateOf<PlaylistCard?>(null) }
 
@@ -96,6 +109,19 @@ fun LibrarySectionDetailScreen(
                 },
             )
 
+            if (items.size > 5) {
+                androidx.compose.material3.OutlinedTextField(
+                    value = query,
+                    onValueChange = { query = it },
+                    singleLine = true,
+                    placeholder = { Text("Search in this list") },
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 4.dp),
+                )
+            }
+
             ContentCard(modifier = Modifier.fillMaxSize()) {
                 when {
                     section == null -> {
@@ -117,7 +143,7 @@ fun LibrarySectionDetailScreen(
 
                     else -> {
                     VideoContainer(
-                        items = items,
+                        items = shown,
                         layout = if (isWide) ContainerLayout.Grid(gridColumns) else ContainerLayout.List,
                         isLoading = false,
                         hasMorePages = false,
