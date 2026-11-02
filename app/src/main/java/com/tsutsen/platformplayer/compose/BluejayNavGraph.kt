@@ -356,6 +356,10 @@ fun BluejayNavGraph(
                 ImportSubscriptionsScreen()
             }
 
+            is NavDestination.Diagnostics -> {
+                DiagnosticsScreen()
+            }
+
             is NavDestination.ImportPlaylists -> {
                 ImportPlaylistsScreen()
             }

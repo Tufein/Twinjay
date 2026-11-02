@@ -28,4 +28,21 @@ class HomeFilterTest {
         val drop = VideoCard(id = "2", title = "Some shorts", thumbnailUrl = null, author = "A", url = "u2")
         assertEquals(listOf(keep), HomeFilter.apply(listOf(keep, drop), listOf("shorts")))
     }
+
+    @Test
+    fun hidesQuietChannels() {
+        val quietCard = VideoCard(id = "3", title = "Hello", thumbnailUrl = null, author = "A", authorUrl = "chan/q", url = "u3")
+        val other = VideoCard(id = "4", title = "Hello", thumbnailUrl = null, author = "B", authorUrl = "chan/o", url = "u4")
+        assertEquals(listOf(other), HomeFilter.apply(listOf(quietCard, other), emptyList(), setOf("chan/q")))
+    }
+
+    @Test
+    fun groupMatching() {
+        val g = com.tsutsen.platformplayer.core.data.groups.ChannelGroups.Group("1", "News", setOf("chan/a"))
+        val m = com.tsutsen.platformplayer.core.data.groups.ChannelGroups
+        assertTrue(m.matches(g, "chan/a"))
+        assertFalse(m.matches(g, "chan/b"))
+        assertFalse(m.matches(g, null))
+        assertTrue(m.matches(null, null))
+    }
 }

@@ -73,6 +73,7 @@ class EngineSubscriptionsRepositoryImpl
         }
 
         override suspend fun refresh() {
+            if (com.tsutsen.platformplayer.Settings.instance.offlineMode) return
             reload(updated = true)
         }
 

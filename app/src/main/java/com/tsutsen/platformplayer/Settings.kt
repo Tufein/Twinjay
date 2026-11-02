@@ -145,6 +145,8 @@ class Settings {
     // Download new videos of notified channels on Wi-Fi in the background.
     var autoDownload: Boolean = false
     var hiddenWords: String = ""
+    // Offline mode: no feed loading or background work, only what is saved.
+    var offlineMode: Boolean = false
     var downloadOnlyCharging: Boolean = false
     var downloadCleanupDays: Int = 0
     // On low battery: dim the second screen fast and cap video at 720p.

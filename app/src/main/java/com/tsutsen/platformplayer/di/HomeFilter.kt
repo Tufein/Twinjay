@@ -15,7 +15,9 @@ object HomeFilter {
         return words.any { t.contains(it) || a.contains(it) }
     }
 
-    fun apply(cards: List<Card>, words: List<String>): List<Card> =
-        if (words.isEmpty()) cards
-        else cards.filterNot { it is VideoCard && shouldHide(it.title, it.author, words) }
+    fun apply(cards: List<Card>, words: List<String>, quiet: Set<String> = emptySet()): List<Card> =
+        if (words.isEmpty() && quiet.isEmpty()) cards
+        else cards.filterNot {
+            it is VideoCard && (shouldHide(it.title, it.author, words) || (it.authorUrl != null && it.authorUrl in quiet))
+        }
 }

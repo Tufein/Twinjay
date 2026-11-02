@@ -52,6 +52,7 @@ sealed class NavDestination {
     data object Buy : NavDestination()
     data object ImportSubscriptions : NavDestination()
     data object ImportPlaylists : NavDestination()
+    data object Diagnostics : NavDestination()
     data class Browser(val url: String) : NavDestination()
     data class Comments(val url: String) : NavDestination()
     data object Suggestions : NavDestination()

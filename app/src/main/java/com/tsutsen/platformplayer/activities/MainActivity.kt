@@ -499,6 +499,13 @@ class MainActivity :
             notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
         }
 
+        // Subscription groups for the subscriptions feed chips.
+        com.tsutsen.platformplayer.core.data.groups.ChannelGroups.provider = {
+            com.tsutsen.platformplayer.states.StateSubscriptionGroups.instance.getSubscriptionGroups().map {
+                com.tsutsen.platformplayer.core.data.groups.ChannelGroups.Group(it.id, it.name, it.urls.toSet())
+            }
+        }
+
         // Set navigator for non-Compose code access
         StateApp.instance.navigator = navigator
 

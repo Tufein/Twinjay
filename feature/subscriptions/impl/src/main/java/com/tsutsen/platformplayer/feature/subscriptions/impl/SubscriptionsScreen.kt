@@ -131,6 +131,7 @@ fun SubscriptionsScreen(
                         gridColumns = gridColumns,
                         watchStates = watchStates,
                         onCreatorSelected = viewModel::selectCreator,
+                        onGroupSelected = viewModel::selectGroup,
                         onGoToChannel = { navigator.navigateToChannel(it) },
                         onStartedToggle = viewModel::toggleStarted,
                         onWatchedToggle = viewModel::toggleWatched,
@@ -193,6 +194,7 @@ private fun SubscriptionsContent(
     gridColumns: Int,
     watchStates: Map<String, com.tsutsen.platformplayer.core.model.WatchState> = emptyMap(),
     onCreatorSelected: (String?) -> Unit,
+    onGroupSelected: (String?) -> Unit = {},
     onGoToChannel: (String) -> Unit,
     onStartedToggle: () -> Unit,
     onWatchedToggle: () -> Unit,
@@ -289,6 +291,8 @@ private fun SubscriptionsContent(
                         onStreamsToggle = onStreamsToggle,
                     )
 
+                    GroupChips(state.groups, state.activeGroupId, onGroupSelected)
+
                     // Videos in grid
                     PullToRefreshBox(
                         // Spinner only for a deliberate refresh or first page —
@@ -370,6 +374,8 @@ private fun SubscriptionsContent(
                     onVideoToggle = onVideoToggle,
                     onStreamsToggle = onStreamsToggle,
                 )
+
+                GroupChips(state.groups, state.activeGroupId, onGroupSelected)
 
                 // Creator avatar strip
                 LazyRow(
@@ -623,5 +629,36 @@ private fun SubsHeader(
             label = { Text("Watched") },
             shapes = tokenizedChipShapes(),
         )
+    }
+}
+
+
+/** Narrow the feed to one of the user's subscription groups. Hidden when there are none. */
+@Composable
+private fun GroupChips(
+    groups: List<com.tsutsen.platformplayer.core.data.groups.ChannelGroups.Group>,
+    activeId: String?,
+    onSelect: (String?) -> Unit,
+) {
+    if (groups.isEmpty()) return
+    LazyRow(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(Tokens.SpaceXs),
+        contentPadding = PaddingValues(horizontal = Tokens.SpaceLg),
+    ) {
+        item {
+            androidx.compose.material3.FilterChip(
+                selected = activeId == null,
+                onClick = { onSelect(null) },
+                label = { Text("All") },
+            )
+        }
+        items(groups) { group ->
+            androidx.compose.material3.FilterChip(
+                selected = activeId == group.id,
+                onClick = { onSelect(if (activeId == group.id) null else group.id) },
+                label = { Text(group.name) },
+            )
+        }
     }
 }

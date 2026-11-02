@@ -60,15 +60,27 @@ fun LibrarySectionDetailScreen(
     val items by viewModel.items.collectAsState()
     val isWide = rememberIsWide()
     var query by remember { mutableStateOf("") }
+    // Time budget: show only what fits in N minutes, shortest first.
+    var budgetMinutes by remember { mutableStateOf(0) }
     val shown =
-        remember(items, query) {
-            if (query.isBlank()) {
-                items
-            } else {
-                items.filter { c ->
-                    c.title.contains(query, ignoreCase = true) ||
-                        (c as? CoreVideoCard)?.author?.contains(query, ignoreCase = true) == true
+        remember(items, query, budgetMinutes) {
+            val searched =
+                if (query.isBlank()) {
+                    items
+                } else {
+                    items.filter { c ->
+                        c.title.contains(query, ignoreCase = true) ||
+                            (c as? CoreVideoCard)?.author?.contains(query, ignoreCase = true) == true
+                    }
                 }
+            if (budgetMinutes <= 0) {
+                searched
+            } else {
+                searched
+                    .filter { c ->
+                        val d = (c as? CoreVideoCard)?.durationMs
+                        d != null && d > 0 && d <= budgetMinutes * 60_000L
+                    }.sortedBy { (it as CoreVideoCard).durationMs }
             }
         }
     var optionsCard by remember { mutableStateOf<CoreVideoCard?>(null) }
@@ -120,6 +132,21 @@ fun LibrarySectionDetailScreen(
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp, vertical = 4.dp),
                 )
+            }
+
+            if (items.size > 5 && items.any { it is CoreVideoCard && (it.durationMs ?: 0) > 0 }) {
+                androidx.compose.foundation.layout.Row(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                    horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(8.dp),
+                ) {
+                    listOf(0 to "All", 10 to "10 min", 20 to "20 min", 40 to "40 min").forEach { (m, label) ->
+                        androidx.compose.material3.FilterChip(
+                            selected = budgetMinutes == m,
+                            onClick = { budgetMinutes = m },
+                            label = { Text(if (m == 0) label else "I have $label") },
+                        )
+                    }
+                }
             }
 
             ContentCard(modifier = Modifier.fillMaxSize()) {
