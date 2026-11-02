@@ -1,7 +1,13 @@
 package com.tsutsen.platformplayer.compose
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -33,7 +39,7 @@ fun ImportPlaylistsScreen() {
     var status by remember { mutableStateOf<String?>(null) }
 
     Column(
-        modifier = Modifier.fillMaxSize().padding(16.dp),
+        modifier = Modifier.fillMaxSize().verticalScroll(androidx.compose.foundation.rememberScrollState()).padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Text("Import playlists", style = MaterialTheme.typography.headlineSmall)
@@ -79,5 +85,45 @@ fun ImportPlaylistsScreen() {
             },
         ) { Text(if (running) "Importing..." else "Import") }
         status?.let { Text(it, style = MaterialTheme.typography.bodyMedium) }
+
+        HorizontalDivider()
+        Text("Merge playlists", style = MaterialTheme.typography.titleLarge)
+        var version by remember { mutableIntStateOf(0) }
+        val playlists = remember(version) { StatePlaylists.instance.getPlaylists() }
+        val picked = remember { mutableStateOf(setOf<String>()) }
+        var mergedName by remember { mutableStateOf("") }
+        playlists.forEach { pl ->
+            Row(
+                Modifier.fillMaxWidth().clickable {
+                    picked.value = if (pl.id in picked.value) picked.value - pl.id else picked.value + pl.id
+                },
+                verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+            ) {
+                Checkbox(checked = pl.id in picked.value, onCheckedChange = null)
+                Text("${pl.name} (${pl.videos.size})", modifier = Modifier.padding(start = 8.dp))
+            }
+        }
+        OutlinedTextField(
+            value = mergedName,
+            onValueChange = { mergedName = it },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true,
+            label = { Text("Name of the new playlist") },
+        )
+        Button(
+            enabled = picked.value.size >= 2 && mergedName.isNotBlank(),
+            onClick = {
+                val chosen = playlists.filter { it.id in picked.value }
+                val seen = HashSet<String>()
+                val videos = chosen.flatMap { it.videos }.filter { seen.add(it.url) }
+                StatePlaylists.instance.createOrUpdatePlaylist(
+                    com.tsutsen.platformplayer.models.Playlist(mergedName.trim(), videos),
+                )
+                status = "Merged into \"${mergedName.trim()}\" (${videos.size} videos)."
+                picked.value = emptySet()
+                mergedName = ""
+                version++
+            },
+        ) { Text("Merge") }
     }
 }

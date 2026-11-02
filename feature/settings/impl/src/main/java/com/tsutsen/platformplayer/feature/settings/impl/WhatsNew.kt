@@ -19,6 +19,11 @@ object WhatsNew {
 
     private val notes: Map<String, String> =
         mapOf(
+            "0.13.0-thor.1" to
+                "- Swap the two screens (Settings > Dual screen)\n" +
+                "- Choose which SponsorBlock parts to skip\n" +
+                "- Merge playlists\n" +
+                "- Download space per channel in Diagnostics",
             "0.12.0-thor.1" to
                 "- Group chips in the subscriptions feed\n" +
                 "- Quiet channels and offline mode\n" +

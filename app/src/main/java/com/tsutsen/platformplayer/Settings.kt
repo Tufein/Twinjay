@@ -142,6 +142,8 @@ class Settings {
     var dualScreenLook: String = "same"
     // Skip sponsor segments of YouTube videos (SponsorBlock).
     var sponsorBlock: Boolean = BuildConfig.IS_THOR_BUILD
+    // Which SponsorBlock categories to skip (comma separated).
+    var sponsorCategories: String = "sponsor,selfpromo,interaction,intro,outro"
     // Download new videos of notified channels on Wi-Fi in the background.
     var autoDownload: Boolean = false
     var hiddenWords: String = ""

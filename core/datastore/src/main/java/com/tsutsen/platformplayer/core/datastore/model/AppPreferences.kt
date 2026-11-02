@@ -45,6 +45,8 @@ data class AppPreferences(
     val dualScreenLook: String = "same",
     /** Skip sponsor / intro / outro segments marked on sponsor.ajay.app. */
     val sponsorBlock: Boolean = false,
+    /** SponsorBlock categories to skip, comma separated. */
+    val sponsorCategories: String = "sponsor,selfpromo,interaction,intro,outro",
     /** Download new videos of notified channels on Wi-Fi in the background. */
     val autoDownload: Boolean = false,
     /** Comma separated words: home videos whose title or channel contain one are hidden. */
