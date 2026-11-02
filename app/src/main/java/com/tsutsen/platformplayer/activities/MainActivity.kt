@@ -500,6 +500,30 @@ class MainActivity :
             notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
         }
 
+        // Pick the second-screen preset from the network type (opt-in).
+        try {
+            val cm = getSystemService(android.net.ConnectivityManager::class.java)
+            var lastWifi: Boolean? = null
+            cm.registerDefaultNetworkCallback(
+                object : android.net.ConnectivityManager.NetworkCallback() {
+                    override fun onCapabilitiesChanged(
+                        network: android.net.Network,
+                        caps: android.net.NetworkCapabilities,
+                    ) {
+                        val wifi = caps.hasTransport(android.net.NetworkCapabilities.TRANSPORT_WIFI)
+                        if (wifi == lastWifi) return
+                        lastWifi = wifi
+                        if (!settingsRepository.preferences.value.autoPresetByNetwork) return
+                        lifecycleScope.launch {
+                            for ((k, v) in NetworkPreset.forWifi(wifi)) settingsRepository.updateGeneral(k, v)
+                        }
+                    }
+                },
+            )
+        } catch (e: Throwable) {
+            Log.w("MainActivity", "network preset unavailable: ${e.message}")
+        }
+
         // Subscription groups for the subscriptions feed chips.
         com.tsutsen.platformplayer.core.data.groups.ChannelGroups.provider = {
             com.tsutsen.platformplayer.states.StateSubscriptionGroups.instance.getSubscriptionGroups().map {

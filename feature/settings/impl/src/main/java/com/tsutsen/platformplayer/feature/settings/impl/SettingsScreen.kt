@@ -1568,6 +1568,22 @@ private fun SectionItems(
                         groupPosition = GroupPosition.Single,
                     )
                     SettingsHeader("Presets")
+                    SettingsSwitchCard(
+                        icon = Icons.Filled.Place,
+                        title = "Pick the preset by network",
+                        subtitle = "Wi-Fi: at home. Mobile data: on the go. Changes when the network changes",
+                        checked = state.autoPresetByNetwork,
+                        onCheckedChange = { viewModel.updateGeneral("autoPresetByNetwork", it) },
+                        groupPosition = GroupPosition.First,
+                    )
+                    SettingsSwitchCard(
+                        icon = Icons.Filled.Home,
+                        title = "Big clock when dimmed",
+                        subtitle = "Handy as a desk clock while charging",
+                        checked = state.bigSleepClock,
+                        onCheckedChange = { viewModel.updateGeneral("bigSleepClock", it) },
+                        groupPosition = GroupPosition.Middle,
+                    )
                     SettingsOptionCard(
                         icon = Icons.Filled.Home,
                         title = "At home",

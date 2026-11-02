@@ -142,5 +142,10 @@ private fun SleepClock() {
             delay(30_000)
         }
     }
-    Text(text, color = Color.White.copy(alpha = 0.3f), fontSize = 28.sp)
+    val big = com.tsutsen.platformplayer.Settings.instance.bigSleepClock
+    Text(
+        text,
+        color = Color.White.copy(alpha = if (big) 0.6f else 0.3f),
+        fontSize = if (big) 96.sp else 28.sp,
+    )
 }

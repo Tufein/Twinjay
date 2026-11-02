@@ -149,6 +149,10 @@ class Settings {
     var hiddenWords: String = ""
     // Offline mode: no feed loading or background work, only what is saved.
     var offlineMode: Boolean = false
+    // Switch the second-screen preset by itself: Wi-Fi = at home, mobile data = on the go.
+    var autoPresetByNetwork: Boolean = false
+    // Show the clock big on the dimmed second screen.
+    var bigSleepClock: Boolean = false
     var downloadOnlyCharging: Boolean = false
     var downloadCleanupDays: Int = 0
     // On low battery: dim the second screen fast and cap video at 720p.

@@ -55,6 +55,8 @@ data class AppPreferences(
     val downloadOnlyCharging: Boolean = false,
     /** No network feed loading or background work; only saved content. */
     val offlineMode: Boolean = false,
+    val autoPresetByNetwork: Boolean = false,
+    val bigSleepClock: Boolean = false,
     /** Delete downloads older than this many days (0 = never). */
     val downloadCleanupDays: Int = 0,
     /** On low battery: dim the second screen fast and cap video at 720p. */

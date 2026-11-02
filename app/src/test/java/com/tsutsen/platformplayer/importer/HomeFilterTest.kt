@@ -52,4 +52,13 @@ class HomeFilterTest {
         assertFalse(swap.isExpired(1_000L, 5_000L))
         assertTrue(swap.isExpired(1_000L, 1_000L + swap.WINDOW_MS + 1))
     }
+
+    @Test
+    fun networkPresetsDiffer() {
+        val home = com.tsutsen.platformplayer.activities.NetworkPreset.forWifi(true).toMap()
+        val away = com.tsutsen.platformplayer.activities.NetworkPreset.forWifi(false).toMap()
+        assertEquals(false, home["dualScreenSleepWhilePlaying"])
+        assertEquals(true, away["dualScreenSleepWhilePlaying"])
+        assertEquals(10, away["dualScreenSleepSeconds"])
+    }
 }
