@@ -53,6 +53,8 @@ jobs:
           --tests '*SponsorBlockTest'
           --tests '*CompanionSleepPolicyTest'
           --tests '*TakeoutCsvTest'
+          --tests '*HomeFilterTest'
+          --tests '*SettingsExtrasTest'
           --tests '*HomeFeedCacheTest'
           --tests '*BatterySaverTest'
           --tests '*SettingsRepositoryImplTest'

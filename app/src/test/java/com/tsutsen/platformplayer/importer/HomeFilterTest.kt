@@ -1,0 +1,31 @@
+package com.tsutsen.platformplayer.importer
+
+import com.tsutsen.platformplayer.core.model.VideoCard
+import com.tsutsen.platformplayer.di.HomeFilter
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
+import org.junit.Test
+
+class HomeFilterTest {
+    @Test
+    fun parsesWordsFromCommasAndLines() {
+        assertEquals(listOf("shorts", "drama"), HomeFilter.parseWords(" Shorts, drama\n\nSHORTS "))
+    }
+
+    @Test
+    fun matchesTitleOrChannelCaseInsensitively() {
+        val words = listOf("shorts", "annoying")
+        assertTrue(HomeFilter.shouldHide("Best SHORTS ever", "Someone", words))
+        assertTrue(HomeFilter.shouldHide("Fine video", "The Annoying Channel", words))
+        assertFalse(HomeFilter.shouldHide("Fine video", "Good channel", words))
+        assertFalse(HomeFilter.shouldHide("Anything", null, emptyList()))
+    }
+
+    @Test
+    fun filtersCards() {
+        val keep = VideoCard(id = "1", title = "Keep me", thumbnailUrl = null, author = "A", url = "u1")
+        val drop = VideoCard(id = "2", title = "Some shorts", thumbnailUrl = null, author = "A", url = "u2")
+        assertEquals(listOf(keep), HomeFilter.apply(listOf(keep, drop), listOf("shorts")))
+    }
+}

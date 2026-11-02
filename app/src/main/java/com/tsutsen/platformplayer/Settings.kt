@@ -144,6 +144,9 @@ class Settings {
     var sponsorBlock: Boolean = BuildConfig.IS_THOR_BUILD
     // Download new videos of notified channels on Wi-Fi in the background.
     var autoDownload: Boolean = false
+    var hiddenWords: String = ""
+    var downloadOnlyCharging: Boolean = false
+    var downloadCleanupDays: Int = 0
     // On low battery: dim the second screen fast and cap video at 720p.
     var batterySaver: Boolean = BuildConfig.IS_THOR_BUILD
 

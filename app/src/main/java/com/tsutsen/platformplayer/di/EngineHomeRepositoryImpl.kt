@@ -16,7 +16,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -34,7 +37,19 @@ class EngineHomeRepositoryImpl
     @Inject
     constructor() : HomeRepository {
         private val _feed = MutableStateFlow(FeedPage())
-        override val feed: StateFlow<FeedPage> = _feed.asStateFlow()
+
+        // The user's hidden words (Settings) are applied on the way out, so
+        // paging and the cache keep working on the full list.
+        override val feed: StateFlow<FeedPage> =
+            _feed
+                .map { page ->
+                    val words = HomeFilter.parseWords(Settings.instance.hiddenWords)
+                    if (words.isEmpty()) page else page.copy(items = HomeFilter.apply(page.items, words))
+                }.stateIn(
+                    CoroutineScope(SupervisorJob() + Dispatchers.Default),
+                    SharingStarted.Eagerly,
+                    FeedPage(),
+                )
 
         private val _enabledSources = MutableStateFlow(emptyList<SourceInfo>())
         override val enabledSources: StateFlow<List<SourceInfo>> = _enabledSources.asStateFlow()
