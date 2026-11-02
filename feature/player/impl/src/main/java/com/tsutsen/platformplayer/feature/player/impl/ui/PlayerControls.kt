@@ -310,6 +310,7 @@ fun PlayerControls(
                                                 subtitlesOn = subtitlesOn,
                                                 onSubtitleToggle = onSubtitleToggle,
                                                 chapters = state.chapters,
+                                                sponsorRanges = state.sponsorRanges,
                                             )
                                         }
                                     }
@@ -354,6 +355,7 @@ fun PlayerControls(
                                                     subtitlesOn = subtitlesOn,
                                                     onSubtitleToggle = onSubtitleToggle,
                                                     chapters = state.chapters,
+                                                sponsorRanges = state.sponsorRanges,
                                                 )
                                             }
                                         }

@@ -75,6 +75,8 @@ sealed interface PlayerUiState {
         val audioTracks: List<AudioTrackInfo> = emptyList(),
         val selectedAudioTrack: String = "",
         val selectedQuality: String = "Auto",
+        val playingHeight: Int = 0,
+        val sponsorRanges: List<LongRange> = emptyList(),
         val selectedSubtitle: String = "Off",
         val subtitleText: String = "",
         val chapters: List<VideoChapter> = emptyList(),
@@ -427,6 +429,8 @@ class PlayerViewModel
                                 audioTracks = playerState.audioTracks,
                                 selectedAudioTrack = playerState.selectedAudioTrack,
                                 selectedQuality = playerState.selectedQuality,
+                                playingHeight = playerState.playingHeight,
+                                sponsorRanges = playerState.sponsorRanges,
                                 selectedSubtitle = playerState.selectedSubtitle,
                                 subtitleText = playerState.subtitleText,
                                 chapters = playerState.chapters,
@@ -927,11 +931,25 @@ class PlayerViewModel
                             PlayerControllerActions.VOLUME_DOWN ->
                                 setVolume((state.volume - 0.1f).coerceIn(0f, 1f))
 
+                            PlayerControllerActions.TOGGLE_FULLSCREEN ->
+                                if (state.isFullscreen) exitFullscreen() else toggleFullscreen()
+
+                            PlayerControllerActions.TOGGLE_STATS -> toggleStats()
+
                             else -> {}
                         }
                     }
             }
             return true
+        }
+
+        private val _statsVisible = kotlinx.coroutines.flow.MutableStateFlow(false)
+
+        /** "Stats for nerds" overlay (resolution, bitrate, buffer). */
+        val statsVisible: kotlinx.coroutines.flow.StateFlow<Boolean> = _statsVisible
+
+        fun toggleStats() {
+            _statsVisible.value = !_statsVisible.value
         }
 
         fun toggleFullscreen() {

@@ -45,6 +45,10 @@ data class AppPreferences(
     val dualScreenLook: String = "same",
     /** Skip sponsor / intro / outro segments marked on sponsor.ajay.app. */
     val sponsorBlock: Boolean = false,
+    /** Download new videos of notified channels on Wi-Fi in the background. */
+    val autoDownload: Boolean = false,
+    /** On low battery: dim the second screen fast and cap video at 720p. */
+    val batterySaver: Boolean = false,
     val dualScreenLibrarySlots: List<String> =
         listOf("watch_later", "liked", "favourite", "history"),
     val gridColumns: Int = 3,

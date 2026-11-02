@@ -103,6 +103,7 @@ class BackgroundWorker(
         val now = OffsetDateTime.now()
         val threeDays = now.minusDays(4)
         val contentNotifs = mutableListOf<Pair<Subscription, IPlatformContent>>()
+        val autoDownloads = mutableListOf<IPlatformVideo>()
         withContext(Dispatchers.IO) {
             val results =
                 StateSubscriptions.instance.getSubscriptionsFeedWithExceptions(true, false, this, { progress, total ->
@@ -161,6 +162,13 @@ class BackgroundWorker(
                             }
                         }
                         newItems.add(content)
+                        // Auto-download candidates: recent videos of channels with
+                        // notifications on (the user's "favourites").
+                        if (sub.doNotifications && content is IPlatformVideo &&
+                            content.datetime?.isAfter(threeDays) == true
+                        ) {
+                            autoDownloads.add(content)
+                        }
                     }
                 })
 
@@ -178,6 +186,28 @@ class BackgroundWorker(
         }
 
         manager.cancel(12)
+
+        if (Settings.instance.autoDownload &&
+            com.tsutsen.platformplayer.core.data.power.BatterySaver.isChargingOrHigh(appContext)
+        ) {
+            val def =
+                com.tsutsen.platformplayer.core.model.DownloadQuality.fromLabel(
+                    Settings.instance.content.defaultDownloadResolution,
+                )
+            autoDownloads.distinctBy { it.url }.take(MAX_AUTO_DOWNLOADS).forEach { video ->
+                try {
+                    if (!com.tsutsen.platformplayer.states.StateDownloads.instance.isDownloaded(video.id)) {
+                        com.tsutsen.platformplayer.states.StateDownloads.instance.download(
+                            video,
+                            def.targetPixelCount,
+                            def.targetBitrate,
+                        )
+                    }
+                } catch (ex: Throwable) {
+                    Logger.w("BackgroundWorker", "Auto-download failed for ${video.url}: ${ex.message}")
+                }
+            }
+        }
 
         if (contentNotifs.size > 0) {
             try {
@@ -203,5 +233,9 @@ class BackgroundWorker(
                 .setContentText("${newItems.size} new content from ${newSubChanges.size} creators")
                 .setSilent(true)
                 .setChannelId(notificationChannel.id).build());*/
+    }
+
+    private companion object {
+        const val MAX_AUTO_DOWNLOADS = 5
     }
 }

@@ -142,6 +142,10 @@ class Settings {
     var dualScreenLook: String = "same"
     // Skip sponsor segments of YouTube videos (SponsorBlock).
     var sponsorBlock: Boolean = BuildConfig.IS_THOR_BUILD
+    // Download new videos of notified channels on Wi-Fi in the background.
+    var autoDownload: Boolean = false
+    // On low battery: dim the second screen fast and cap video at 720p.
+    var batterySaver: Boolean = BuildConfig.IS_THOR_BUILD
 
     // Player gesture assignments per player mode and surface slot
     // (see PlayerGesturePreferences). Each map: gesture type

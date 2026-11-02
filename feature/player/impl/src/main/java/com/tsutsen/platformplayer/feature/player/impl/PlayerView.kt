@@ -1228,6 +1228,11 @@ fun PlayerView(
                     }
                 }
 
+                val statsVisible by viewModel.statsVisible.collectAsState()
+                if (statsVisible) {
+                    StatsOverlay(player = player, selectedQuality = state.selectedQuality)
+                }
+
                 // ==================== Modals ====================
                 if (showOptionsModal) {
                     val downloadInfo = downloads.find { it.url == state.currentVideo?.url }
@@ -1240,6 +1245,9 @@ fun PlayerView(
                     OptionsModal(
                         playbackSpeed = state.playbackSpeed,
                         quality = state.selectedQuality,
+                        playingHeight = state.playingHeight,
+                        statsVisible = viewModel.statsVisible.collectAsState().value,
+                        onToggleStats = { viewModel.toggleStats() },
                         qualities = state.videoQualities,
                         subtitle = state.selectedSubtitle,
                         subtitles = state.subtitleLanguages,

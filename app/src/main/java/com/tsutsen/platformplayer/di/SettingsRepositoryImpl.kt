@@ -96,6 +96,8 @@ class SettingsRepositoryImpl
                 dualScreenSleepLevel = s.dualScreenSleepLevel,
                 dualScreenLook = s.dualScreenLook,
                 sponsorBlock = s.sponsorBlock,
+                autoDownload = s.autoDownload,
+                batterySaver = s.batterySaver,
                 dualScreenLibrarySlots = s.dualScreenLibrarySlots,
                 librarySectionOrder = s.librarySectionOrder,
                 librarySectionsEnabled = s.librarySectionsEnabled,
@@ -145,6 +147,8 @@ class SettingsRepositoryImpl
                 "fontScalePercent" -> s.appearance.fontScalePercent = (value as Number).toInt()
                 "pureBlack" -> s.appearance.pureBlack = value as Boolean
                 "sponsorBlock" -> s.sponsorBlock = value as Boolean
+                "autoDownload" -> s.autoDownload = value as Boolean
+                "batterySaver" -> s.batterySaver = value as Boolean
                 "dynamicColor" -> s.appearance.dynamicColor = value as Boolean
                 "uiRounding" -> s.appearance.uiRounding = (value as Number).toInt()
                 "gridColumns" -> s.feed.gridColumns = value as Int
@@ -320,6 +324,8 @@ class SettingsRepositoryImpl
             s.dualScreenSleepLevel = 0
             s.dualScreenLook = "same"
             s.sponsorBlock = false
+            s.autoDownload = false
+            s.batterySaver = false
             s.dualScreenLibrarySlots =
                 listOf("watch_later", "liked", "favourite", "history")
             s.librarySectionOrder =

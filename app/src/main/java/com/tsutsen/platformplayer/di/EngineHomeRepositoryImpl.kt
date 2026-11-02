@@ -88,7 +88,17 @@ class EngineHomeRepositoryImpl
 
         private suspend fun doLoadInitial() {
             Logger.i("EngineHomeRepository", "loadInitial")
-            _feed.update { it.copy(isLoading = true, error = null) }
+            // Show the last known feed right away while the sources load.
+            val cacheDir = StateApp.instance.contextOrNull?.filesDir
+            var showingCache = false
+            if (cacheDir != null && _feed.value.items.isEmpty()) {
+                val cached = withContext(Dispatchers.IO) { HomeFeedCache.load(cacheDir) }
+                if (cached.isNotEmpty()) {
+                    showingCache = true
+                    _feed.update { it.copy(items = cached, isLoading = true, error = null) }
+                }
+            }
+            if (!showingCache) _feed.update { it.copy(isLoading = true, error = null) }
 
             // Ensure plugins are initialized before loading feed
             try {
@@ -182,12 +192,16 @@ class EngineHomeRepositoryImpl
                         currentPage = 1,
                     )
                 }
+                if (cacheDir != null && (refreshPager?.pendingPagers ?: 0) == 0) {
+                    withContext(Dispatchers.IO) { HomeFeedCache.save(cacheDir, flow.items) }
+                }
             } catch (e: Exception) {
                 Logger.e("EngineHomeRepository", "loadInitial failed", e)
                 _feed.update {
                     it.copy(
                         isLoading = false,
-                        items = emptyList(),
+                        // Keep the cached feed visible when offline.
+                        items = if (showingCache) it.items else emptyList(),
                         hasMorePages = false,
                         error = e.message ?: "Failed to load feed",
                     )

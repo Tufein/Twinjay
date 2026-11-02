@@ -45,6 +45,8 @@ import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Extension
+import androidx.compose.material.icons.filled.BatteryAlert
+import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Forward30
 import androidx.compose.material.icons.filled.Games
 import androidx.compose.material.icons.filled.Gesture
@@ -239,6 +241,15 @@ fun SettingsScreen(
                             title = "Backup & restore",
                             subtitle = "Export or restore the full app state",
                             onClick = { navigator.navigateToSettingsFragment("backup") },
+                            groupPosition = GroupPosition.Middle,
+                        )
+                    }
+                    item {
+                        SettingsOptionCard(
+                            icon = Icons.Filled.Upload,
+                            title = "Import subscriptions",
+                            subtitle = "From a Google Takeout subscriptions.csv",
+                            onClick = { navigator.navigateToImportSubscriptions() },
                             groupPosition = GroupPosition.Middle,
                         )
                     }
@@ -1155,6 +1166,23 @@ private fun SectionItems(
                         checked = state.sponsorBlock,
                         onCheckedChange = { viewModel.updateGeneral("sponsorBlock", it) },
                         groupPosition = GroupPosition.Single,
+                    )
+                    SettingsHeader("Battery and downloads")
+                    SettingsSwitchCard(
+                        icon = Icons.Filled.BatteryAlert,
+                        title = "Battery saver",
+                        subtitle = "Below 20% (not charging): dim the second screen after 5 s and play at 720p at most",
+                        checked = state.batterySaver,
+                        onCheckedChange = { viewModel.updateGeneral("batterySaver", it) },
+                        groupPosition = GroupPosition.First,
+                    )
+                    SettingsSwitchCard(
+                        icon = Icons.Filled.Download,
+                        title = "Auto-download new videos",
+                        subtitle = "On Wi-Fi in the background: new videos of channels with notifications on (max 5 per run)",
+                        checked = state.autoDownload,
+                        onCheckedChange = { viewModel.updateGeneral("autoDownload", it) },
+                        groupPosition = GroupPosition.Last,
                     )
                     SettingsHeader(
                         title = "Subtitles",

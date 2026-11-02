@@ -353,7 +353,7 @@ fun BluejayNavGraph(
             }
 
             is NavDestination.ImportSubscriptions -> {
-                PlaceholderScreen("Import Subscriptions", "Coming soon")
+                ImportSubscriptionsScreen()
             }
 
             is NavDestination.ImportPlaylists -> {
