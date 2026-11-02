@@ -298,6 +298,7 @@ class MainActivity :
     override fun onResume() {
         super.onResume()
         pipLog("onResume")
+        SwapScreens.onResume(this)
         // Self-heal: if modeChanged(false) was dropped and pipActive stuck
         // true, a fullscreen-sized window proves we're out of PiP — trust
         // the window, clear the state, no relaunch.
@@ -503,6 +504,12 @@ class MainActivity :
         com.tsutsen.platformplayer.core.data.groups.ChannelGroups.provider = {
             com.tsutsen.platformplayer.states.StateSubscriptionGroups.instance.getSubscriptionGroups().map {
                 com.tsutsen.platformplayer.core.data.groups.ChannelGroups.Group(it.id, it.name, it.urls.toSet())
+            }
+        }
+
+        com.tsutsen.platformplayer.core.data.screens.ScreenSwap.action = {
+            if (!SwapScreens.swap(this)) {
+                android.widget.Toast.makeText(this, "No second screen found", android.widget.Toast.LENGTH_LONG).show()
             }
         }
 

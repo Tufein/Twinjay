@@ -45,4 +45,11 @@ class HomeFilterTest {
         assertFalse(m.matches(g, null))
         assertTrue(m.matches(null, null))
     }
+
+    @Test
+    fun swapWindowExpires() {
+        val swap = com.tsutsen.platformplayer.core.data.screens.ScreenSwap
+        assertFalse(swap.isExpired(1_000L, 5_000L))
+        assertTrue(swap.isExpired(1_000L, 1_000L + swap.WINDOW_MS + 1))
+    }
 }

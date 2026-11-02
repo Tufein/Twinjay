@@ -1,5 +1,13 @@
 # TwinJay (Thor) changes
 
+## 0.13.0-thor.1 — round three, part two
+
+- Swap the two screens (Settings > Dual screen > Screens). The new screen asks
+  "keep this?" and moves the app back by itself after 10 seconds if nobody answers.
+- SponsorBlock: choose which parts to skip (sponsors, self promotion, reminders, intros, outros).
+- Merge playlists into a new one (Settings > Import playlists).
+- Diagnostics: how much space downloads use per channel.
+
 ## 0.12.0-thor.1 — round three, part one
 
 - Subscriptions feed: chips to narrow to one of your groups.

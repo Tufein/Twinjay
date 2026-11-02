@@ -1260,8 +1260,45 @@ private fun SectionItems(
                         subtitle = "Skips sponsors, intros and outros of YouTube videos (sponsor.ajay.app)",
                         checked = state.sponsorBlock,
                         onCheckedChange = { viewModel.updateGeneral("sponsorBlock", it) },
-                        groupPosition = GroupPosition.Single,
+                        groupPosition = GroupPosition.First,
                     )
+                    var sponsorDialog by remember { mutableStateOf(false) }
+                    SettingsOptionCard(
+                        icon = Icons.Filled.Forward30,
+                        title = "What to skip",
+                        subtitle = state.sponsorCategories.split(',').filter { it.isNotBlank() }.joinToString(", ").ifEmpty { "Nothing" },
+                        onClick = { sponsorDialog = true },
+                        groupPosition = GroupPosition.Last,
+                    )
+                    if (sponsorDialog) {
+                        val all = listOf("sponsor" to "Sponsors", "selfpromo" to "Self promotion", "interaction" to "Like/subscribe reminders", "intro" to "Intros", "outro" to "Outros")
+                        val chosen = remember { mutableStateOf(state.sponsorCategories.split(',').filter { it.isNotBlank() }.toSet()) }
+                        androidx.compose.material3.AlertDialog(
+                            onDismissRequest = { sponsorDialog = false },
+                            title = { Text("Skip these parts") },
+                            text = {
+                                Column {
+                                    all.forEach { (key, label) ->
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth().clickable {
+                                                chosen.value = if (key in chosen.value) chosen.value - key else chosen.value + key
+                                            },
+                                            verticalAlignment = Alignment.CenterVertically,
+                                        ) {
+                                            androidx.compose.material3.Checkbox(checked = key in chosen.value, onCheckedChange = null)
+                                            Text(label, modifier = Modifier.padding(start = 8.dp))
+                                        }
+                                    }
+                                }
+                            },
+                            confirmButton = {
+                                androidx.compose.material3.TextButton(onClick = {
+                                    viewModel.updateGeneral("sponsorCategories", all.map { it.first }.filter { it in chosen.value }.joinToString(","))
+                                    sponsorDialog = false
+                                }) { Text("OK") }
+                            },
+                        )
+                    }
                     SettingsHeader("Battery, downloads and filters")
                     SettingsSwitchCard(
                         icon = Icons.Filled.BatteryAlert,
@@ -1522,6 +1559,14 @@ private fun SectionItems(
                         ActivityResultContracts.StartActivityForResult(),
                     ) { }
                 Column(verticalArrangement = Arrangement.spacedBy(Tokens.SpaceXs)) {
+                    SettingsHeader("Screens")
+                    SettingsOptionCard(
+                        icon = Icons.Filled.Home,
+                        title = "Swap the two screens",
+                        subtitle = "The app moves to the other screen. It asks to keep it and goes back by itself after 10 seconds",
+                        onClick = { com.tsutsen.platformplayer.core.data.screens.ScreenSwap.action?.invoke() },
+                        groupPosition = GroupPosition.Single,
+                    )
                     SettingsHeader("Presets")
                     SettingsOptionCard(
                         icon = Icons.Filled.Home,
