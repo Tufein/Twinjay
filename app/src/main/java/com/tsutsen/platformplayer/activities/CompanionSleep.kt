@@ -2,6 +2,7 @@ package com.tsutsen.platformplayer.activities
 
 import android.os.SystemClock
 import android.view.Window
+import android.view.WindowManager
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
@@ -30,6 +31,17 @@ internal object CompanionSleepPolicy {
         idleMs: Long,
         delayMs: Long = IDLE_MS,
     ): Boolean = enabled && isPlaying && idleMs >= delayMs
+
+    /** Backlight while asleep: 0 for black, else the chosen percentage (capped). */
+    fun sleepBrightness(levelPercent: Int): Float = levelPercent.coerceIn(0, 100) / 100f
+
+    /**
+     * Brightness to put back on wake. A saved value of 0 (captured while
+     * already dimmed) or "unset" goes back to the system brightness, so the
+     * screen can never stay stuck dark.
+     */
+    fun wakeBrightness(saved: Float?): Float =
+        if (saved == null || saved <= 0.01f) WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE else saved
 }
 
 /**
@@ -42,28 +54,30 @@ internal fun CompanionSleepLayer(
     enabled: Boolean,
     isPlaying: Boolean,
     window: Window?,
+    delayMs: Long = CompanionSleepPolicy.IDLE_MS,
+    levelPercent: Int = 0,
     content: @Composable () -> Unit,
 ) {
     var lastTouch by remember { mutableLongStateOf(SystemClock.elapsedRealtime()) }
     var asleep by remember { mutableStateOf(false) }
 
-    LaunchedEffect(enabled, isPlaying) {
+    LaunchedEffect(enabled, isPlaying, delayMs) {
         lastTouch = SystemClock.elapsedRealtime()
         while (true) {
-            asleep = CompanionSleepPolicy.shouldSleep(enabled, isPlaying, SystemClock.elapsedRealtime() - lastTouch)
+            asleep = CompanionSleepPolicy.shouldSleep(enabled, isPlaying, SystemClock.elapsedRealtime() - lastTouch, delayMs)
             delay(1_000)
         }
     }
 
-    DisposableEffect(asleep, window) {
+    DisposableEffect(asleep, window, levelPercent) {
         val w = window
         val saved = w?.attributes?.screenBrightness
-        if (asleep && w != null && saved != null) {
-            w.attributes = w.attributes.apply { screenBrightness = 0f }
+        if (asleep && w != null) {
+            w.attributes = w.attributes.apply { screenBrightness = CompanionSleepPolicy.sleepBrightness(levelPercent) }
         }
         onDispose {
-            if (asleep && w != null && saved != null) {
-                w.attributes = w.attributes.apply { screenBrightness = saved }
+            if (asleep && w != null) {
+                w.attributes = w.attributes.apply { screenBrightness = CompanionSleepPolicy.wakeBrightness(saved) }
             }
         }
     }
@@ -87,7 +101,9 @@ internal fun CompanionSleepLayer(
                 modifier =
                     Modifier
                         .fillMaxSize()
-                        .background(Color.Black)
+                        // Black hides everything; a dim level keeps the
+                        // page faintly visible under a translucent scrim.
+                        .background(if (levelPercent <= 0) Color.Black else Color.Black.copy(alpha = 0.55f))
                         .pointerInput(Unit) {
                             detectTapGestures {
                                 lastTouch = SystemClock.elapsedRealtime()

@@ -613,6 +613,36 @@ fun SettingsSectionScreen(
             }
         }
 
+        Choice.DUAL_SLEEP_DELAY -> {
+            loaded?.let {
+                ChoiceDialog(
+                    title = "Dim second screen after",
+                    options = dualSleepDelayOptions,
+                    selected = it.dualScreenSleepSeconds.toString(),
+                    onSelected = { value ->
+                        viewModel.updateGeneral("dualScreenSleepSeconds", value.toInt())
+                        selectedChoice = null
+                    },
+                    onDismiss = { selectedChoice = null },
+                )
+            }
+        }
+
+        Choice.DUAL_SLEEP_LEVEL -> {
+            loaded?.let {
+                ChoiceDialog(
+                    title = "How far to dim",
+                    options = dualSleepLevelOptions,
+                    selected = it.dualScreenSleepLevel.toString(),
+                    onSelected = { value ->
+                        viewModel.updateGeneral("dualScreenSleepLevel", value.toInt())
+                        selectedChoice = null
+                    },
+                    onDismiss = { selectedChoice = null },
+                )
+            }
+        }
+
         Choice.JUMP_STEP -> {
             loaded?.let {
                 ChoiceDialog(
@@ -1311,11 +1341,31 @@ private fun SectionItems(
                     SettingsSwitchCard(
                         icon = Icons.Filled.Timer,
                         title = "Dim second screen while playing",
-                        subtitle = "Turns the second screen black after 20 s without touch; touch wakes it",
+                        subtitle =
+                            if (state.dualScreenSleepWhilePlaying) "On: touch the screen to wake it"
+                            else "Off: the second screen stays at normal brightness",
                         checked = state.dualScreenSleepWhilePlaying,
                         onCheckedChange = { viewModel.updateGeneral("dualScreenSleepWhilePlaying", it) },
                         groupPosition = GroupPosition.Middle,
                     )
+                    if (state.dualScreenSleepWhilePlaying) {
+                        SettingsOptionCard(
+                            icon = Icons.Filled.Timer,
+                            title = "Dim after",
+                            subtitle = dualSleepDelayOptions.firstOrNull { it.second == state.dualScreenSleepSeconds.toString() }?.first
+                                ?: "${state.dualScreenSleepSeconds} s without touch",
+                            onClick = { onChoiceSelected(Choice.DUAL_SLEEP_DELAY) },
+                            groupPosition = GroupPosition.Middle,
+                        )
+                        SettingsOptionCard(
+                            icon = Icons.Filled.Timer,
+                            title = "How far to dim",
+                            subtitle = dualSleepLevelOptions.firstOrNull { it.second == state.dualScreenSleepLevel.toString() }?.first
+                                ?: "${state.dualScreenSleepLevel}% brightness",
+                            onClick = { onChoiceSelected(Choice.DUAL_SLEEP_LEVEL) },
+                            groupPosition = GroupPosition.Middle,
+                        )
+                    }
                     SettingsOptionCard(
                         icon = Icons.Filled.Layers,
                         title = "Pages",
@@ -1731,6 +1781,20 @@ private fun AboutItems(viewModel: SettingsViewModel) {
                 .versionName
         }.getOrNull() ?: "unknown"
 
+    var updateRelease by remember { mutableStateOf<com.tsutsen.platformplayer.core.data.update.ReleaseInfo?>(null) }
+    var checkingUpdate by remember { mutableStateOf(false) }
+    updateRelease?.let { r ->
+        UpdateDialog(
+            release = r,
+            currentVersion = version,
+            onDownload = {
+                UpdatePrompt.download(context, r)
+                updateRelease = null
+            },
+            onLater = { updateRelease = null },
+        )
+    }
+
     Column(verticalArrangement = Arrangement.spacedBy(Tokens.SpaceLg)) {
         Card(
             shape = RoundedCornerShape(BluejayTokens().radius.card),
@@ -1803,22 +1867,23 @@ private fun AboutItems(viewModel: SettingsViewModel) {
                 SettingsOptionCard(
                     icon = Icons.Filled.SystemUpdateAlt,
                     title = "Check for updates",
-                    subtitle = "Looks for a newer $applicationLabel release on GitHub",
+                    subtitle = if (checkingUpdate) "Checking GitHub…" else "Looks for a newer $applicationLabel release on GitHub",
                     onClick = {
-                        scope.launch {
-                            val release =
-                                withContext(Dispatchers.IO) {
-                                    runCatching { GithubReleaseUpdate.fetchLatest() }.getOrNull()
+                        if (!checkingUpdate) {
+                            checkingUpdate = true
+                            scope.launch {
+                                val release =
+                                    withContext(Dispatchers.IO) {
+                                        runCatching { GithubReleaseUpdate.fetchLatest() }.getOrNull()
+                                    }
+                                checkingUpdate = false
+                                when {
+                                    release == null ->
+                                        Toast.makeText(context, "Could not check for updates. Are you online?", Toast.LENGTH_LONG).show()
+                                    GithubReleaseUpdate.isNewer(release.tag, version) -> updateRelease = release
+                                    else ->
+                                        Toast.makeText(context, "You are on the latest version ($version)", Toast.LENGTH_LONG).show()
                                 }
-                            when {
-                                release == null ->
-                                    Toast.makeText(context, "Could not check for updates", Toast.LENGTH_LONG).show()
-                                GithubReleaseUpdate.isNewer(release.tag, version) -> {
-                                    Toast.makeText(context, "Update ${release.tag} available", Toast.LENGTH_LONG).show()
-                                    openUrl(context, release.apkUrl ?: release.pageUrl)
-                                }
-                                else ->
-                                    Toast.makeText(context, "You are on the latest version", Toast.LENGTH_LONG).show()
                             }
                         }
                     },
@@ -1981,6 +2046,8 @@ private enum class Choice {
     PLAYBACK_SPEED,
     SPEEDUP_SENSITIVITY,
     JUMP_STEP,
+    DUAL_SLEEP_DELAY,
+    DUAL_SLEEP_LEVEL,
     CONTROLLER_SEEK_BACK,
     CONTROLLER_SEEK_FORWARD,
     VIDEO_RESOLUTION,
@@ -2152,6 +2219,24 @@ private fun SettingsHeader(
 
 /** Canonical defaults — used to decide which subsections deviate. */
 private val defaults = AppPreferences()
+
+private val dualSleepDelayOptions =
+    listOf(
+        "10 seconds" to "10",
+        "20 seconds" to "20",
+        "30 seconds" to "30",
+        "1 minute" to "60",
+        "2 minutes" to "120",
+        "5 minutes" to "300",
+    )
+
+private val dualSleepLevelOptions =
+    listOf(
+        "Black (backlight off)" to "0",
+        "Very dim (5%)" to "5",
+        "Dim (15%)" to "15",
+        "Slightly dim (35%)" to "35",
+    )
 
 /**
  * Configure the four 2x2 second-screen library slots. Tapping a slot opens a

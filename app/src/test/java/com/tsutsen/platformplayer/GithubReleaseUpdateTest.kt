@@ -44,4 +44,19 @@ class GithubReleaseUpdateTest {
     @Test fun garbageIsRejected() {
         assertNull(GithubReleaseUpdate.parse("{}"))
     }
+
+    @Test fun parsesNotesAndSize() {
+        val json = """{"html_url":"https://github.com/x/y/releases/tag/v1","tag_name":"v1",
+            "body":"## What's new\r\n- **Faster** start\r\n- See [docs](http://a.b)\r\n\r\n\r\nFull Changelog: x",
+            "assets":[{"size":1234,"browser_download_url":"https://x/TwinJay-v1-arm64.apk"}]}"""
+        val release = GithubReleaseUpdate.parse(json)!!
+        assertEquals("What's new\n• Faster start\n• See docs", release.notes)
+        assertEquals(1234L, release.apkSizeBytes)
+    }
+
+    @Test fun missingBodyGivesEmptyNotes() {
+        val release = GithubReleaseUpdate.parse("""{"tag_name":"v1"}""")!!
+        assertEquals("", release.notes)
+        assertNull(release.apkSizeBytes)
+    }
 }

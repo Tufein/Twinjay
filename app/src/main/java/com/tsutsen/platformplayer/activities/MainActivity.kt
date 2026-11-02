@@ -41,6 +41,7 @@ import androidx.core.pip.VideoPlaybackPictureInPicture
 import androidx.lifecycle.lifecycleScope
 import com.tsutsen.platformplayer.compose.BluejayNavGraph
 import com.tsutsen.platformplayer.gettingstarted.GettingStartedFlow
+import com.tsutsen.platformplayer.feature.settings.impl.UpdatePromptHost
 import com.tsutsen.platformplayer.core.data.repository.ChannelRepository
 import com.tsutsen.platformplayer.core.data.repository.HomeRepository
 import com.tsutsen.platformplayer.core.data.repository.LibraryRepository
@@ -596,6 +597,9 @@ private fun BluejayMainActivity(
                             }
                         },
                     )
+                } else {
+                    // Offers a newer GitHub release once per app start.
+                    UpdatePromptHost()
                 }
             }
         }

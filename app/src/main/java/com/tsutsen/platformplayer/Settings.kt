@@ -134,6 +134,10 @@ class Settings {
     var dualScreenFeedSources: List<String> = emptyList()
     // Second screen goes dark while a video plays and it is not touched.
     var dualScreenSleepWhilePlaying: Boolean = BuildConfig.IS_THOR_BUILD
+    // Seconds without touch before the second screen dims.
+    var dualScreenSleepSeconds: Int = 20
+    // How far it dims: 0 = black with the backlight off, otherwise the backlight percentage.
+    var dualScreenSleepLevel: Int = 0
     // Skip sponsor segments of YouTube videos (SponsorBlock).
     var sponsorBlock: Boolean = BuildConfig.IS_THOR_BUILD
 
