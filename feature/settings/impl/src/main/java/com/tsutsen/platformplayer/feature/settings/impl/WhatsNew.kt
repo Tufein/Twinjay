@@ -19,6 +19,9 @@ object WhatsNew {
 
     private val notes: Map<String, String> =
         mapOf(
+            "0.14.0-thor.1" to
+                "- Second-screen preset follows the network (Settings > Dual screen)\n" +
+                "- Big clock on the dimmed second screen",
             "0.13.0-thor.1" to
                 "- Swap the two screens (Settings > Dual screen)\n" +
                 "- Choose which SponsorBlock parts to skip\n" +

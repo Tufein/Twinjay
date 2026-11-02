@@ -1,5 +1,11 @@
 # TwinJay (Thor) changes
 
+## 0.14.0-thor.1 — round three, part three
+
+- Pick the second-screen preset by network (Settings > Dual screen > Presets):
+  Wi-Fi switches to "at home", mobile data to "on the go".
+- Big clock on the dimmed second screen, handy as a desk clock.
+
 ## 0.13.0-thor.1 — round three, part two
 
 - Swap the two screens (Settings > Dual screen > Screens). The new screen asks
