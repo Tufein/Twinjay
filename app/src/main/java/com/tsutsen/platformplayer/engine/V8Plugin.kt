@@ -46,8 +46,10 @@ import com.tsutsen.platformplayer.engine.packages.V8Package
 import com.tsutsen.platformplayer.getOrDefault
 import com.tsutsen.platformplayer.getOrThrow
 import com.tsutsen.platformplayer.logging.Logger
+import com.tsutsen.platformplayer.states.StateApp
 import com.tsutsen.platformplayer.states.StateAssets
 import com.tsutsen.platformplayer.states.StateDeveloper
+import com.tsutsen.platformplayer.states.StatePlugins
 import com.tsutsen.platformplayer.toList
 import com.tsutsen.platformplayer.toV8ValueBlocking
 import com.tsutsen.platformplayer.toV8ValueAsync
@@ -500,6 +502,9 @@ class V8Plugin {
                 else if(isOfficial)
                     PackageBrowser(this)
                 else if(config is SourcePluginConfig && config.id == StateDeveloper.DEV_ID)
+                    PackageBrowser(this)
+                else if(config is SourcePluginConfig && StatePlugins.instance.isShippedScript(
+                        StateApp.instance.context, config.id, _script ?: StatePlugins.instance.getScript(config.id)))
                     PackageBrowser(this)
                 else
                     throw IllegalArgumentException("Browser is only allowed for debug and official plugins due to security");
