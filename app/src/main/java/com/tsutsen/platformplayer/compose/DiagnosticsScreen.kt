@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -96,6 +97,9 @@ fun DiagnosticsScreen() {
             )
         }
         item { HorizontalDivider() }
+        item { Text("Battery (last 24 h)", style = MaterialTheme.typography.titleMedium) }
+        item { BatteryGraph(com.tsutsen.platformplayer.di.BatteryLog.read(context)) }
+        item { HorizontalDivider() }
         item {
             val total = usage.sumOf { it.second }
             Text("Downloads: ${formatBytes(total)}", style = MaterialTheme.typography.titleMedium)
@@ -142,3 +146,34 @@ internal fun formatBytes(bytes: Long): String =
         bytes >= 1L shl 20 -> String.format(java.util.Locale.US, "%.0f MB", bytes / (1L shl 20).toDouble())
         else -> "${bytes / 1024} KB"
     }
+
+@Composable
+private fun BatteryGraph(samples: List<com.tsutsen.platformplayer.di.BatteryLog.Sample>) {
+    val cutoff = System.currentTimeMillis() - 24 * 3_600_000L
+    val pts = samples.filter { it.time >= cutoff }
+    if (pts.size < 2) {
+        Text("Not enough data yet. The app records the battery every 5 minutes while it is open.", style = MaterialTheme.typography.bodySmall)
+        return
+    }
+    val line = MaterialTheme.colorScheme.primary
+    val charge = MaterialTheme.colorScheme.tertiary
+    val grid = MaterialTheme.colorScheme.outlineVariant
+    androidx.compose.foundation.Canvas(Modifier.fillMaxWidth().height(120.dp)) {
+        val t0 = pts.first().time
+        val span = (pts.last().time - t0).coerceAtLeast(1L).toFloat()
+        listOf(0f, 0.5f, 1f).forEach { f ->
+            drawLine(grid, androidx.compose.ui.geometry.Offset(0f, size.height * f), androidx.compose.ui.geometry.Offset(size.width, size.height * f))
+        }
+        for (i in 1 until pts.size) {
+            val a = pts[i - 1]
+            val b = pts[i]
+            drawLine(
+                if (b.charging) charge else line,
+                androidx.compose.ui.geometry.Offset((a.time - t0) / span * size.width, size.height * (1f - a.percent / 100f)),
+                androidx.compose.ui.geometry.Offset((b.time - t0) / span * size.width, size.height * (1f - b.percent / 100f)),
+                strokeWidth = 4f,
+            )
+        }
+    }
+    Text("Now ${pts.last().percent}% · lowest ${pts.minOf { it.percent }}%", style = MaterialTheme.typography.bodySmall)
+}

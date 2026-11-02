@@ -59,6 +59,10 @@ data class AppPreferences(
     val bigSleepClock: Boolean = false,
     /** Delete downloads older than this many days (0 = never). */
     val downloadCleanupDays: Int = 0,
+    val gestureSensitivity: Float = 1f,
+    val downloadFromHour: Int = 0,
+    val downloadToHour: Int = 0,
+    val downloadShortestFirst: Boolean = false,
     /** On low battery: dim the second screen fast and cap video at 720p. */
     val batterySaver: Boolean = false,
     val dualScreenLibrarySlots: List<String> =

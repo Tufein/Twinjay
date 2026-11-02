@@ -54,6 +54,17 @@ class HomeFilterTest {
     }
 
     @Test
+    fun downloadWindowWrapsMidnight() {
+        val w = com.tsutsen.platformplayer.core.data.downloads.DownloadWindow
+        assertTrue(w.isOpen(12, 5, 5))
+        assertTrue(w.isOpen(3, 1, 7))
+        assertFalse(w.isOpen(8, 1, 7))
+        assertTrue(w.isOpen(23, 22, 6))
+        assertTrue(w.isOpen(2, 22, 6))
+        assertFalse(w.isOpen(12, 22, 6))
+    }
+
+    @Test
     fun networkPresetsDiffer() {
         val home = com.tsutsen.platformplayer.activities.NetworkPreset.forWifi(true).toMap()
         val away = com.tsutsen.platformplayer.activities.NetworkPreset.forWifi(false).toMap()

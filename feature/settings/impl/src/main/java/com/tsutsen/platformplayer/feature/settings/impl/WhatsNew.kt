@@ -19,6 +19,13 @@ object WhatsNew {
 
     private val notes: Map<String, String> =
         mapOf(
+            "0.15.0-thor.1" to
+                "- Gesture sensitivity (Settings > Playback)\n" +
+                "- Downloads only between chosen hours, shortest first\n" +
+                "- History filters: today, this week, this month\n" +
+                "- Subtitle and audio track remembered per channel\n" +
+                "- Battery graph in Diagnostics\n" +
+                "- Backup also holds quiet channels and channel settings",
             "0.14.0-thor.1" to
                 "- Second-screen preset follows the network (Settings > Dual screen)\n" +
                 "- Big clock on the dimmed second screen",

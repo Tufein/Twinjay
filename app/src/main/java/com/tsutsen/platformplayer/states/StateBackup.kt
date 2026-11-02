@@ -358,6 +358,15 @@ class StateBackup {
                 Logger.e(TAG, "Failed to serialize history");
             }
 
+            try {
+                val extras = com.tsutsen.platformplayer.di.TwinjayExtras.export(StateApp.instance.context);
+                if (extras.isNotEmpty())
+                    storesToSave.set(com.tsutsen.platformplayer.di.TwinjayExtras.STORE, extras);
+            }
+            catch(ex: Throwable) {
+                Logger.e(TAG, "Failed to serialize TwinJay extras");
+            }
+
             val settings = Settings.instance.encode();
             val pluginSettings = StatePlugins.instance.getPlugins()
                 .associateBy { it.config.id }
@@ -471,6 +480,12 @@ class StateBackup {
                                                             }
                                                         }, UIDialogs.ActionStyle.PRIMARY)
                                                     )
+                                                }
+                                            } else if (store.key == com.tsutsen.platformplayer.di.TwinjayExtras.STORE) {
+                                                try {
+                                                    com.tsutsen.platformplayer.di.TwinjayExtras.import(context, store.value);
+                                                } catch (ex: Throwable) {
+                                                    Logger.e(TAG, "Failed to import TwinJay extras", ex);
                                                 }
                                             } else if (store.key == "subscription_groups") {
                                                 withContext(Dispatchers.Main) {

@@ -62,13 +62,22 @@ fun LibrarySectionDetailScreen(
     var query by remember { mutableStateOf("") }
     // Time budget: show only what fits in N minutes, shortest first.
     var budgetMinutes by remember { mutableStateOf(0) }
+    // History filter: only entries added within the last N days (0 = all).
+    var sinceDays by remember { mutableStateOf(0) }
     val shown =
-        remember(items, query, budgetMinutes) {
-            val searched =
-                if (query.isBlank()) {
+        remember(items, query, budgetMinutes, sinceDays) {
+            val cutoff = if (sinceDays > 0) System.currentTimeMillis() - sinceDays * 86_400_000L else 0L
+            val dated =
+                if (cutoff == 0L) {
                     items
                 } else {
-                    items.filter { c ->
+                    items.filter { c -> ((c as? CoreVideoCard)?.addedAt ?: 0L) >= cutoff }
+                }
+            val searched =
+                if (query.isBlank()) {
+                    dated
+                } else {
+                    dated.filter { c ->
                         c.title.contains(query, ignoreCase = true) ||
                             (c as? CoreVideoCard)?.author?.contains(query, ignoreCase = true) == true
                     }
@@ -132,6 +141,21 @@ fun LibrarySectionDetailScreen(
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp, vertical = 4.dp),
                 )
+            }
+
+            if (sectionId == LibraryRepositoryImpl.HISTORY_ID) {
+                androidx.compose.foundation.layout.Row(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                    horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(8.dp),
+                ) {
+                    listOf(0 to "All time", 1 to "Today", 7 to "This week", 30 to "This month").forEach { (d, label) ->
+                        androidx.compose.material3.FilterChip(
+                            selected = sinceDays == d,
+                            onClick = { sinceDays = d },
+                            label = { Text(label) },
+                        )
+                    }
+                }
             }
 
             if (items.size > 5 && items.any { it is CoreVideoCard && (it.durationMs ?: 0) > 0 }) {

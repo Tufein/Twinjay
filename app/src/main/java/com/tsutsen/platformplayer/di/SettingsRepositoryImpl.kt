@@ -104,6 +104,10 @@ class SettingsRepositoryImpl
                 autoPresetByNetwork = s.autoPresetByNetwork,
                 bigSleepClock = s.bigSleepClock,
                 downloadCleanupDays = s.downloadCleanupDays,
+                downloadFromHour = s.downloadFromHour,
+                gestureSensitivity = s.gestureSensitivity,
+                downloadToHour = s.downloadToHour,
+                downloadShortestFirst = s.downloadShortestFirst,
                 batterySaver = s.batterySaver,
                 dualScreenLibrarySlots = s.dualScreenLibrarySlots,
                 librarySectionOrder = s.librarySectionOrder,
@@ -162,6 +166,10 @@ class SettingsRepositoryImpl
                 "autoPresetByNetwork" -> s.autoPresetByNetwork = value as Boolean
                 "bigSleepClock" -> s.bigSleepClock = value as Boolean
                 "downloadCleanupDays" -> s.downloadCleanupDays = (value as Number).toInt()
+                "gestureSensitivity" -> s.gestureSensitivity = (value as Number).toFloat()
+                "downloadFromHour" -> s.downloadFromHour = (value as Number).toInt()
+                "downloadToHour" -> s.downloadToHour = (value as Number).toInt()
+                "downloadShortestFirst" -> s.downloadShortestFirst = value as Boolean
                 "batterySaver" -> s.batterySaver = value as Boolean
                 "dynamicColor" -> s.appearance.dynamicColor = value as Boolean
                 "uiRounding" -> s.appearance.uiRounding = (value as Number).toInt()
@@ -346,6 +354,10 @@ class SettingsRepositoryImpl
             s.autoPresetByNetwork = false
             s.bigSleepClock = false
             s.downloadCleanupDays = 0
+            s.downloadFromHour = 0
+            s.gestureSensitivity = 1f
+            s.downloadToHour = 0
+            s.downloadShortestFirst = false
             s.batterySaver = false
             s.dualScreenLibrarySlots =
                 listOf("watch_later", "liked", "favourite", "history")

@@ -425,6 +425,15 @@ class MainActivity :
 
         // Initialize StateApp and FragmentedStorage before setting content
         StateApp.instance.setGlobalContext(this, lifecycleScope, "compose")
+        lifecycleScope.launch {
+            while (true) {
+                try {
+                    com.tsutsen.platformplayer.di.BatteryLog.sample(this@MainActivity)
+                } catch (_: Throwable) {
+                }
+                kotlinx.coroutines.delay(5 * 60_000L)
+            }
+        }
         StateApp.instance.mainAppStarting(this)
         pipLog("onCreate")
 

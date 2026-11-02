@@ -789,6 +789,16 @@ class PlayerRepositoryImpl(
                 currentAudioTracks = resolution.videoDetails?.audioTracks ?: emptyList()
                 currentVideoStreams = resolution.videoDetails?.videoStreams ?: emptyList()
                 currentVideoStreamUrl = resolution.videoDetails?.videoStreamUrl
+                // Per-channel subtitle / audio choice, when the channel has one saved.
+                run {
+                    val chKey = channelSpeedKey(resolution.videoDetails?.let { mapVideoDetailsToContentItem(it) } ?: initial)
+                    ChannelTrackStore.get(context, chKey, "sub")?.let { saved ->
+                        if (saved == "Off" || currentSubtitles.any { it.name == saved }) selectedSubtitle = saved
+                    }
+                    ChannelTrackStore.get(context, chKey, "audio")?.let { saved ->
+                        if (currentAudioTracks.any { it.label == saved }) preferredAudioTrack = saved
+                    }
+                }
                 // Unmuxed streams: the loaded file IS the quality — seed the
                 // options and highlight the actually-loaded resolution
                 // (overrides the prefs default, which ABR-only streams use).
@@ -1139,12 +1149,14 @@ class PlayerRepositoryImpl(
             lastExplicitSubtitle = selection
         }
         selectedSubtitle = selection
+        ChannelTrackStore.put(context, channelSpeedKey(_playerState.value.currentVideo), "sub", selection)
         applyTrackSelectionParameters()
         _playerState.update { it.copy(selectedSubtitle = selection) }
         applySubtitleSource()
     }
 
     override suspend fun setAudioTrack(selection: String) {
+        ChannelTrackStore.put(context, channelSpeedKey(_playerState.value.currentVideo), "audio", selection)
         // Unmuxed streams: the track list came from the resolver, so a
         // selection swaps the audio URL and rebuilds the merged source.
         val track = currentAudioTracks.firstOrNull { it.label == selection }
