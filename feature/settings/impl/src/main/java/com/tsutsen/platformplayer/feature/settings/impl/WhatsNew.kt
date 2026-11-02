@@ -19,6 +19,12 @@ object WhatsNew {
 
     private val notes: Map<String, String> =
         mapOf(
+            "0.12.0-thor.1" to
+                "- Group chips in the subscriptions feed\n" +
+                "- Quiet channels and offline mode\n" +
+                "- Speed buttons on the second screen\n" +
+                "- Time budget in library lists (10/20/40 min)\n" +
+                "- Diagnostics page in Settings",
             "0.11.0-thor.1" to
                 "- Subscription groups (Settings)\n" +
                 "- Import playlists by link (Settings)\n" +

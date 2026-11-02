@@ -1,5 +1,14 @@
 # TwinJay (Thor) changes
 
+## 0.12.0-thor.1 — round three, part one
+
+- Subscriptions feed: chips to narrow to one of your groups.
+- Quiet channels (Settings > Subscription groups): stay subscribed but vanish from Home.
+- Offline mode (Settings > Playback): no feed loading or background work.
+- Second screen controls: quick speed buttons (0.75x to 2x).
+- Library lists: "I have 10 / 20 / 40 min" shows what fits, shortest first.
+- Diagnostics page (Settings): version, device, sources on/off, share logs, controller button cheat sheet.
+
 ## 0.11.0-thor.1 — the wish-list, part two
 
 - Subscription groups (Settings > Subscription groups): make groups of channels

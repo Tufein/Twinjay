@@ -290,6 +290,15 @@ fun SettingsScreen(
                     item {
                         SettingsOptionCard(
                             icon = Icons.Filled.Info,
+                            title = "Diagnostics",
+                            subtitle = "Version, sources, logs and controller buttons",
+                            onClick = { navigator.navigateToDiagnostics() },
+                            groupPosition = GroupPosition.Middle,
+                        )
+                    }
+                    item {
+                        SettingsOptionCard(
+                            icon = Icons.Filled.Info,
                             title = "Subscription groups",
                             subtitle = "Group your channels",
                             onClick = { navigator.navigateToSubscriptionGroups() },
@@ -1261,6 +1270,14 @@ private fun SectionItems(
                         checked = state.batterySaver,
                         onCheckedChange = { viewModel.updateGeneral("batterySaver", it) },
                         groupPosition = GroupPosition.First,
+                    )
+                    SettingsSwitchCard(
+                        icon = Icons.Filled.BatteryAlert,
+                        title = "Offline mode",
+                        subtitle = "No feed loading or background work: only saved and downloaded content (for flights, saving data)",
+                        checked = state.offlineMode,
+                        onCheckedChange = { viewModel.updateGeneral("offlineMode", it) },
+                        groupPosition = GroupPosition.Middle,
                     )
                     SettingsSwitchCard(
                         icon = Icons.Filled.Download,

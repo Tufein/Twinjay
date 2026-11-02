@@ -26,6 +26,7 @@ object SettingsIndex {
             Entry("Battery saver", "playback", "low battery 720p dim"),
             Entry("Auto-download", "playback", "download wifi charging cleanup delete old"),
             Entry("Hide videos with words", "playback", "filter block keyword channel"),
+            Entry("Offline mode", "playback", "no network flight data saving"),
             Entry("Subtitles", "playback", "captions language size"),
             Entry("Gestures", "gestures", "swipe double tap hold"),
             Entry("Controller buttons", "controller", "gamepad bind fullscreen stats seek"),

@@ -429,6 +429,7 @@ internal fun CompanionContent(
                                         }
                                     },
                                     onSeekTo = { ms -> scope.launch { playerRepository.seekTo(ms) } },
+                                    onSetSpeed = { v -> scope.launch { playerRepository.setPlaybackSpeed(v) } },
                                     onPlay = onPlay,
                                     onLongClick = onLongClick,
                                     queue = queue,

@@ -31,6 +31,7 @@ class BackgroundWorker(
     private val workerParams: WorkerParameters,
 ) : CoroutineWorker(appContext, workerParams) {
     override suspend fun doWork(): Result {
+        if (Settings.instance.offlineMode) return Result.success()
         if (StateApp.instance.isMainActive && !inputData.getBoolean("bypassMainCheck", false)) {
             Logger.i("BackgroundWorker", "CANCELLED")
             return Result.success()

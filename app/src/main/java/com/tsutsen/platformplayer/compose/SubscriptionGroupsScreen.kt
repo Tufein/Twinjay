@@ -25,6 +25,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.LocalContext
+import com.tsutsen.platformplayer.di.QuietChannels
 import com.tsutsen.platformplayer.models.SubscriptionGroup
 import com.tsutsen.platformplayer.states.StateSubscriptionGroups
 import com.tsutsen.platformplayer.states.StateSubscriptions
@@ -37,7 +39,9 @@ import java.time.OffsetDateTime
  */
 @Composable
 fun SubscriptionGroupsScreen(focusId: String? = null) {
+    val context = LocalContext.current
     var version by remember { mutableIntStateOf(0) }
+    var quietOpen by remember { mutableStateOf(false) }
     var newName by remember { mutableStateOf("") }
     var openId by remember { mutableStateOf(focusId) }
     val groups = remember(version) { StateSubscriptionGroups.instance.getSubscriptionGroups().sortedBy { it.name.lowercase() } }
@@ -48,6 +52,39 @@ fun SubscriptionGroupsScreen(focusId: String? = null) {
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         item { Text("Subscription groups", style = MaterialTheme.typography.headlineSmall) }
+        item {
+            val quiet = remember(version) { QuietChannels.get(context) }
+            Column(Modifier.fillMaxWidth()) {
+                Row(
+                    Modifier.fillMaxWidth().clickable { quietOpen = !quietOpen }.padding(vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Column(Modifier.weight(1f)) {
+                        Text("Quiet channels", style = MaterialTheme.typography.titleMedium)
+                        Text(
+                            "${quiet.size} hidden from Home (still subscribed). Applies at the next refresh.",
+                            style = MaterialTheme.typography.bodySmall,
+                        )
+                    }
+                }
+                if (quietOpen) {
+                    subs.forEach { sub ->
+                        val url = sub.channel.url
+                        Row(
+                            Modifier.fillMaxWidth().clickable {
+                                QuietChannels.toggle(context, url)
+                                version++
+                            },
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Checkbox(checked = url in quiet, onCheckedChange = null)
+                            Text(sub.channel.name, modifier = Modifier.padding(start = 8.dp))
+                        }
+                    }
+                }
+                HorizontalDivider()
+            }
+        }
         item {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedTextField(

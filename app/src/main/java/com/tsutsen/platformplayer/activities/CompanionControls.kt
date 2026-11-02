@@ -628,6 +628,8 @@ internal fun CompanionControlsTab(
     isLive: Boolean,
     onSeekTo: (Long) -> Unit,
     companionWindow: Window?,
+    speed: Float = 1f,
+    onSetSpeed: (Float) -> Unit = {},
 ) {
     val context = LocalContext.current
     // Dragged seek position — the slider follows the finger, the player
@@ -759,6 +761,20 @@ internal fun CompanionControlsTab(
                     value = brightness,
                     onValueChange = onBrightness,
                 )
+                // Quick speed buttons.
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    listOf(0.75f, 1f, 1.25f, 1.5f, 2f).forEach { v ->
+                        androidx.compose.material3.FilterChip(
+                            selected = kotlin.math.abs(speed - v) < 0.01f,
+                            onClick = { onSetSpeed(v) },
+                            label = { Text(if (v == 1f) "1x" else "${v}x".replace(".0x", "x")) },
+                        )
+                    }
+                }
             }
         }
     }

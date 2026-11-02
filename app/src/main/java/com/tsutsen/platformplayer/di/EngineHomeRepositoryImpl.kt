@@ -44,7 +44,8 @@ class EngineHomeRepositoryImpl
             _feed
                 .map { page ->
                     val words = HomeFilter.parseWords(Settings.instance.hiddenWords)
-                    if (words.isEmpty()) page else page.copy(items = HomeFilter.apply(page.items, words))
+                    val quiet = QuietChannels.get(com.tsutsen.platformplayer.states.StateApp.instance.context)
+                    if (words.isEmpty() && quiet.isEmpty()) page else page.copy(items = HomeFilter.apply(page.items, words, quiet))
                 }.stateIn(
                     CoroutineScope(SupervisorJob() + Dispatchers.Default),
                     SharingStarted.Eagerly,
@@ -114,6 +115,10 @@ class EngineHomeRepositoryImpl
                 }
             }
             if (!showingCache) _feed.update { it.copy(isLoading = true, error = null) }
+            if (com.tsutsen.platformplayer.Settings.instance.offlineMode) {
+                _feed.update { it.copy(isLoading = false) }
+                return
+            }
 
             // Ensure plugins are initialized before loading feed
             try {

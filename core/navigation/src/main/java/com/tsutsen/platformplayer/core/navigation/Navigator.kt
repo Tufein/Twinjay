@@ -138,6 +138,8 @@ class Navigator
 
         fun navigateToImportPlaylists() = navigate(NavDestination.ImportPlaylists)
 
+        fun navigateToDiagnostics() = navigate(NavDestination.Diagnostics)
+
         fun navigateToBrowser(url: String) = navigate(NavDestination.Browser(url))
 
         fun navigateToComments(url: String) = navigate(NavDestination.Comments(url))

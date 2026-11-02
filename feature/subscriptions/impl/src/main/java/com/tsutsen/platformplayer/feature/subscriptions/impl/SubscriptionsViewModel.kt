@@ -25,6 +25,8 @@ sealed interface SubscriptionsUiState {
         val isLoading: Boolean = false,
         val hasMorePages: Boolean = false,
         val error: String? = null,
+        val groups: List<com.tsutsen.platformplayer.core.data.groups.ChannelGroups.Group> = emptyList(),
+        val activeGroupId: String? = null,
         // True only for a deliberate refresh (pull / retry) — the spinner
         // must NOT spin while "load more" prefetches the next page.
         val isRefreshing: Boolean = false,
@@ -61,11 +63,25 @@ class SubscriptionsViewModel
 
         init {
             viewModelScope.launch {
-                subscriptionRepository.feed.collect { feed ->
+                combine(subscriptionRepository.feed, com.tsutsen.platformplayer.core.data.groups.ChannelGroups.selected) { f, g -> f to g }.collect { (feed, groupId) ->
                     if (!feed.isLoading) _isRefreshing.value = false
+                    val groups = com.tsutsen.platformplayer.core.data.groups.ChannelGroups.groups()
+                    val active = groups.firstOrNull { it.id == groupId }
                     _uiState.value =
                         SubscriptionsUiState.Success(
-                            items = feed.items,
+                            groups = groups,
+                            activeGroupId = active?.id,
+                            items =
+                                if (active == null) {
+                                    feed.items
+                                } else {
+                                    feed.items.filter {
+                                        com.tsutsen.platformplayer.core.data.groups.ChannelGroups.matches(
+                                            active,
+                                            (it as? com.tsutsen.platformplayer.core.model.VideoCard)?.authorUrl,
+                                        )
+                                    }
+                                },
                             creators = feed.creators,
                             activeCreatorId = feed.activeCreatorId,
                             filterStarted = feed.filterStarted,
@@ -95,6 +111,10 @@ class SubscriptionsViewModel
 
         fun selectCreator(creatorId: String?) {
             viewModelScope.launch { subscriptionRepository.selectCreator(creatorId) }
+        }
+
+        fun selectGroup(id: String?) {
+            com.tsutsen.platformplayer.core.data.groups.ChannelGroups.selected.value = id
         }
 
         fun toggleStarted() {
