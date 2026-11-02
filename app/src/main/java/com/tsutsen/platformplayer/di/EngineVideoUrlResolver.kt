@@ -361,8 +361,15 @@ class EngineVideoUrlResolver
                     .filterIsInstance<IVideoUrlSource>()
                     .filter { it.height > 0 && it.getVideoUrl().isNotBlank() }
             if (sources.isEmpty()) return null
-            val defaultHeight =
+            var defaultHeight =
                 Settings.instance.content.defaultVideoResolution.removeSuffix("p").toIntOrNull()
+            // Battery saver: never start above 720p on a low battery.
+            if (Settings.instance.batterySaver &&
+                com.tsutsen.platformplayer.core.data.power.BatterySaver.isLow(StateApp.instance.context)
+            ) {
+                val cap = com.tsutsen.platformplayer.core.data.power.BatterySaver.MAX_HEIGHT
+                defaultHeight = (defaultHeight ?: cap).coerceAtMost(cap)
+            }
             if (defaultHeight == null) return pickAutoUnmuxedVideoSource(sources)
             return sources.minWith(
                 compareBy<IVideoUrlSource> { kotlin.math.abs(it.height - defaultHeight) }

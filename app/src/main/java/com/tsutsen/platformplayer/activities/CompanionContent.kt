@@ -313,12 +313,23 @@ internal fun CompanionContent(
     // No peek: the sheet only ever opens programmatically (long-press), so
     // a 56dp peek would just reserve a blank strip below the content.
     // 0dp keeps the content's top and bottom insets equal.
+    // Battery saver: on a low battery the second screen goes black after 5 s.
+    val batteryContext = LocalContext.current
+    var lowBattery by remember { mutableStateOf(false) }
+    LaunchedEffect(prefs.batterySaver) {
+        while (prefs.batterySaver) {
+            lowBattery = com.tsutsen.platformplayer.core.data.power.BatterySaver.isLow(batteryContext)
+            kotlinx.coroutines.delay(30_000)
+        }
+        lowBattery = false
+    }
+    val batteryDim = prefs.batterySaver && lowBattery
     CompanionSleepLayer(
-        enabled = prefs.dualScreenSleepWhilePlaying,
+        enabled = prefs.dualScreenSleepWhilePlaying || batteryDim,
         isPlaying = playerState.isPlaying,
         window = companionWindow,
-        delayMs = prefs.dualScreenSleepSeconds.coerceAtLeast(5) * 1000L,
-        levelPercent = prefs.dualScreenSleepLevel,
+        delayMs = if (batteryDim) 5_000L else prefs.dualScreenSleepSeconds.coerceAtLeast(5) * 1000L,
+        levelPercent = if (batteryDim) 0 else prefs.dualScreenSleepLevel,
     ) {
     BottomSheetScaffold(
         scaffoldState = scaffoldState,

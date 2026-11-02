@@ -41,6 +41,8 @@ object PlayerControllerActions {
     const val BRIGHTNESS_DOWN = "brightness_down"
     const val VOLUME_UP = "volume_up"
     const val VOLUME_DOWN = "volume_down"
+    const val TOGGLE_FULLSCREEN = "toggle_fullscreen"
+    const val TOGGLE_STATS = "toggle_stats"
 
     data class Action(
         val id: String,
@@ -70,6 +72,8 @@ object PlayerControllerActions {
             Action(BRIGHTNESS_DOWN, "Brightness down", KeyEvent.KEYCODE_BRIGHTNESS_DOWN),
             Action(VOLUME_UP, "Volume up", KeyEvent.KEYCODE_VOLUME_UP),
             Action(VOLUME_DOWN, "Volume down", KeyEvent.KEYCODE_VOLUME_DOWN),
+            Action(TOGGLE_FULLSCREEN, "Fullscreen on / off", KeyEvent.KEYCODE_BUTTON_Y),
+            Action(TOGGLE_STATS, "Stats overlay on / off", KeyEvent.KEYCODE_BUTTON_THUMBR),
         )
 
     /** "KEYCODE_MEDIA_PLAY_PAUSE" → "Media play pause". */

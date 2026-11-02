@@ -49,6 +49,7 @@ internal fun PlayerNormalBottomOverlay(
     // frozen until the scrub commits).
     seekPreviewMs: Long? = null,
     chapters: List<VideoChapter> = emptyList(),
+    sponsorRanges: List<LongRange> = emptyList(),
 ) {
     // Collected here — at the leaf — so the 10 Hz position ticks recompose
     // only this overlay, not the whole player screen.
@@ -184,6 +185,28 @@ internal fun PlayerNormalBottomOverlay(
             val progress = playheadFraction
             val playedDotColor = MaterialTheme.colorScheme.secondaryContainer
             val unplayedDotColor = MaterialTheme.colorScheme.primary
+            if (sponsorRanges.isNotEmpty() && durationMs > 0) {
+                // SponsorBlock segments: thin orange bar along the track.
+                Box(
+                    modifier =
+                        Modifier
+                            .matchParentSize()
+                            .drawBehind {
+                                val cy = size.height / 2f
+                                val barHeight = 4.dp.toPx()
+                                sponsorRanges.forEach { range ->
+                                    val from = (range.first.toFloat() / durationMs).coerceIn(0f, 1f)
+                                    val to = (range.last.toFloat() / durationMs).coerceIn(0f, 1f)
+                                    if (to <= from) return@forEach
+                                    drawRect(
+                                        color = Color(0xFFFF9800),
+                                        topLeft = Offset(from * size.width, cy - barHeight / 2f),
+                                        size = androidx.compose.ui.geometry.Size((to - from) * size.width, barHeight),
+                                    )
+                                }
+                            },
+                )
+            }
             if (chapters.isNotEmpty() && durationMs > 0) {
                 Box(
                     modifier =

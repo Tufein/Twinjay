@@ -1,5 +1,24 @@
 # TwinJay (Thor) changes
 
+## 0.9.0-thor.1 — more control, less waiting
+
+- Controller: new bindable actions "Fullscreen on / off" (default Y) and
+  "Stats overlay on / off" (default right-stick click), in Settings > Controller.
+- Stats for nerds: resolution, frame rate, codecs, bitrates, buffer and speed
+  of the playing video (options sheet, or the controller button).
+- Quality: "Auto" now shows the resolution that is really playing
+  (for example "Auto · 1080p").
+- SponsorBlock segments show as orange bars on the timeline.
+- Battery saver (Settings > Playback): below 20% and not charging the second
+  screen dims after 5 s and video plays at 720p at most.
+- Auto-download (Settings > Playback, off by default): during the background
+  subscription update (Wi-Fi, charging or at least 50% battery) the newest
+  videos (max 5) of channels with notifications on are downloaded.
+- Import subscriptions (Settings): pick the subscriptions.csv from Google
+  Takeout, or a list of channel links, and subscribe to all of them.
+- Faster start: the last home feed is shown immediately while the sources
+  load, and stays visible offline.
+
 ## 0.8.1-thor.1 — nicer updates, setup and sign-in; adjustable dimming
 
 - Updates: TwinJay now checks GitHub once at start and shows a dialog with the

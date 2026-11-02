@@ -49,6 +49,9 @@ import kotlinx.coroutines.flow.StateFlow
 internal fun OptionsModal(
     playbackSpeed: Float,
     quality: String,
+    playingHeight: Int = 0,
+    statsVisible: Boolean = false,
+    onToggleStats: () -> Unit = {},
     qualities: List<Int>,
     subtitle: String,
     subtitles: List<String>,
@@ -113,11 +116,21 @@ internal fun OptionsModal(
                     FilterChip(
                         selected = quality == q,
                         onClick = { onQualityChange(q) },
-                        label = { Text(q) },
+                        label = {
+                            Text(if (q == "Auto" && playingHeight > 0) "Auto · ${playingHeight}p" else q)
+                        },
                         shapes = tokenizedChipShapes(),
                     )
                     Spacer(modifier = Modifier.width(Tokens.SpaceSm))
                 }
+            }
+            OptionCard(title = "Stats for nerds") {
+                FilterChip(
+                    selected = statsVisible,
+                    onClick = onToggleStats,
+                    label = { Text(if (statsVisible) "Showing" else "Show") },
+                    shapes = tokenizedChipShapes(),
+                )
             }
             // A single track is the default — nothing to select.
             if (audioTracks.size > 1) {

@@ -52,6 +52,9 @@ jobs:
           --tests '*GithubReleaseUpdateTest'
           --tests '*SponsorBlockTest'
           --tests '*CompanionSleepPolicyTest'
+          --tests '*TakeoutCsvTest'
+          --tests '*HomeFeedCacheTest'
+          --tests '*BatterySaverTest'
           --tests '*SettingsRepositoryImplTest'
           --tests 'com.tsutsen.platformplayer.player.*'
           -PtargetAbis=arm64-v8a

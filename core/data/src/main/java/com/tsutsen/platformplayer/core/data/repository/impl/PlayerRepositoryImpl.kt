@@ -260,6 +260,10 @@ class PlayerRepositoryImpl(
                 // This avoids race conditions with seekTo() and scrubbing
             }
 
+            override fun onVideoSizeChanged(videoSize: androidx.media3.common.VideoSize) {
+                _playerState.update { it.copy(playingHeight = videoSize.height) }
+            }
+
             override fun onPlaybackParametersChanged(playbackParameters: PlaybackParameters) {
                 _playerState.update { it.copy(playbackSpeed = playbackParameters.speed) }
             }
@@ -559,12 +563,17 @@ class PlayerRepositoryImpl(
 
             sponsorSegments = emptyList()
             sponsorSkipped.clear()
+            _playerState.update { it.copy(sponsorRanges = emptyList()) }
             if (prefs?.sponsorBlock == true) {
                 val sbId = com.tsutsen.platformplayer.core.data.sponsorblock.SponsorBlock.videoId(videoId)
                 if (sbId != null) {
                     extrasScope.launch(Dispatchers.IO) {
                         val found = com.tsutsen.platformplayer.core.data.sponsorblock.SponsorBlock.fetch(sbId)
-                        if (generation == playGeneration.get()) sponsorSegments = found
+                        if (generation == playGeneration.get()) {
+                            sponsorSegments = found
+                            val ranges = found.map { it.startMs..it.endMs }
+                            _playerState.update { it.copy(sponsorRanges = ranges) }
+                        }
                     }
                 }
             }
@@ -1201,6 +1210,11 @@ class PlayerRepositoryImpl(
             // prefer lower quality" path and it collapses to 144p. Grayjay uses 9999.
             builder.setMinVideoSize(0, height - 10)
             builder.setMaxVideoSize(9999, height + 10)
+        } else if (settingsRepository?.preferences?.value?.batterySaver == true &&
+            com.tsutsen.platformplayer.core.data.power.BatterySaver.isLow(context)
+        ) {
+            // Battery saver: "Auto" never goes above 720p on a low battery.
+            builder.setMaxVideoSize(9999, com.tsutsen.platformplayer.core.data.power.BatterySaver.MAX_HEIGHT)
         }
         when (selectedSubtitle) {
             "Off" -> {

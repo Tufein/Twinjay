@@ -26,6 +26,10 @@ data class PlayerState(
     val subtitleLanguages: List<String> = emptyList(),
     /** UI label of the selected quality ("Auto" or "NNNp"). */
     val selectedQuality: String = "Auto",
+    /** Height in pixels of the video actually being rendered (0 until known). */
+    val playingHeight: Int = 0,
+    /** SponsorBlock segments (start..end in ms) of the current video, for the timeline. */
+    val sponsorRanges: List<LongRange> = emptyList(),
     /** UI label of the selected subtitle ("Auto", "Off" or a language code). */
     val selectedSubtitle: String = "Off",
     /** Audio tracks of the current media, in manifest order (empty when none). */
