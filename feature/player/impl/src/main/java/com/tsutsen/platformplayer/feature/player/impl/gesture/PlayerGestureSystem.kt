@@ -97,6 +97,8 @@ fun PlayerGestureSystem(
     // Floating-mode drag params (only used when overlayMode == FLOATING)
     onOffsetChanged: (Float, Float) -> Unit = { _, _ -> },
     onExpand: () -> Unit = {},
+    // 1 = normal; higher = shorter swipe / hold needed.
+    sensitivity: Float = 1f,
 ) {
     val density = LocalDensity.current
     val scope = rememberCoroutineScope()
@@ -105,7 +107,15 @@ fun PlayerGestureSystem(
     var pendingTapJob by remember { mutableStateOf<Job?>(null) }
     // The pure decision state machine; the pointerInput block below is a
     // thin adapter that feeds it events and dispatches its output.
-    val recognizer = remember { PlayerGestureRecognizer() }
+    val recognizer =
+        remember(sensitivity) {
+            PlayerGestureRecognizer(
+                swipeThreshold = PlayerGestureRecognizer.SWIPE_THRESHOLD / sensitivity,
+                holdTimeoutMs = (PlayerGestureRecognizer.HOLD_TIMEOUT_MS / sensitivity).toLong(),
+            )
+        }
+    val holdDelayMs = (PlayerGestureRecognizer.HOLD_TIMEOUT_MS / sensitivity).toLong()
+    val swipeThresholdPx = SWIPE_THRESHOLD / sensitivity
     val currentHandler by rememberUpdatedState(handler)
     val currentConfigs by rememberUpdatedState(gestureConfigs)
     val currentOverlayMode by rememberUpdatedState(overlayMode)
@@ -285,7 +295,7 @@ fun PlayerGestureSystem(
                                         null
                                     } else {
                                         scope.launch {
-                                            delay(PlayerGestureRecognizer.HOLD_TIMEOUT_MS)
+                                            delay(holdDelayMs)
                                             recognizer.onHoldTimeout(System.currentTimeMillis())
                                                 ?.let {
                                                     Log.d("GESTURE", "HOLD fired: sector=${it.sector} action=${it.action}")
@@ -424,7 +434,7 @@ fun PlayerGestureSystem(
                                             panLastY = panChange.position.y
                                             panTotalX += panDx
                                             panTotalY += panDy
-                                            if (!panStarted && hypot(panTotalX, panTotalY) > SWIPE_THRESHOLD) {
+                                            if (!panStarted && hypot(panTotalX, panTotalY) > swipeThresholdPx) {
                                                 panStarted = true
                                             }
                                             if (panStarted) currentOnZoomPan(panDx, panDy)

@@ -155,6 +155,12 @@ class Settings {
     var bigSleepClock: Boolean = false
     var downloadOnlyCharging: Boolean = false
     var downloadCleanupDays: Int = 0
+    // Downloads only run between these hours (equal = any time).
+    var downloadFromHour: Int = 0
+    // Touch gesture eagerness: 1 = normal, higher = shorter swipe/hold needed.
+    var gestureSensitivity: Float = 1f
+    var downloadToHour: Int = 0
+    var downloadShortestFirst: Boolean = false
     // On low battery: dim the second screen fast and cap video at 720p.
     var batterySaver: Boolean = BuildConfig.IS_THOR_BUILD
 
@@ -269,7 +275,12 @@ class Settings {
     class DownloadsSettings {
         var byteRangeDownload: Boolean = true
 
-        fun shouldDownload(): Boolean = true
+        fun shouldDownload(): Boolean =
+            com.tsutsen.platformplayer.core.data.downloads.DownloadWindow.isOpen(
+                java.time.LocalTime.now().hour,
+                Settings.instance.downloadFromHour,
+                Settings.instance.downloadToHour,
+            )
 
         fun getByteRangeThreadCount(): Int = 4
     }

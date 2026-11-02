@@ -352,6 +352,7 @@ fun PlayerContent(
             isLandscape = isLandscape,
             gestureConfigs = gestureConfigs,
             handler = gestureHandler,
+            sensitivity = gestureHandler.sensitivity,
             isScrubbing = isScrubbing,
             onTap = onTap,
             // Pinch-to-zoom (default, non-configurable): the gesture system

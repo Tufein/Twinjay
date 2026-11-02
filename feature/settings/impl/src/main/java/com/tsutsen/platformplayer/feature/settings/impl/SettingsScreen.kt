@@ -483,6 +483,25 @@ fun SettingsSectionScreen(
             }
         }
 
+        Choice.DL_FROM_HOUR, Choice.DL_TO_HOUR -> {
+            loaded?.let {
+                val isFrom = selectedChoice == Choice.DL_FROM_HOUR
+                StepperDialog(
+                    title = if (isFrom) "Downloads may start at" else "Downloads stop at",
+                    value = if (isFrom) it.downloadFromHour else it.downloadToHour,
+                    step = 1,
+                    min = 0,
+                    max = 23,
+                    suffix = ":00",
+                    onSelected = { value ->
+                        viewModel.updateGeneral(if (isFrom) "downloadFromHour" else "downloadToHour", value)
+                        selectedChoice = null
+                    },
+                    onDismiss = { selectedChoice = null },
+                )
+            }
+        }
+
         Choice.SUBTITLE_SIZE -> {
             loaded?.let {
                 StepperDialog(
@@ -692,6 +711,26 @@ fun SettingsSectionScreen(
                     selected = it.defaultSpeedup.toString(),
                     onSelected = { value ->
                         viewModel.updateGeneral("defaultSpeedup", value.toFloat())
+                        selectedChoice = null
+                    },
+                    onDismiss = { selectedChoice = null },
+                )
+            }
+        }
+
+        Choice.GESTURE_SENSITIVITY -> {
+            loaded?.let {
+                ChoiceDialog(
+                    title = "Gesture sensitivity",
+                    options =
+                        listOf(
+                            "Relaxed (fewer accidents)" to "0.7",
+                            "Normal" to "1.0",
+                            "Eager (quick swipes)" to "1.4",
+                        ),
+                    selected = it.gestureSensitivity.toString(),
+                    onSelected = { value ->
+                        viewModel.updateGeneral("gestureSensitivity", value.toFloat())
                         selectedChoice = null
                     },
                     onDismiss = { selectedChoice = null },
@@ -1332,6 +1371,28 @@ private fun SectionItems(
                         onCheckedChange = { viewModel.updateGeneral("downloadOnlyCharging", it) },
                         groupPosition = GroupPosition.Middle,
                     )
+                    SettingsSwitchCard(
+                        icon = Icons.Filled.Download,
+                        title = "Shortest videos first",
+                        subtitle = "The download queue starts with the shortest video",
+                        checked = state.downloadShortestFirst,
+                        onCheckedChange = { viewModel.updateGeneral("downloadShortestFirst", it) },
+                        groupPosition = GroupPosition.Middle,
+                    )
+                    SettingsOptionCard(
+                        icon = Icons.Filled.Download,
+                        title = "Downloads start at",
+                        subtitle = if (state.downloadFromHour == state.downloadToHour) "Any time (set both times to limit)" else "%02d:00".format(state.downloadFromHour),
+                        onClick = { onChoiceSelected(Choice.DL_FROM_HOUR) },
+                        groupPosition = GroupPosition.Middle,
+                    )
+                    SettingsOptionCard(
+                        icon = Icons.Filled.Download,
+                        title = "Downloads stop at",
+                        subtitle = if (state.downloadFromHour == state.downloadToHour) "Any time" else "%02d:00".format(state.downloadToHour),
+                        onClick = { onChoiceSelected(Choice.DL_TO_HOUR) },
+                        groupPosition = GroupPosition.Middle,
+                    )
                     SettingsOptionCard(
                         icon = Icons.Filled.Download,
                         title = "Delete old downloads",
@@ -1453,6 +1514,17 @@ private fun SectionItems(
                         title = "Speedup gesture speed",
                         subtitle = "${state.speedupSensitivity}x",
                         onClick = { onChoiceSelected(Choice.SPEEDUP_SENSITIVITY) },
+                        groupPosition = GroupPosition.Middle,
+                    )
+                    SettingsOptionCard(
+                        icon = Icons.Filled.Speed,
+                        title = "Gesture sensitivity",
+                        subtitle = when {
+                            state.gestureSensitivity < 0.9f -> "Relaxed"
+                            state.gestureSensitivity > 1.1f -> "Eager"
+                            else -> "Normal"
+                        },
+                        onClick = { onChoiceSelected(Choice.GESTURE_SENSITIVITY) },
                         groupPosition = GroupPosition.Middle,
                     )
                     SettingsOptionCard(
@@ -2364,6 +2436,9 @@ private enum class Choice {
     DUAL_SLEEP_DELAY,
     HIDDEN_WORDS,
     CLEANUP_DAYS,
+    DL_FROM_HOUR,
+    GESTURE_SENSITIVITY,
+    DL_TO_HOUR,
     DUAL_SLEEP_LEVEL,
     DUAL_LOOK,
     FONT_SCALE,

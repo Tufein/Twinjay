@@ -208,6 +208,10 @@ class PlayerViewModel
         val speedupSensitivity: Float
             get() = settingsRepository.preferences.value.speedupSensitivity
 
+        /** How readily touch gestures trigger (1 = normal, higher = more eager). */
+        val gestureSensitivity: Float
+            get() = settingsRepository.preferences.value.gestureSensitivity
+
         /** Jump step (seconds) for the back/forward seek gestures. */
         val jumpStepSeconds: Int
             get() = settingsRepository.preferences.value.jumpStepSeconds

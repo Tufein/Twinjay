@@ -1,5 +1,15 @@
 # TwinJay (Thor) changes
 
+## 0.15.0-thor.1 — round three, part four
+
+- Gesture sensitivity (Settings > Playback): relaxed, normal or eager swipes and holds.
+- Downloads: only between chosen hours (Settings > Downloads) and optionally shortest video first.
+- History: filter by today, this week or this month.
+- The subtitle and audio track you pick is remembered per channel.
+- Diagnostics: battery graph for the last 24 hours (sampled every 5 minutes while the app is open).
+- Backup now includes quiet channels and the per-channel speed, subtitle and audio choices.
+- Already present, so not rebuilt: chapter browsing and next-video picking on the second screen, the in-app mini player.
+
 ## 0.14.0-thor.1 — round three, part three
 
 - Pick the second-screen preset by network (Settings > Dual screen > Presets):

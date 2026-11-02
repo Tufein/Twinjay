@@ -171,7 +171,10 @@ class StateDownloads {
     }
 
     fun getDownloading(): List<VideoDownload> {
-        return _downloading.getItems();
+        val items = _downloading.getItems();
+        if (!Settings.instance.downloadShortestFirst)
+            return items;
+        return items.sortedBy { (it.videoDetails?.duration ?: it.video?.duration ?: Long.MAX_VALUE) };
     }
     fun updateDownloading(download: VideoDownload) {
         _downloading.save(download, false, true);
