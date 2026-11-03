@@ -651,8 +651,20 @@ internal fun CompanionControlsTab(
             }
         }
     }
+    // Follow the device volume (hardware keys, system panel) while the tab
+    // is open, unless the slider was just touched.
+    var lastVolumeTouch by remember { mutableStateOf(0L) }
+    LaunchedEffect(Unit) {
+        while (true) {
+            kotlinx.coroutines.delay(400)
+            if (android.os.SystemClock.elapsedRealtime() - lastVolumeTouch > 800) {
+                volume = SystemControls.getVolume(context)
+            }
+        }
+    }
     val onVolume: (Float) -> Unit = {
         volume = it
+        lastVolumeTouch = android.os.SystemClock.elapsedRealtime()
         SystemControls.setVolume(context, it)
         // Bus event so the main screen shows the volume badge like its own actions.
         PlayerEventBus.emit(PlayerEvent.VolumeChanged(it))

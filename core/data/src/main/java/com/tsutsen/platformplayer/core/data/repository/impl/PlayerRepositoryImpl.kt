@@ -50,6 +50,7 @@ import com.tsutsen.platformplayer.core.model.ContentItem
 import com.tsutsen.platformplayer.core.model.PlayerState
 import com.tsutsen.platformplayer.core.model.VideoChapter
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlin.math.roundToInt
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -743,6 +744,9 @@ class PlayerRepositoryImpl(
                             .build()
                     _exoPlayer?.addListener(playerListener)
                     _exoPlayer?.addAnalyticsListener(analyticsListener)
+                    // The device volume is the only volume (see setVolume).
+                    _exoPlayer?.volume = 1f
+                    ensureVolumeSync()
                     // media3 1.x disables legacy text decoding by default, so
                     // the raw VTT subtitle sources we attach can't be decoded
                     // without opting back in.
@@ -1092,11 +1096,55 @@ class PlayerRepositoryImpl(
         }
     }
 
+    /**
+     * One volume only: the device's media volume (the same one the Thor's
+     * hardware keys, the gestures and the second-screen slider move). The
+     * ExoPlayer's own volume stays at 1, so the in-app level can never drift
+     * from the level on the device.
+     */
     override suspend fun setVolume(volume: Float) {
-        withContext(Dispatchers.Main) {
-            _exoPlayer?.volume = volume
+        runCatching {
+            val am = context.getSystemService(Context.AUDIO_SERVICE) as android.media.AudioManager
+            val max = am.getStreamMaxVolume(android.media.AudioManager.STREAM_MUSIC)
+            am.setStreamVolume(
+                android.media.AudioManager.STREAM_MUSIC,
+                (volume.coerceIn(0f, 1f) * max).roundToInt().coerceIn(0, max),
+                0,
+            )
         }
-        _playerState.update { it.copy(volume = volume) }
+        syncSystemVolume()
+        ensureVolumeSync()
+    }
+
+    private var volumeObserver: android.database.ContentObserver? = null
+
+    private fun readSystemVolume(): Float? =
+        runCatching {
+            val am = context.getSystemService(Context.AUDIO_SERVICE) as android.media.AudioManager
+            val max = am.getStreamMaxVolume(android.media.AudioManager.STREAM_MUSIC)
+            if (max > 0) am.getStreamVolume(android.media.AudioManager.STREAM_MUSIC).toFloat() / max else null
+        }.getOrNull()
+
+    /** Copies the device volume into the player state (hardware keys included). */
+    private fun syncSystemVolume() {
+        val v = readSystemVolume() ?: return
+        _playerState.update { if (it.volume == v) it else it.copy(volume = v) }
+    }
+
+    /** Follows volume changes made with the hardware keys or the system panel. */
+    private fun ensureVolumeSync() {
+        if (volumeObserver != null) return
+        runCatching {
+            val observer =
+                object : android.database.ContentObserver(android.os.Handler(android.os.Looper.getMainLooper())) {
+                    override fun onChange(selfChange: Boolean) {
+                        syncSystemVolume()
+                    }
+                }
+            context.contentResolver.registerContentObserver(android.provider.Settings.System.CONTENT_URI, true, observer)
+            volumeObserver = observer
+        }
+        syncSystemVolume()
     }
 
     override suspend fun setBrightness(brightness: Float) {
