@@ -19,6 +19,9 @@ object WhatsNew {
 
     private val notes: Map<String, String> =
         mapOf(
+            "0.17.0-thor.1" to
+                "- New in-app update screen: download with progress and install without leaving TwinJay\n" +
+                "- Night mode: warm tint between chosen hours",
             "0.16.0-thor.1" to
                 "- Step back a few seconds after a long pause\n" +
                 "- Skip silence\n" +

@@ -483,6 +483,22 @@ fun SettingsSectionScreen(
             }
         }
 
+        Choice.NIGHT_FROM, Choice.NIGHT_TO -> {
+            loaded?.let {
+                val isFrom = selectedChoice == Choice.NIGHT_FROM
+                StepperDialog(
+                    title = if (isFrom) "Night mode starts at" else "Night mode ends at",
+                    value = if (isFrom) it.nightFromHour else it.nightToHour,
+                    step = 1, min = 0, max = 23, suffix = ":00",
+                    onSelected = { value ->
+                        viewModel.updateGeneral(if (isFrom) "nightFromHour" else "nightToHour", value)
+                        selectedChoice = null
+                    },
+                    onDismiss = { selectedChoice = null },
+                )
+            }
+        }
+
         Choice.RESUME_REWIND -> {
             loaded?.let {
                 StepperDialog(
@@ -1588,6 +1604,20 @@ private fun SectionItems(
                         groupPosition = GroupPosition.Middle,
                     )
                     SettingsOptionCard(
+                        icon = Icons.Filled.Timer,
+                        title = "Night mode starts at",
+                        subtitle = if (state.nightFromHour == state.nightToHour) "Off (set both times to turn on)" else "%02d:00, warm tint for the whole app".format(state.nightFromHour),
+                        onClick = { onChoiceSelected(Choice.NIGHT_FROM) },
+                        groupPosition = GroupPosition.Middle,
+                    )
+                    SettingsOptionCard(
+                        icon = Icons.Filled.Timer,
+                        title = "Night mode ends at",
+                        subtitle = if (state.nightFromHour == state.nightToHour) "Off" else "%02d:00".format(state.nightToHour),
+                        onClick = { onChoiceSelected(Choice.NIGHT_TO) },
+                        groupPosition = GroupPosition.Middle,
+                    )
+                    SettingsOptionCard(
                         icon = Icons.Filled.Speed,
                         title = "Gesture sensitivity",
                         subtitle = when {
@@ -2242,13 +2272,9 @@ private fun AboutItems(viewModel: SettingsViewModel) {
     var updateRelease by remember { mutableStateOf<com.tsutsen.platformplayer.core.data.update.ReleaseInfo?>(null) }
     var checkingUpdate by remember { mutableStateOf(false) }
     updateRelease?.let { r ->
-        UpdateDialog(
+        UpdateScreen(
             release = r,
             currentVersion = version,
-            onDownload = {
-                UpdatePrompt.download(context, r)
-                updateRelease = null
-            },
             onLater = {
                 // Same as the startup prompt: skip this version until a newer one.
                 UpdatePrompt.dismiss(context, r.tag)
@@ -2514,6 +2540,8 @@ private enum class Choice {
     DL_FROM_HOUR,
     GESTURE_SENSITIVITY,
     RESUME_REWIND,
+    NIGHT_FROM,
+    NIGHT_TO,
     BATTERY_PERCENT,
     STORAGE_LIMIT,
     DL_TO_HOUR,

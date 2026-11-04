@@ -61,6 +61,8 @@ data class AppPreferences(
     val downloadCleanupDays: Int = 0,
     val gestureSensitivity: Float = 1f,
     val resumeRewindSeconds: Int = 5,
+    val nightFromHour: Int = 0,
+    val nightToHour: Int = 0,
     val skipSilence: Boolean = false,
     val batterySaverPercent: Int = 20,
     val storageLimitGb: Int = 0,

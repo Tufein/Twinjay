@@ -161,6 +161,9 @@ class Settings {
     var gestureSensitivity: Float = 1f
     // After a long pause, step back a few seconds so you do not miss anything (0 = off).
     var resumeRewindSeconds: Int = 5
+    // Night mode: a warm tint between these hours (equal = off).
+    var nightFromHour: Int = 0
+    var nightToHour: Int = 0
     // Skip silent parts of the audio.
     var skipSilence: Boolean = false
     // Battery saver starts below this charge level.

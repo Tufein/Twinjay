@@ -1,5 +1,12 @@
 # TwinJay (Thor) changes
 
+## 0.17.0-thor.1 — round four, part two
+
+- New update screen inside the app: release notes, download with a progress bar and install
+  through the system installer, without a browser or notification detour.
+  The permission to install updates is requested in the same flow.
+- Night mode: a warm tint over the app between chosen hours (Settings > Playback).
+
 ## 0.16.0-thor.1 — round four, part one
 
 - Step back a few seconds when you resume after a pause of 2 minutes or more (Settings > Playback).
