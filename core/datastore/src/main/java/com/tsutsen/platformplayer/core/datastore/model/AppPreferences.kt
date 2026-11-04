@@ -60,6 +60,10 @@ data class AppPreferences(
     /** Delete downloads older than this many days (0 = never). */
     val downloadCleanupDays: Int = 0,
     val gestureSensitivity: Float = 1f,
+    val resumeRewindSeconds: Int = 5,
+    val skipSilence: Boolean = false,
+    val batterySaverPercent: Int = 20,
+    val storageLimitGb: Int = 0,
     val downloadFromHour: Int = 0,
     val downloadToHour: Int = 0,
     val downloadShortestFirst: Boolean = false,

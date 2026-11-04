@@ -10,13 +10,16 @@ object BatterySaver {
     /** Below this charge (percent) and not charging, the battery saver kicks in. */
     const val LOW_PERCENT = 20
 
+    /** Current level, set from the settings (default [LOW_PERCENT]). */
+    @Volatile var lowPercent: Int = LOW_PERCENT
+
     /** Quality cap in pixels (height) while the battery saver is active. */
     const val MAX_HEIGHT = 720
 
     /** Pure rule, so it can be unit tested. [level] and [scale] are as in ACTION_BATTERY_CHANGED. */
     fun isLow(level: Int, scale: Int, charging: Boolean): Boolean {
         if (level < 0 || scale <= 0 || charging) return false
-        return level * 100 / scale < LOW_PERCENT
+        return level * 100 / scale < lowPercent
     }
 
     /** True when the device is low on battery and not charging (false when unknown). */

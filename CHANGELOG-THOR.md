@@ -1,5 +1,15 @@
 # TwinJay (Thor) changes
 
+## 0.16.0-thor.1 — round four, part one
+
+- Step back a few seconds when you resume after a pause of 2 minutes or more (Settings > Playback).
+- Skip silence (Settings > Playback).
+- Battery saver level is adjustable (default 20%).
+- Download size limit: the oldest downloads go first (Settings > Downloads).
+- Pause a channel for 7 days (Settings > Subscription groups > Quiet channels).
+- Watch Later: "Remove duplicates".
+- Diagnostics: "Send bug report" shares the app log with a summary.
+
 ## 0.15.0-thor.1 — round three, part four
 
 - Gesture sensitivity (Settings > Playback): relaxed, normal or eager swipes and holds.

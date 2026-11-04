@@ -53,7 +53,8 @@ fun SubscriptionGroupsScreen(focusId: String? = null) {
     ) {
         item { Text("Subscription groups", style = MaterialTheme.typography.headlineSmall) }
         item {
-            val quiet = remember(version) { QuietChannels.get(context) }
+            val quiet = remember(version) { QuietChannels.permanent(context) }
+            val paused = remember(version) { QuietChannels.pausedUntil(context) }
             Column(Modifier.fillMaxWidth()) {
                 Row(
                     Modifier.fillMaxWidth().clickable { quietOpen = !quietOpen }.padding(vertical = 8.dp),
@@ -78,7 +79,13 @@ fun SubscriptionGroupsScreen(focusId: String? = null) {
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             Checkbox(checked = url in quiet, onCheckedChange = null)
-                            Text(sub.channel.name, modifier = Modifier.padding(start = 8.dp))
+                            Text(sub.channel.name, modifier = Modifier.padding(start = 8.dp).weight(1f))
+                            val until = paused[url] ?: 0L
+                            val daysLeft = ((until - System.currentTimeMillis()) / 86_400_000L).toInt() + 1
+                            androidx.compose.material3.TextButton(onClick = {
+                                if (until > System.currentTimeMillis()) QuietChannels.resume(context, url) else QuietChannels.pauseDays(context, url, 7)
+                                version++
+                            }) { Text(if (until > System.currentTimeMillis()) "Back in ${daysLeft}d" else "Pause 7d") }
                         }
                     }
                 }

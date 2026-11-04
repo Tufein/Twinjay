@@ -65,6 +65,24 @@ class LibrarySectionDetailViewModel
             }
         }
 
+        /** Watch Later cleanup: removes later copies of the same video (same title and channel). Returns the count. */
+        fun removeDuplicates(onDone: (Int) -> Unit) {
+            if (loadedSectionId != LibraryRepositoryImpl.WATCH_LATER_ID) return
+            viewModelScope.launch {
+                val extras =
+                    com.tsutsen.platformplayer.core.data.util.Dedupe.extras(_items.value) { c ->
+                        val v = c as? com.tsutsen.platformplayer.core.model.VideoCard
+                        if (v == null) c.id else com.tsutsen.platformplayer.core.data.util.Dedupe.normalizeTitle(v.title, v.author)
+                    }
+                extras.forEach { c ->
+                    (c as? com.tsutsen.platformplayer.core.model.VideoCard)?.let {
+                        libraryRepository.removeSavedVideo(SavedVideoType.WATCH_LATER, it.url)
+                    }
+                }
+                onDone(extras.size)
+            }
+        }
+
         /** Removes a video from watch history (options sheet, history page). */
         fun deleteFromHistory(url: String) {
             viewModelScope.launch {

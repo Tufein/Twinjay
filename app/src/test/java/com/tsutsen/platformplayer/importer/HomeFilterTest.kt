@@ -65,6 +65,24 @@ class HomeFilterTest {
     }
 
     @Test
+    fun storageLimitDropsOldestFirst() {
+        val s = com.tsutsen.platformplayer.core.data.downloads.StorageLimit
+        fun E(k: String, t: Long, z: Long) = com.tsutsen.platformplayer.core.data.downloads.StorageLimit.Entry(k, t, z)
+        val e = listOf(E("b", 2, 40), E("a", 1, 40), E("c", 3, 40))
+        assertEquals(listOf("a"), s.toDelete(e, 100))
+        assertEquals(listOf("a", "b"), s.toDelete(e, 50))
+        assertEquals(emptyList<String>(), s.toDelete(e, 0))
+    }
+
+    @Test
+    fun dedupeKeepsFirstCopy() {
+        val d = com.tsutsen.platformplayer.core.data.util.Dedupe
+        val k = d.normalizeTitle("Big Talk!", "Ann")
+        assertEquals(k, d.normalizeTitle("big talk", "ANN"))
+        assertEquals(listOf("x2"), d.extras(listOf("x1", "x2", "y")) { if (it.startsWith("x")) "x" else it })
+    }
+
+    @Test
     fun networkPresetsDiffer() {
         val home = com.tsutsen.platformplayer.activities.NetworkPreset.forWifi(true).toMap()
         val away = com.tsutsen.platformplayer.activities.NetworkPreset.forWifi(false).toMap()

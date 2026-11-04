@@ -19,6 +19,13 @@ object WhatsNew {
 
     private val notes: Map<String, String> =
         mapOf(
+            "0.16.0-thor.1" to
+                "- Step back a few seconds after a long pause\n" +
+                "- Skip silence\n" +
+                "- Battery saver level and download size limit\n" +
+                "- Pause a channel for 7 days\n" +
+                "- Remove duplicates in Watch Later\n" +
+                "- Send bug report in one tap (Diagnostics)",
             "0.15.0-thor.1" to
                 "- Gesture sensitivity (Settings > Playback)\n" +
                 "- Downloads only between chosen hours, shortest first\n" +

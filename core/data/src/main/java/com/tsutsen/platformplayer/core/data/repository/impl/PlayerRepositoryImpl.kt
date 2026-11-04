@@ -848,6 +848,7 @@ class PlayerRepositoryImpl(
                 _exoPlayer?.playWhenReady = true
                 // Per-channel speed: a saved speed applies; leaving such a
                 // channel puts the speed back to normal.
+                _exoPlayer?.setSkipSilenceEnabled(settingsRepository?.preferences?.value?.skipSilence == true)
                 val savedSpeed = ChannelSpeedStore.get(context, channelSpeedKey(resolution.videoDetails?.let { mapVideoDetailsToContentItem(it) } ?: initial))
                 if (savedSpeed != null) {
                     _exoPlayer?.playbackParameters = androidx.media3.common.PlaybackParameters(savedSpeed)
@@ -1046,7 +1047,10 @@ class PlayerRepositoryImpl(
         }
     }
 
+    @Volatile private var pausedAtMs = 0L
+
     override suspend fun pause() {
+        pausedAtMs = System.currentTimeMillis()
         if (_playerState.value.isCasting) {
             castingRepository?.pause()
             _playerState.update { it.copy(isPlaying = false) }
@@ -1064,8 +1068,15 @@ class PlayerRepositoryImpl(
             _playerState.update { it.copy(isPlaying = true) }
             return
         }
+        val rewind = (settingsRepository?.preferences?.value?.resumeRewindSeconds ?: 0) * 1000L
+        val longPause = pausedAtMs > 0 && System.currentTimeMillis() - pausedAtMs > 120_000L
+        pausedAtMs = 0L
         withContext(Dispatchers.Main) {
-            _exoPlayer?.playWhenReady = true
+            val p = _exoPlayer
+            if (p != null && rewind > 0 && longPause && !p.isCurrentMediaItemLive) {
+                p.seekTo((p.currentPosition - rewind).coerceAtLeast(0L))
+            }
+            p?.playWhenReady = true
         }
         _playerState.update { it.copy(isPlaying = true) }
     }

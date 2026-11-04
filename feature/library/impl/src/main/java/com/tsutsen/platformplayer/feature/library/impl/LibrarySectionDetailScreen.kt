@@ -126,6 +126,17 @@ fun LibrarySectionDetailScreen(
                                 style = MaterialTheme.typography.labelLarge,
                             )
                         }
+                        val ctx = androidx.compose.ui.platform.LocalContext.current
+                        TextButton(onClick = {
+                            viewModel.removeDuplicates { n ->
+                                android.widget.Toast.makeText(ctx, if (n == 0) "No duplicates" else "Removed $n duplicates", android.widget.Toast.LENGTH_SHORT).show()
+                            }
+                        }) {
+                            Text(
+                                text = "Remove duplicates",
+                                style = MaterialTheme.typography.labelLarge,
+                            )
+                        }
                     }
                 },
             )
