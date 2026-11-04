@@ -67,7 +67,8 @@ class HomeFilterTest {
     @Test
     fun storageLimitDropsOldestFirst() {
         val s = com.tsutsen.platformplayer.core.data.downloads.StorageLimit
-        val e = listOf(s.Entry("b", 2, 40), s.Entry("a", 1, 40), s.Entry("c", 3, 40))
+        fun E(k: String, t: Long, z: Long) = com.tsutsen.platformplayer.core.data.downloads.StorageLimit.Entry(k, t, z)
+        val e = listOf(E("b", 2, 40), E("a", 1, 40), E("c", 3, 40))
         assertEquals(listOf("a"), s.toDelete(e, 100))
         assertEquals(listOf("a", "b"), s.toDelete(e, 50))
         assertEquals(emptyList<String>(), s.toDelete(e, 0))
