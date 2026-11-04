@@ -108,6 +108,8 @@ class SettingsRepositoryImpl
                 downloadFromHour = s.downloadFromHour,
                 gestureSensitivity = s.gestureSensitivity,
                 resumeRewindSeconds = s.resumeRewindSeconds,
+                nightFromHour = s.nightFromHour,
+                nightToHour = s.nightToHour,
                 skipSilence = s.skipSilence,
                 batterySaverPercent = s.batterySaverPercent,
                 storageLimitGb = s.storageLimitGb,
@@ -171,6 +173,8 @@ class SettingsRepositoryImpl
                 "autoPresetByNetwork" -> s.autoPresetByNetwork = value as Boolean
                 "bigSleepClock" -> s.bigSleepClock = value as Boolean
                 "downloadCleanupDays" -> s.downloadCleanupDays = (value as Number).toInt()
+                "nightFromHour" -> s.nightFromHour = (value as Number).toInt()
+                "nightToHour" -> s.nightToHour = (value as Number).toInt()
                 "resumeRewindSeconds" -> s.resumeRewindSeconds = (value as Number).toInt()
                 "skipSilence" -> s.skipSilence = value as Boolean
                 "batterySaverPercent" -> s.batterySaverPercent = (value as Number).toInt()
@@ -366,6 +370,8 @@ class SettingsRepositoryImpl
             s.downloadFromHour = 0
             s.gestureSensitivity = 1f
             s.resumeRewindSeconds = 5
+            s.nightFromHour = 0
+            s.nightToHour = 0
             s.skipSilence = false
             s.batterySaverPercent = 20
             s.storageLimitGb = 0

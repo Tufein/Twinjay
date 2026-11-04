@@ -34,6 +34,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
 import androidx.core.pip.PictureInPictureDelegate
@@ -654,6 +655,7 @@ private fun BluejayMainActivity(
                     UpdatePromptHost()
                     com.tsutsen.platformplayer.feature.settings.impl.WhatsNewHost()
                 }
+                NightOverlay(p.nightFromHour, p.nightToHour)
             }
         }
     }
@@ -754,4 +756,22 @@ private fun bluejayMainActivityContent(
             }
         },
     )
+}
+
+/** Warm tint over the whole app between the chosen hours; touches pass straight through. */
+@Composable
+private fun NightOverlay(fromHour: Int, toHour: Int) {
+    if (fromHour == toHour) return
+    var hour by remember { mutableStateOf(java.time.LocalTime.now().hour) }
+    LaunchedEffect(Unit) {
+        while (true) {
+            hour = java.time.LocalTime.now().hour
+            delay(30_000L)
+        }
+    }
+    if (com.tsutsen.platformplayer.core.data.downloads.DownloadWindow.isOpen(hour, fromHour, toHour)) {
+        androidx.compose.foundation.layout.Box(
+            Modifier.fillMaxSize().background(androidx.compose.ui.graphics.Color(0x33FF8A00)),
+        )
+    }
 }
