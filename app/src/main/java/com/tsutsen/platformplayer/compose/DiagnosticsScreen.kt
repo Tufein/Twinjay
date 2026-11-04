@@ -86,6 +86,27 @@ fun DiagnosticsScreen() {
                 }) { Text("Share playback log") }
             }
         }
+        item {
+            Button(onClick = {
+                scope.launch {
+                    val uri = withContext(Dispatchers.IO) { AppLogShare.save(context) }
+                    if (uri == null) {
+                        Toast.makeText(context, "Could not save the log", Toast.LENGTH_LONG).show()
+                    } else {
+                        val summary =
+                            "TwinJay $version\n${Build.MANUFACTURER} ${Build.MODEL}, Android ${Build.VERSION.RELEASE}\n" +
+                                "Battery: ${com.tsutsen.platformplayer.di.BatteryLog.read(context).lastOrNull()?.percent ?: "?"}%\n" +
+                                "Sources on: ${enabled.joinToString { it.name }}\n\nWhat went wrong:\n"
+                        context.startActivity(
+                            AppLogShare.shareIntent(uri).apply {
+                                putExtra(android.content.Intent.EXTRA_SUBJECT, "TwinJay bug report")
+                                putExtra(android.content.Intent.EXTRA_TEXT, summary)
+                            },
+                        )
+                    }
+                }
+            }) { Text("Send bug report") }
+        }
         item { HorizontalDivider() }
         item { Text("Sources (${enabled.size} on of ${available.size})", style = MaterialTheme.typography.titleMedium) }
         items0(available.sortedBy { it.name.lowercase() }) { client ->

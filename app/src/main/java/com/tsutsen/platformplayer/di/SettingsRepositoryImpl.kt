@@ -31,6 +31,7 @@ class SettingsRepositoryImpl
 
         private fun fromSettings(): AppPreferences {
             val s = Settings.instance
+            com.tsutsen.platformplayer.core.data.power.BatterySaver.lowPercent = s.batterySaverPercent
             return AppPreferences(
                 appearance =
                     AppearancePreferences(
@@ -106,6 +107,10 @@ class SettingsRepositoryImpl
                 downloadCleanupDays = s.downloadCleanupDays,
                 downloadFromHour = s.downloadFromHour,
                 gestureSensitivity = s.gestureSensitivity,
+                resumeRewindSeconds = s.resumeRewindSeconds,
+                skipSilence = s.skipSilence,
+                batterySaverPercent = s.batterySaverPercent,
+                storageLimitGb = s.storageLimitGb,
                 downloadToHour = s.downloadToHour,
                 downloadShortestFirst = s.downloadShortestFirst,
                 batterySaver = s.batterySaver,
@@ -166,6 +171,10 @@ class SettingsRepositoryImpl
                 "autoPresetByNetwork" -> s.autoPresetByNetwork = value as Boolean
                 "bigSleepClock" -> s.bigSleepClock = value as Boolean
                 "downloadCleanupDays" -> s.downloadCleanupDays = (value as Number).toInt()
+                "resumeRewindSeconds" -> s.resumeRewindSeconds = (value as Number).toInt()
+                "skipSilence" -> s.skipSilence = value as Boolean
+                "batterySaverPercent" -> s.batterySaverPercent = (value as Number).toInt()
+                "storageLimitGb" -> s.storageLimitGb = (value as Number).toInt()
                 "gestureSensitivity" -> s.gestureSensitivity = (value as Number).toFloat()
                 "downloadFromHour" -> s.downloadFromHour = (value as Number).toInt()
                 "downloadToHour" -> s.downloadToHour = (value as Number).toInt()
@@ -356,6 +365,10 @@ class SettingsRepositoryImpl
             s.downloadCleanupDays = 0
             s.downloadFromHour = 0
             s.gestureSensitivity = 1f
+            s.resumeRewindSeconds = 5
+            s.skipSilence = false
+            s.batterySaverPercent = 20
+            s.storageLimitGb = 0
             s.downloadToHour = 0
             s.downloadShortestFirst = false
             s.batterySaver = false

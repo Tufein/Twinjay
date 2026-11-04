@@ -483,6 +483,48 @@ fun SettingsSectionScreen(
             }
         }
 
+        Choice.RESUME_REWIND -> {
+            loaded?.let {
+                StepperDialog(
+                    title = "Step back after a long pause (0 = off)",
+                    value = it.resumeRewindSeconds, step = 1, min = 0, max = 30, suffix = " s",
+                    onSelected = { value ->
+                        viewModel.updateGeneral("resumeRewindSeconds", value)
+                        selectedChoice = null
+                    },
+                    onDismiss = { selectedChoice = null },
+                )
+            }
+        }
+
+        Choice.BATTERY_PERCENT -> {
+            loaded?.let {
+                StepperDialog(
+                    title = "Battery saver starts below",
+                    value = it.batterySaverPercent, step = 5, min = 5, max = 50, suffix = " %",
+                    onSelected = { value ->
+                        viewModel.updateGeneral("batterySaverPercent", value)
+                        selectedChoice = null
+                    },
+                    onDismiss = { selectedChoice = null },
+                )
+            }
+        }
+
+        Choice.STORAGE_LIMIT -> {
+            loaded?.let {
+                StepperDialog(
+                    title = "Download size limit (0 = no limit)",
+                    value = it.storageLimitGb, step = 5, min = 0, max = 200, suffix = " GB",
+                    onSelected = { value ->
+                        viewModel.updateGeneral("storageLimitGb", value)
+                        selectedChoice = null
+                    },
+                    onDismiss = { selectedChoice = null },
+                )
+            }
+        }
+
         Choice.DL_FROM_HOUR, Choice.DL_TO_HOUR -> {
             loaded?.let {
                 val isFrom = selectedChoice == Choice.DL_FROM_HOUR
@@ -1381,6 +1423,13 @@ private fun SectionItems(
                     )
                     SettingsOptionCard(
                         icon = Icons.Filled.Download,
+                        title = "Download size limit",
+                        subtitle = if (state.storageLimitGb == 0) "No limit" else "Oldest go above ${state.storageLimitGb} GB",
+                        onClick = { onChoiceSelected(Choice.STORAGE_LIMIT) },
+                        groupPosition = GroupPosition.Middle,
+                    )
+                    SettingsOptionCard(
+                        icon = Icons.Filled.Download,
                         title = "Downloads start at",
                         subtitle = if (state.downloadFromHour == state.downloadToHour) "Any time (set both times to limit)" else "%02d:00".format(state.downloadFromHour),
                         onClick = { onChoiceSelected(Choice.DL_FROM_HOUR) },
@@ -1514,6 +1563,28 @@ private fun SectionItems(
                         title = "Speedup gesture speed",
                         subtitle = "${state.speedupSensitivity}x",
                         onClick = { onChoiceSelected(Choice.SPEEDUP_SENSITIVITY) },
+                        groupPosition = GroupPosition.Middle,
+                    )
+                    SettingsOptionCard(
+                        icon = Icons.Filled.Timer,
+                        title = "Step back after a pause",
+                        subtitle = if (state.resumeRewindSeconds == 0) "Off" else "${state.resumeRewindSeconds}s after 2 minutes paused",
+                        onClick = { onChoiceSelected(Choice.RESUME_REWIND) },
+                        groupPosition = GroupPosition.Middle,
+                    )
+                    SettingsSwitchCard(
+                        icon = Icons.Filled.Speed,
+                        title = "Skip silence",
+                        subtitle = "Skips silent parts, handy for talks and podcasts",
+                        checked = state.skipSilence,
+                        onCheckedChange = { viewModel.updateGeneral("skipSilence", it) },
+                        groupPosition = GroupPosition.Middle,
+                    )
+                    SettingsOptionCard(
+                        icon = Icons.Filled.BatteryAlert,
+                        title = "Battery saver level",
+                        subtitle = "Below ${state.batterySaverPercent}%",
+                        onClick = { onChoiceSelected(Choice.BATTERY_PERCENT) },
                         groupPosition = GroupPosition.Middle,
                     )
                     SettingsOptionCard(
@@ -2442,6 +2513,9 @@ private enum class Choice {
     CLEANUP_DAYS,
     DL_FROM_HOUR,
     GESTURE_SENSITIVITY,
+    RESUME_REWIND,
+    BATTERY_PERCENT,
+    STORAGE_LIMIT,
     DL_TO_HOUR,
     DUAL_SLEEP_LEVEL,
     DUAL_LOOK,

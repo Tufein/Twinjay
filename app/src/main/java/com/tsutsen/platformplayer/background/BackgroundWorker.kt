@@ -202,6 +202,27 @@ class BackgroundWorker(
             }
         }
 
+        // Keep downloads under the size limit: oldest go first.
+        val limitGb = Settings.instance.storageLimitGb
+        if (limitGb > 0) {
+            try {
+                val downloads = com.tsutsen.platformplayer.states.StateDownloads.instance
+                val all = downloads.getDownloadedVideos()
+                val entries =
+                    all.map { v ->
+                        com.tsutsen.platformplayer.core.data.downloads.StorageLimit.Entry(
+                            v.id.value ?: v.url,
+                            v.downloadDate?.toEpochSecond() ?: 0L,
+                            v.videoSource.sumOf { it.fileSize } + v.audioSource.sumOf { it.fileSize },
+                        )
+                    }
+                val drop = com.tsutsen.platformplayer.core.data.downloads.StorageLimit.toDelete(entries, limitGb * (1L shl 30))
+                all.filter { (it.id.value ?: it.url) in drop }.forEach { downloads.deleteCachedVideo(it.id) }
+            } catch (ex: Throwable) {
+                Logger.w("BackgroundWorker", "Download size limit failed: ${ex.message}")
+            }
+        }
+
         if (Settings.instance.autoDownload &&
             com.tsutsen.platformplayer.core.data.power.BatterySaver.isChargingOrHigh(
                 appContext,

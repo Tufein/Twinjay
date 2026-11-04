@@ -159,6 +159,14 @@ class Settings {
     var downloadFromHour: Int = 0
     // Touch gesture eagerness: 1 = normal, higher = shorter swipe/hold needed.
     var gestureSensitivity: Float = 1f
+    // After a long pause, step back a few seconds so you do not miss anything (0 = off).
+    var resumeRewindSeconds: Int = 5
+    // Skip silent parts of the audio.
+    var skipSilence: Boolean = false
+    // Battery saver starts below this charge level.
+    var batterySaverPercent: Int = 20
+    // Delete the oldest downloads above this size in GB (0 = no limit).
+    var storageLimitGb: Int = 0
     var downloadToHour: Int = 0
     var downloadShortestFirst: Boolean = false
     // On low battery: dim the second screen fast and cap video at 720p.
