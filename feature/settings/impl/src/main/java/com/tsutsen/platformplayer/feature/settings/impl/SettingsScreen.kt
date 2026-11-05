@@ -513,6 +513,20 @@ fun SettingsSectionScreen(
             }
         }
 
+        Choice.DAILY_GOAL -> {
+            loaded?.let {
+                StepperDialog(
+                    title = "Daily watch goal (0 = off)",
+                    value = it.dailyGoalMinutes, step = 15, min = 0, max = 600, suffix = " min",
+                    onSelected = { value ->
+                        viewModel.updateGeneral("dailyGoalMinutes", value)
+                        selectedChoice = null
+                    },
+                    onDismiss = { selectedChoice = null },
+                )
+            }
+        }
+
         Choice.BATTERY_PERCENT -> {
             loaded?.let {
                 StepperDialog(
@@ -1660,6 +1674,37 @@ private fun SectionItems(
                         onClick = { onChoiceSelected(Choice.BATTERY_PERCENT) },
                         groupPosition = GroupPosition.Middle,
                     )
+                    SettingsSwitchCard(
+                        icon = Icons.Filled.Home,
+                        title = "Even volume",
+                        subtitle = "Evens out loud and quiet videos (effect depends on the video)",
+                        checked = state.normalizeVolume,
+                        onCheckedChange = { viewModel.updateGeneral("normalizeVolume", it) },
+                        groupPosition = GroupPosition.Middle,
+                    )
+                    SettingsSwitchCard(
+                        icon = Icons.Filled.Home,
+                        title = "Subtitle background",
+                        subtitle = "Dark box behind the subtitles",
+                        checked = state.subtitleBackground,
+                        onCheckedChange = { viewModel.updateGeneral("subtitleBackground", it) },
+                        groupPosition = GroupPosition.Middle,
+                    )
+                    SettingsSwitchCard(
+                        icon = Icons.Filled.Home,
+                        title = "Yellow subtitles",
+                        subtitle = "Easier to read on busy pictures",
+                        checked = state.subtitleYellow,
+                        onCheckedChange = { viewModel.updateGeneral("subtitleYellow", it) },
+                        groupPosition = GroupPosition.Middle,
+                    )
+                    SettingsOptionCard(
+                        icon = Icons.Filled.Home,
+                        title = "Daily watch goal",
+                        subtitle = if (state.dailyGoalMinutes == 0) "Off" else "Warns after ${state.dailyGoalMinutes} min per day",
+                        onClick = { onChoiceSelected(Choice.DAILY_GOAL) },
+                        groupPosition = GroupPosition.Middle,
+                    )
                     SettingsOptionCard(
                         icon = Icons.Filled.Timer,
                         title = "Night mode starts at",
@@ -2018,6 +2063,38 @@ private fun SectionItems(
                         subtitle = "Shows the subtitles large on this screen",
                         checked = state.rearSubtitles,
                         onCheckedChange = { viewModel.updateGeneral("rearSubtitles", it) },
+                        groupPosition = GroupPosition.Middle,
+                    )
+                    SettingsSwitchCard(
+                        icon = Icons.Filled.Home,
+                        title = "Couch mode",
+                        subtitle = "Big buttons only on the video page, for when the Thor lies down",
+                        checked = state.rearCouchMode,
+                        onCheckedChange = { viewModel.updateGeneral("rearCouchMode", it) },
+                        groupPosition = GroupPosition.Middle,
+                    )
+                    SettingsSwitchCard(
+                        icon = Icons.Filled.Home,
+                        title = "Up next countdown",
+                        subtitle = "Counts down before the next queued video starts, with a stop button",
+                        checked = state.rearUpNext,
+                        onCheckedChange = { viewModel.updateGeneral("rearUpNext", it) },
+                        groupPosition = GroupPosition.Middle,
+                    )
+                    SettingsSwitchCard(
+                        icon = Icons.Filled.Home,
+                        title = "Recent channels strip",
+                        subtitle = "Shows the channels you watched lately on the dash page",
+                        checked = state.rearRecentChannels,
+                        onCheckedChange = { viewModel.updateGeneral("rearRecentChannels", it) },
+                        groupPosition = GroupPosition.Middle,
+                    )
+                    SettingsSwitchCard(
+                        icon = Icons.Filled.Home,
+                        title = "Main screen off in audio only",
+                        subtitle = "Blacks out the main screen while only listening",
+                        checked = state.blankMainOnAudio,
+                        onCheckedChange = { viewModel.updateGeneral("blankMainOnAudio", it) },
                         groupPosition = GroupPosition.Last,
                     )
                 }
@@ -2278,6 +2355,15 @@ private fun BackupItems(viewModel: SettingsViewModel) {
                 },
                 groupPosition = GroupPosition.Middle,
             )
+            var showQr by remember { mutableStateOf(false) }
+            SettingsOptionCard(
+                icon = Icons.Filled.Upload,
+                title = "Show settings as QR code",
+                subtitle = "Scan it with your other device's camera and copy the text",
+                onClick = { showQr = true },
+                groupPosition = GroupPosition.Middle,
+            )
+            if (showQr) SettingsQrDialog(viewModel.exportSettingsCompressed()) { showQr = false }
             SettingsOptionCard(
                 icon = Icons.Filled.Restore,
                 title = "Import settings from clipboard",
@@ -2640,7 +2726,6 @@ private enum class Choice {
     THEME,
     GRID_COLUMNS,
     SUBTITLE_FONT,
-    SUBTITLE_SIZE,
     SUBTITLE_PADDING,
     SUBTITLE_OUTLINE,
     DUAL_PAGES,
@@ -2664,6 +2749,8 @@ private enum class Choice {
     NIGHT_FROM,
     NIGHT_TO,
     BATTERY_PERCENT,
+    SUBTITLE_SIZE,
+    DAILY_GOAL,
     STORAGE_LIMIT,
     DL_TO_HOUR,
     DUAL_SLEEP_LEVEL,
@@ -2982,4 +3069,44 @@ private fun SlotPickRow(
             overflow = TextOverflow.Ellipsis,
         )
     }
+}
+
+
+/** A QR code with the (compressed) settings text. */
+@Composable
+private fun SettingsQrDialog(
+    text: String,
+    onDismiss: () -> Unit,
+) {
+    val bitmap =
+        remember(text) {
+            runCatching {
+                val hints = mapOf(com.google.zxing.EncodeHintType.ERROR_CORRECTION to com.google.zxing.qrcode.decoder.ErrorCorrectionLevel.L)
+                val m = com.google.zxing.qrcode.QRCodeWriter().encode(text, com.google.zxing.BarcodeFormat.QR_CODE, 0, 0, hints)
+                val scale = 6
+                val bmp = android.graphics.Bitmap.createBitmap(m.width * scale, m.height * scale, android.graphics.Bitmap.Config.ARGB_8888)
+                for (x in 0 until bmp.width) {
+                    for (y in 0 until bmp.height) {
+                        bmp.setPixel(x, y, if (m.get(x / scale, y / scale)) android.graphics.Color.BLACK else android.graphics.Color.WHITE)
+                    }
+                }
+                bmp
+            }.getOrNull()
+        }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Settings as QR code") },
+        text = {
+            if (bitmap != null) {
+                androidx.compose.foundation.Image(
+                    bitmap = bitmap.asImageBitmap(),
+                    contentDescription = "QR code with your settings",
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            } else {
+                Text("The settings are too big for one QR code. Use Share settings instead.")
+            }
+        },
+        confirmButton = { TextButton(onClick = onDismiss) { Text("Close") } },
+    )
 }

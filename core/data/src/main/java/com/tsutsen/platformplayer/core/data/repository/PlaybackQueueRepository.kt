@@ -36,4 +36,15 @@ interface PlaybackQueueRepository {
     fun remove(url: String)
     fun move(from: Int, to: Int)
     fun clear()
+
+    /** Set while an "up next" countdown runs before the next video starts. */
+    val upNext: kotlinx.coroutines.flow.StateFlow<UpNext?>
+
+    /** Stops the countdown; the next video is not started. */
+    fun cancelUpNext()
+
+    data class UpNext(
+        val title: String,
+        val seconds: Int,
+    )
 }

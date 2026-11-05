@@ -156,6 +156,14 @@ class Settings {
     var rearChannelInfo: Boolean = false
     var rearSwipeNav: Boolean = false
     var rearSubtitles: Boolean = false
+    var rearCouchMode: Boolean = false
+    var rearUpNext: Boolean = false
+    var rearRecentChannels: Boolean = false
+    var blankMainOnAudio: Boolean = false
+    var normalizeVolume: Boolean = false
+    var subtitleBackground: Boolean = false
+    var subtitleYellow: Boolean = false
+    var dailyGoalMinutes: Int = 0
     var downloadOnlyCharging: Boolean = false
     var downloadCleanupDays: Int = 0
     // Downloads only run between these hours (equal = any time).

@@ -35,6 +35,10 @@ data class WatchStats(
     val topCreators: List<CreatorWatch> = emptyList(), // top 10
     val last30Days: List<DailyWatch> = emptyList(), // 30-day sliding window, oldest first
     val videoCount: Int = 0,
+    /** Per creator: this week against the week before, biggest change first. */
+    val trends: List<CreatorTrend> = emptyList(),
+    /** Creators you watch a lot but are not subscribed to. */
+    val suggestions: List<CreatorWatch> = emptyList(),
 ) {
     val isEmpty: Boolean get() = videoCount == 0
 
@@ -47,6 +51,12 @@ data class DailyWatch(
     val day: LocalDate,
     val ms: Long,
     val topCreator: String? = null,
+)
+
+data class CreatorTrend(
+    val author: String,
+    val thisWeekMs: Long,
+    val previousWeekMs: Long,
 )
 
 data class CreatorWatch(
@@ -75,6 +85,8 @@ object WatchStatsBuilder {
         val daySums = HashMap<LocalDate, Long>() // last 30 days
         val dayAuthorMs = HashMap<LocalDate, MutableMap<String, Long>>() // last 30 days
         val weekCreators = HashMap<String, LongArray>() // [ms, count]
+        val previousWeek = HashMap<String, Long>()
+        val previousStart = now.minusDays(13)
         val allCreators = HashMap<String, LongArray>()
         val creatorAvatars = HashMap<String, String?>()
         val creatorUrls = HashMap<String, String?>()
@@ -123,6 +135,9 @@ object WatchStatsBuilder {
                     .getOrPut(day) { HashMap() }
                     .let { it[creator] = (it[creator] ?: 0L) + ms }
             }
+            if (day in previousStart..weekStart.minusDays(1)) {
+                previousWeek[creator] = (previousWeek[creator] ?: 0L) + ms
+            }
             if (day in weekStart..now) {
                 weekMs += ms
                 weekVideos++
@@ -154,6 +169,19 @@ object WatchStatsBuilder {
             topCreators = topCreators(allCreators, creatorAvatars, creatorUrls, 10),
             last30Days = last30Days,
             videoCount = history.size,
+            trends =
+                (weekCreators.keys + previousWeek.keys)
+                    .map { CreatorTrend(it, weekCreators[it]?.get(0) ?: 0L, previousWeek[it] ?: 0L) }
+                    .sortedByDescending { kotlin.math.abs(it.thisWeekMs - it.previousWeekMs) }
+                    .take(6),
+            suggestions =
+                if (channelAvatars.isEmpty()) {
+                    emptyList()
+                } else {
+                    topCreators(allCreators, creatorAvatars, creatorUrls, Int.MAX_VALUE)
+                        .filter { it.videoCount >= 3 && it.authorUrl != null && it.authorUrl !in channelAvatars.keys }
+                        .take(5)
+                },
         )
     }
 

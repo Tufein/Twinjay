@@ -25,6 +25,7 @@ import androidx.activity.result.ActivityResult
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.rememberCoroutineScope
@@ -656,6 +657,8 @@ private fun BluejayMainActivity(
                     com.tsutsen.platformplayer.feature.settings.impl.WhatsNewHost()
                 }
                 NightOverlay(p.nightFromHour, p.nightToHour)
+                BlankOnAudio(p.blankMainOnAudio, playerRepository)
+                DailyGoalWatcher(p.dailyGoalMinutes, activity.historyTracker)
             }
         }
     }
@@ -756,6 +759,59 @@ private fun bluejayMainActivityContent(
             }
         },
     )
+}
+
+/** Warns once a day when today's watch time passes the chosen goal. */
+@Composable
+private fun DailyGoalWatcher(
+    goalMinutes: Int,
+    historyTracker: com.tsutsen.platformplayer.feature.player.impl.HistoryTracker,
+) {
+    if (goalMinutes <= 0) return
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val history by historyTracker.observeHistory().collectAsState(initial = emptyList())
+    LaunchedEffect(history, goalMinutes) {
+        val today = java.time.LocalDate.now().toString()
+        val prefs = context.getSharedPreferences("daily_goal", android.content.Context.MODE_PRIVATE)
+        if (prefs.getString("warned", "") == today) return@LaunchedEffect
+        val todayMs =
+            kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) {
+                com.tsutsen.platformplayer.stats.WatchStatsBuilder.build(history).todayMs
+            }
+        if (todayMs >= goalMinutes * 60_000L) {
+            prefs.edit().putString("warned", today).apply()
+            android.widget.Toast.makeText(
+                context,
+                "Daily goal reached: $goalMinutes minutes watched today",
+                android.widget.Toast.LENGTH_LONG,
+            ).show()
+        }
+    }
+}
+
+/** Black screen while only listening (audio only); a tap shows the app again for 10 seconds. */
+@Composable
+private fun BlankOnAudio(enabled: Boolean, playerRepository: PlayerRepository) {
+    if (!enabled) return
+    val state by playerRepository.playerState.collectAsState()
+    var peek by remember { mutableStateOf(false) }
+    LaunchedEffect(peek) {
+        if (peek) {
+            delay(10_000L)
+            peek = false
+        }
+    }
+    if (state.audioOnly && state.isPlaying && !peek) {
+        androidx.compose.foundation.layout.Box(
+            Modifier
+                .fillMaxSize()
+                .background(androidx.compose.ui.graphics.Color.Black)
+                .clickable(
+                    interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
+                    indication = null,
+                ) { peek = true },
+        )
+    }
 }
 
 /** Warm tint over the whole app between the chosen hours; touches pass straight through. */

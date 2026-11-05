@@ -91,6 +91,7 @@ internal fun CompanionContent(
     val playerState by playerRepository.playerState.collectAsState()
     val liveChat by liveChatRepository.state.collectAsState()
     val queue by playbackQueueRepository.queue.collectAsState()
+    val upNext by playbackQueueRepository.upNext.collectAsState()
     val scope = rememberCoroutineScope()
     val video = playerState.currentVideo
 
@@ -382,7 +383,35 @@ internal fun CompanionContent(
                         modifier = Modifier.fillMaxSize(),
                     ) { page ->
                         when (pageKeys.getOrNull(page)) {
-                            "video" -> {
+                            "video" -> if (prefs.rearCouchMode && video != null) {
+                                CouchControls(
+                                    title = video.title,
+                                    isPlaying = playerState.isPlaying,
+                                    onPlayPause = {
+                                        scope.launch {
+                                            if (playerState.isPlaying) playerRepository.pause() else playerRepository.resume()
+                                        }
+                                    },
+                                    onSeekBy = { deltaMs ->
+                                        val target =
+                                            (playerState.currentPositionMs + deltaMs)
+                                                .coerceIn(0L, if (playerState.durationMs > 0) playerState.durationMs else Long.MAX_VALUE)
+                                        scope.launch { playerRepository.seekTo(target) }
+                                    },
+                                    onPrevious = {
+                                        val index = playerState.selectedIndex
+                                        if (playerState.queue.isNotEmpty() && index > 0) {
+                                            scope.launch { playerRepository.play(playerState.queue[index - 1].id) }
+                                        }
+                                    },
+                                    onNext = {
+                                        val index = playerState.selectedIndex
+                                        if (playerState.queue.isNotEmpty() && index + 1 < playerState.queue.size) {
+                                            scope.launch { playerRepository.play(playerState.queue[index + 1].id) }
+                                        }
+                                    },
+                                )
+                            } else {
                                 CompanionVideoPage(
                                     playerState = playerState,
                                     video = video,
@@ -486,12 +515,14 @@ internal fun CompanionContent(
                                     },
                                     onStatsClick = onWatchStats,
                                     onChannelClick = onChannelClick,
+                                    showRecentChannels = prefs.rearRecentChannels,
                                 )
                             }
                         }
                     }
                 }
                 if (prefs.rearSubtitles) RearSubtitles(playerState.subtitleText)
+                RearUpNext(upNext, onStop = { playbackQueueRepository.cancelUpNext() }, onNow = { playbackQueueRepository.playNext() })
                 if (prefs.rearChannelInfo) RearChannelInfo(video, channelRepository)
                 if (scrimAlpha > 0.001f) {
                     Box(

@@ -47,6 +47,9 @@ interface SettingsRepository {
     /** All settings as one shareable text. */
     fun exportSettingsText(): String
 
+    /** Same as [exportSettingsText] but gzip + base64, short enough for a QR code. */
+    fun exportSettingsCompressed(): String
+
     /** Replaces the settings with a text from [exportSettingsText]; false when it is not valid. */
     suspend fun importSettingsText(text: String): Boolean
 }

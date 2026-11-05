@@ -248,6 +248,10 @@ class PlayerRepositoryImpl(
                 }
             }
 
+            override fun onAudioSessionIdChanged(audioSessionId: Int) {
+                applyVolumeNormalization(audioSessionId)
+            }
+
             override fun onIsPlayingChanged(isPlaying: Boolean) {
                 Log.i(TAG, "isPlaying changed: $isPlaying")
                 _playerState.update { it.copy(isPlaying = isPlaying) }
@@ -940,6 +944,7 @@ class PlayerRepositoryImpl(
                 Log.i(TAG, "Current video title: ${currentVideo.title}")
                 Log.i(TAG, "Current video author: ${currentVideo.author?.name}")
                 Log.i(TAG, "Current video thumbnail: ${currentVideo.thumbnailUrl}")
+                rememberForWidget(currentVideo)
 
                 _playerState.update {
                     it.copy(
@@ -1198,6 +1203,65 @@ class PlayerRepositoryImpl(
     @Volatile private var speedFromChannel = false
 
     private var introArmed = false
+
+    /** Keeps the last video for the home screen widget and asks it to redraw. */
+    private fun rememberForWidget(video: ContentItem) {
+        if (video.title == "Loading...") return
+        runCatching {
+            context.getSharedPreferences("widget_continue", android.content.Context.MODE_PRIVATE)
+                .edit()
+                .putString("title", video.title)
+                .putString("author", video.author?.name ?: "")
+                .apply()
+            val component = ComponentName(context, "com.tsutsen.platformplayer.widget.ContinueWidget")
+            val manager = android.appwidget.AppWidgetManager.getInstance(context)
+            val ids = manager.getAppWidgetIds(component)
+            if (ids.isNotEmpty()) {
+                context.sendBroadcast(
+                    Intent(android.appwidget.AppWidgetManager.ACTION_APPWIDGET_UPDATE)
+                        .setComponent(component)
+                        .putExtra(android.appwidget.AppWidgetManager.EXTRA_APPWIDGET_IDS, ids),
+                )
+            }
+        }
+    }
+
+    private var loudnessEnhancer: android.media.audiofx.LoudnessEnhancer? = null
+    private var limiterEffect: android.media.audiofx.AudioEffect? = null
+
+    /** Even volume: a small boost plus a limiter so loud videos do not clip. Effect depends on the video. */
+    private fun applyVolumeNormalization(sessionId: Int) {
+        runCatching { loudnessEnhancer?.release() }
+        runCatching { limiterEffect?.release() }
+        loudnessEnhancer = null
+        limiterEffect = null
+        if (!com.tsutsen.platformplayer.core.data.util.TwinjayFlags.normalizeVolume || sessionId <= 0) return
+        runCatching {
+            loudnessEnhancer =
+                android.media.audiofx.LoudnessEnhancer(sessionId).apply {
+                    setTargetGain(400)
+                    enabled = true
+                }
+        }
+        if (android.os.Build.VERSION.SDK_INT >= 28) {
+            runCatching {
+                val config =
+                    android.media.audiofx.DynamicsProcessing.Config.Builder(
+                        android.media.audiofx.DynamicsProcessing.VARIANT_FAVOR_FREQUENCY_RESOLUTION,
+                        2, false, 0, false, 0, false, 0, true,
+                    ).build()
+                val dp = android.media.audiofx.DynamicsProcessing(0, sessionId, config)
+                for (ch in 0..1) {
+                    dp.setLimiterByChannelIndex(
+                        ch,
+                        android.media.audiofx.DynamicsProcessing.Limiter(true, true, 0, 1f, 60f, 10f, -2f, 0f),
+                    )
+                }
+                dp.enabled = true
+                limiterEffect = dp
+            }
+        }
+    }
 
     private fun channelSpeedKey(video: ContentItem?): String? = video?.author?.url ?: video?.author?.id
 

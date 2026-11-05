@@ -631,6 +631,7 @@ internal fun CompanionControlsTab(
     speed: Float = 1f,
     onSetSpeed: (Float) -> Unit = {},
     introChannelKey: String? = null,
+    videoUrl: String? = null,
 ) {
     val context = LocalContext.current
     // Dragged seek position — the slider follows the finger, the player
@@ -785,6 +786,56 @@ internal fun CompanionControlsTab(
                             selected = kotlin.math.abs(speed - v) < 0.01f,
                             onClick = { onSetSpeed(v) },
                             label = { Text(if (v == 1f) "1x" else "${v}x".replace(".0x", "x")) },
+                        )
+                    }
+                }
+                if (videoUrl != null && !isLive) {
+                    val bm = com.tsutsen.platformplayer.core.data.util.VideoBookmarks
+                    var marks by remember(videoUrl) { mutableStateOf(bm.get(context, videoUrl)) }
+                    var adding by remember { mutableStateOf(false) }
+                    var note by remember { mutableStateOf("") }
+                    androidx.compose.material3.OutlinedButton(onClick = { note = ""; adding = true }) {
+                        Text("Bookmark here")
+                    }
+                    marks.sortedBy { kotlin.math.abs(it.positionMs - positionMs) }.take(3).sortedBy { it.positionMs }.forEach { m ->
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            androidx.compose.material3.TextButton(
+                                onClick = { onSeekTo(m.positionMs) },
+                                modifier = Modifier.weight(1f),
+                            ) {
+                                val sec = m.positionMs / 1000
+                                Text(
+                                    "%d:%02d  %s".format(sec / 60, sec % 60, m.note),
+                                    maxLines = 1,
+                                )
+                            }
+                            androidx.compose.material3.TextButton(onClick = {
+                                marks = marks - m
+                                bm.put(context, videoUrl, marks)
+                            }) { Text("\u2715") }
+                        }
+                    }
+                    if (adding) {
+                        androidx.compose.material3.AlertDialog(
+                            onDismissRequest = { adding = false },
+                            title = { Text("Bookmark") },
+                            text = {
+                                androidx.compose.material3.OutlinedTextField(
+                                    value = note,
+                                    onValueChange = { note = it },
+                                    label = { Text("Note (optional)") },
+                                )
+                            },
+                            confirmButton = {
+                                androidx.compose.material3.TextButton(onClick = {
+                                    marks = (marks + com.tsutsen.platformplayer.core.data.util.VideoBookmarks.Bookmark(positionMs, note.trim())).sortedBy { it.positionMs }
+                                    bm.put(context, videoUrl, marks)
+                                    adding = false
+                                }) { Text("Save") }
+                            },
+                            dismissButton = {
+                                androidx.compose.material3.TextButton(onClick = { adding = false }) { Text("Cancel") }
+                            },
                         )
                     }
                 }

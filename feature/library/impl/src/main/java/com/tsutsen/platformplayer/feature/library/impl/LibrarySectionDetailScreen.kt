@@ -92,7 +92,12 @@ fun LibrarySectionDetailScreen(
                 } else {
                     dated.filter { c ->
                         c.title.contains(query, ignoreCase = true) ||
-                            (c as? CoreVideoCard)?.author?.contains(query, ignoreCase = true) == true
+                            (c as? CoreVideoCard)?.author?.contains(query, ignoreCase = true) == true ||
+                            (
+                                sectionId == LibraryRepositoryImpl.DOWNLOADS_ID &&
+                                    c is CoreVideoCard &&
+                                    com.tsutsen.platformplayer.core.data.util.SubtitleIndex.matchesVideo(c.url, query)
+                            )
                     }
                 }
             if (budgetMinutes <= 0) {
@@ -178,6 +183,46 @@ fun LibrarySectionDetailScreen(
                             onClick = { sinceDays = d },
                             label = { Text(label) },
                         )
+                    }
+                }
+            }
+
+            var smartRules by remember {
+                mutableStateOf(com.tsutsen.platformplayer.core.data.util.SmartLists.get(tagContext))
+            }
+            val currentRule =
+                com.tsutsen.platformplayer.core.data.util.SmartLists.Rule(tagFilter, budgetMinutes, query.trim())
+            if (smartRules.isNotEmpty() || currentRule.label.isNotEmpty()) {
+                androidx.compose.foundation.lazy.LazyRow(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                    horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(8.dp),
+                ) {
+                    lazyItems(smartRules) { rule ->
+                        androidx.compose.material3.FilterChip(
+                            selected = rule == currentRule,
+                            onClick = {
+                                if (rule == currentRule) {
+                                    smartRules = smartRules - rule
+                                    com.tsutsen.platformplayer.core.data.util.SmartLists.put(tagContext, smartRules)
+                                } else {
+                                    tagFilter = rule.tag
+                                    budgetMinutes = rule.budgetMinutes
+                                    query = rule.query
+                                }
+                            },
+                            label = { Text("\u2605 " + rule.label) },
+                        )
+                    }
+                    if (currentRule.label.isNotEmpty() && currentRule !in smartRules) {
+                        item {
+                            androidx.compose.material3.AssistChip(
+                                onClick = {
+                                    smartRules = smartRules + currentRule
+                                    com.tsutsen.platformplayer.core.data.util.SmartLists.put(tagContext, smartRules)
+                                },
+                                label = { Text("Save this filter") },
+                            )
+                        }
                     }
                 }
             }
