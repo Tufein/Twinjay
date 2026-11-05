@@ -63,6 +63,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
@@ -196,7 +197,7 @@ internal fun CompanionVideoPage(
                                 if (swipeNav) {
                                     Modifier.fillMaxWidth().pointerInput(onPrevious, onNext) {
                                         var dx = 0f
-                                        androidx.compose.foundation.gestures.detectHorizontalDragGestures(
+                                        detectHorizontalDragGestures(
                                             onDragStart = { dx = 0f },
                                             onDragEnd = {
                                                 if (dx > 120f) onPrevious() else if (dx < -120f) onNext()
