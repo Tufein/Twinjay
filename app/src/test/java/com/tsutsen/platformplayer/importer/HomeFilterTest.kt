@@ -126,7 +126,7 @@ class HomeFilterTest {
     @Test
     fun bookmarksRoundTripAndSort() {
         val b = com.tsutsen.platformplayer.core.data.util.VideoBookmarks
-        val text = b.encode(listOf(b.Bookmark(90_000, "later"), b.Bookmark(5_000, "start | here")))
+        val text = b.encode(listOf(com.tsutsen.platformplayer.core.data.util.VideoBookmarks.Bookmark(90_000, "later"), com.tsutsen.platformplayer.core.data.util.VideoBookmarks.Bookmark(5_000, "start | here")))
         val back = b.decode(text)
         assertEquals(listOf(5_000L, 90_000L), back.map { it.positionMs })
         assertEquals("start | here", back.first().note)
@@ -135,7 +135,10 @@ class HomeFilterTest {
     @Test
     fun smartListRulesRoundTrip() {
         val l = com.tsutsen.platformplayer.core.data.util.SmartLists
-        val rules = listOf(l.Rule("cooking", 20, ""), l.Rule("", 0, "lofi"))
+        val rules = listOf(
+            com.tsutsen.platformplayer.core.data.util.SmartLists.Rule("cooking", 20, ""),
+            com.tsutsen.platformplayer.core.data.util.SmartLists.Rule("", 0, "lofi"),
+        )
         assertEquals(rules, l.decode(l.encode(rules)))
         assertEquals("#cooking 20 min", rules[0].label)
     }
