@@ -48,6 +48,9 @@ sealed interface SettingsUiState {
         val offlineMode: Boolean = false,
         val autoPresetByNetwork: Boolean = false,
         val bigSleepClock: Boolean = false,
+        val rearChannelInfo: Boolean = false,
+        val rearSwipeNav: Boolean = false,
+        val rearSubtitles: Boolean = false,
         val downloadCleanupDays: Int = 0,
         val gestureSensitivity: Float = 1f,
         val resumeRewindSeconds: Int = 5,
@@ -153,6 +156,9 @@ class SettingsViewModel
                                 offlineMode = prefs.offlineMode,
                                 autoPresetByNetwork = prefs.autoPresetByNetwork,
                                 bigSleepClock = prefs.bigSleepClock,
+                                rearChannelInfo = prefs.rearChannelInfo,
+                                rearSwipeNav = prefs.rearSwipeNav,
+                                rearSubtitles = prefs.rearSubtitles,
                                 downloadCleanupDays = prefs.downloadCleanupDays,
                                 gestureSensitivity = prefs.gestureSensitivity,
                                 resumeRewindSeconds = prefs.resumeRewindSeconds,
@@ -212,6 +218,15 @@ class SettingsViewModel
             viewModelScope.launch {
                 settingsRepository.updateGeneral(key, value)
             }
+        }
+
+        fun exportSettingsText(): String = settingsRepository.exportSettingsText()
+
+        fun importSettingsText(
+            text: String,
+            onDone: (Boolean) -> Unit,
+        ) {
+            viewModelScope.launch { onDone(settingsRepository.importSettingsText(text)) }
         }
 
         fun setDualScreenPages(pages: List<String>) {

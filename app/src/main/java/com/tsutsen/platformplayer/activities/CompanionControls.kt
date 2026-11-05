@@ -630,6 +630,7 @@ internal fun CompanionControlsTab(
     companionWindow: Window?,
     speed: Float = 1f,
     onSetSpeed: (Float) -> Unit = {},
+    introChannelKey: String? = null,
 ) {
     val context = LocalContext.current
     // Dragged seek position — the slider follows the finger, the player
@@ -786,6 +787,30 @@ internal fun CompanionControlsTab(
                             label = { Text(if (v == 1f) "1x" else "${v}x".replace(".0x", "x")) },
                         )
                     }
+                }
+                if (introChannelKey != null && !isLive) {
+                    var intro by remember(introChannelKey) {
+                        mutableStateOf(com.tsutsen.platformplayer.core.data.util.ChannelIntroStore.get(context, introChannelKey))
+                    }
+                    androidx.compose.material3.FilterChip(
+                        selected = intro > 0,
+                        onClick = {
+                            val store = com.tsutsen.platformplayer.core.data.util.ChannelIntroStore
+                            if (intro > 0) {
+                                store.put(context, introChannelKey, 0)
+                                intro = 0
+                            } else if (positionMs in 3_000L..600_000L) {
+                                intro = (positionMs / 1000).toInt()
+                                store.put(context, introChannelKey, intro)
+                            }
+                        },
+                        label = {
+                            Text(
+                                if (intro > 0) "Skip intro: ${intro}s (tap to clear)"
+                                else "Skip intro up to here for this channel",
+                            )
+                        },
+                    )
                 }
             }
         }

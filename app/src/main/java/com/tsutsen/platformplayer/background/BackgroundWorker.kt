@@ -236,10 +236,13 @@ class BackgroundWorker(
             autoDownloads.distinctBy { it.url }.take(MAX_AUTO_DOWNLOADS).forEach { video ->
                 try {
                     if (!com.tsutsen.platformplayer.states.StateDownloads.instance.isDownloaded(video.id)) {
+                        val q =
+                            com.tsutsen.platformplayer.core.data.util.ChannelDownloadQuality.get(appContext, video.author.url)
+                                ?.let { com.tsutsen.platformplayer.core.model.DownloadQuality.fromLabel(it) } ?: def
                         com.tsutsen.platformplayer.states.StateDownloads.instance.download(
                             video,
-                            def.targetPixelCount,
-                            def.targetBitrate,
+                            q.targetPixelCount,
+                            q.targetBitrate,
                         )
                     }
                 } catch (ex: Throwable) {

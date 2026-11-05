@@ -1,5 +1,17 @@
 # TwinJay (Thor) changes
 
+## 0.18.0-thor.1 — round four, part three
+
+- Second screen: channel info for a few seconds when a video starts, swipe the title block left or right
+  for previous or next video, and big subtitles (Settings > Dual screen > Video page).
+- Layout profiles for the second screen: three slots to save and switch (Settings > Dual screen).
+- Skip intro per channel: set it from the Controls tab, it skips that many seconds at the start.
+- Playlists: order by saved order, oldest, newest or shuffle.
+- Tags on videos (video options sheet) and a tag filter in the library lists.
+- Saved searches: star a recent search to pin it above the list.
+- Download quality per channel (Settings > Subscription groups).
+- Share only the settings as text and import them from the clipboard (Settings > Backup & restore).
+
 ## 0.17.0-thor.1 — round four, part two
 
 - New update screen inside the app: release notes, download with a progress bar and install

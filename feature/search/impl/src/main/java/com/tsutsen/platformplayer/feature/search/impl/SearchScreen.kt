@@ -34,6 +34,8 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ButtonGroup
@@ -455,9 +457,15 @@ fun SearchScreen(
                 }
             }
 
+            val savedContext = androidx.compose.ui.platform.LocalContext.current
+            var savedSearches by remember {
+                androidx.compose.runtime.mutableStateOf(
+                    com.tsutsen.platformplayer.core.data.util.SavedSearches.get(savedContext),
+                )
+            }
             // Recent searches — below the filters, only while the field is focused.
             AnimatedVisibility(
-                visible = isSearchFocused && uiState.searchHistory.isNotEmpty(),
+                visible = isSearchFocused && (uiState.searchHistory.isNotEmpty() || savedSearches.isNotEmpty()),
                 enter = fadeIn() + expandVertically(),
                 exit = fadeOut() + shrinkVertically(),
             ) {
@@ -513,6 +521,11 @@ fun SearchScreen(
                             ).padding(Tokens.SpaceMd),
                 ) {
                     RecentSearches(
+                        saved = savedSearches,
+                        onToggleSaved = { q ->
+                            savedSearches = com.tsutsen.platformplayer.core.data.util.SavedSearches.toggle(savedSearches, q)
+                            com.tsutsen.platformplayer.core.data.util.SavedSearches.put(savedContext, savedSearches)
+                        },
                         history = uiState.searchHistory.take(5),
                         onItemClick = { viewModel.search(it) },
                         onDeleteItem = { viewModel.deleteFromHistory(it) },
@@ -689,6 +702,8 @@ fun SearchScreen(
  */
 @Composable
 private fun RecentSearches(
+    saved: List<String>,
+    onToggleSaved: (String) -> Unit,
     history: List<String>,
     onItemClick: (String) -> Unit,
     onDeleteItem: (String) -> Unit,
@@ -699,6 +714,44 @@ private fun RecentSearches(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(Tokens.SpaceXs),
     ) {
+        if (saved.isNotEmpty()) {
+            item {
+                Text(
+                    text = "Saved searches",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.padding(bottom = Tokens.SpaceXs),
+                )
+            }
+            items(saved, key = { "saved:$it" }) { query ->
+                Row(
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = Tokens.SpaceXs)
+                            .background(
+                                MaterialTheme.colorScheme.primaryContainer,
+                                RoundedCornerShape(BluejayTokens().radius.sm),
+                            ).clickable { onItemClick(query) }
+                            .padding(horizontal = Tokens.SpaceMd, vertical = Tokens.SpaceSm),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        text = query,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        modifier = Modifier.weight(1f),
+                    )
+                    Icon(
+                        imageVector = Icons.Default.Star,
+                        contentDescription = "Remove from saved",
+                        modifier = Modifier.size(Tokens.IconSm).clickable { onToggleSaved(query) },
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                    )
+                }
+            }
+        }
+
         item {
             Row(
                 modifier =
@@ -742,6 +795,16 @@ private fun RecentSearches(
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.weight(1f),
+                    )
+                    Icon(
+                        imageVector = if (saved.any { it.equals(query, true) }) Icons.Default.Star else Icons.Default.StarBorder,
+                        contentDescription = "Save search",
+                        modifier =
+                            Modifier
+                                .padding(end = Tokens.SpaceSm)
+                                .size(Tokens.IconSm)
+                                .clickable { onToggleSaved(query) },
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                     Icon(
                         imageVector = Icons.Default.Close,

@@ -225,6 +225,19 @@ class PlayerRepositoryImpl(
                         _exoPlayer?.seekTo(pos)
                     }
                 }
+                // Per-channel intro skip, for videos that start from the beginning.
+                if (playbackState == Player.STATE_READY && introArmed) {
+                    introArmed = false
+                    val v = _playerState.value.currentVideo
+                    val secs =
+                        com.tsutsen.platformplayer.core.data.util.ChannelIntroStore.get(
+                            context,
+                            com.tsutsen.platformplayer.core.data.util.ChannelIntroStore.key(v?.author?.url, v?.author?.id),
+                        )
+                    if (secs > 0 && (duration <= 0 || secs * 1000L < duration / 2)) {
+                        _exoPlayer?.seekTo(secs * 1000L)
+                    }
+                }
                 // LOOP_ONCE: replay the video exactly one more time, then stop.
                 if (playbackState == Player.STATE_ENDED && loopOnceArmed) {
                     loopOnceArmed = false
@@ -544,6 +557,8 @@ class PlayerRepositoryImpl(
             withContext(Dispatchers.IO) {
                 historyDao?.getByUrl(videoId)?.lastPositionMs ?: 0L
             }
+
+        introArmed = pendingResumePosition <= 0
 
         // Publish loading state IMMEDIATELY, before any network/resolve/ExoPlayer work.
         // This is what lets the UI show a spinner right away instead of a blank gap.
@@ -1181,6 +1196,8 @@ class PlayerRepositoryImpl(
     }
 
     @Volatile private var speedFromChannel = false
+
+    private var introArmed = false
 
     private fun channelSpeedKey(video: ContentItem?): String? = video?.author?.url ?: video?.author?.id
 

@@ -153,6 +153,9 @@ fun VideoOptionsSheet(
     // (the second screen uses a material3 BottomSheetScaffold, which cannot
     // host a Popup-based modal sheet).
     embedded: Boolean = false,
+    // Own tags of the video; a non-null [onEditTags] shows the tag line.
+    tags: List<String> = emptyList(),
+    onEditTags: (() -> Unit)? = null,
 ) {
     val context = LocalContext.current
     var showPlaylists by remember { mutableStateOf(false) }
@@ -202,6 +205,19 @@ fun VideoOptionsSheet(
                         modifier = Modifier.padding(top = 2.dp),
                     )
                 }
+            }
+        }
+
+        onEditTags?.let { edit ->
+            androidx.compose.material3.TextButton(
+                onClick = edit,
+                modifier = Modifier.padding(horizontal = 8.dp),
+            ) {
+                Text(
+                    if (tags.isEmpty()) "Add tags" else "Tags: " + tags.joinToString(", ") + " (edit)",
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
             }
         }
 

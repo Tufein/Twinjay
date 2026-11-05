@@ -57,6 +57,9 @@ data class AppPreferences(
     val offlineMode: Boolean = false,
     val autoPresetByNetwork: Boolean = false,
     val bigSleepClock: Boolean = false,
+    val rearChannelInfo: Boolean = false,
+    val rearSwipeNav: Boolean = false,
+    val rearSubtitles: Boolean = false,
     /** Delete downloads older than this many days (0 = never). */
     val downloadCleanupDays: Int = 0,
     val gestureSensitivity: Float = 1f,

@@ -104,6 +104,9 @@ class SettingsRepositoryImpl
                 offlineMode = s.offlineMode,
                 autoPresetByNetwork = s.autoPresetByNetwork,
                 bigSleepClock = s.bigSleepClock,
+                rearChannelInfo = s.rearChannelInfo,
+                rearSwipeNav = s.rearSwipeNav,
+                rearSubtitles = s.rearSubtitles,
                 downloadCleanupDays = s.downloadCleanupDays,
                 downloadFromHour = s.downloadFromHour,
                 gestureSensitivity = s.gestureSensitivity,
@@ -172,6 +175,9 @@ class SettingsRepositoryImpl
                 "offlineMode" -> s.offlineMode = value as Boolean
                 "autoPresetByNetwork" -> s.autoPresetByNetwork = value as Boolean
                 "bigSleepClock" -> s.bigSleepClock = value as Boolean
+                "rearChannelInfo" -> s.rearChannelInfo = value as Boolean
+                "rearSwipeNav" -> s.rearSwipeNav = value as Boolean
+                "rearSubtitles" -> s.rearSubtitles = value as Boolean
                 "downloadCleanupDays" -> s.downloadCleanupDays = (value as Number).toInt()
                 "nightFromHour" -> s.nightFromHour = (value as Number).toInt()
                 "nightToHour" -> s.nightToHour = (value as Number).toInt()
@@ -338,6 +344,20 @@ class SettingsRepositoryImpl
             emit()
         }
 
+        override fun exportSettingsText(): String = "TWINJAY-SETTINGS-1\n" + Settings.instance.encode()
+
+        override suspend fun importSettingsText(text: String): Boolean {
+            val trimmed = text.trim()
+            if (!trimmed.startsWith("TWINJAY-SETTINGS-1")) return false
+            val json = trimmed.removePrefix("TWINJAY-SETTINGS-1").trim()
+            val before = Settings.instance
+            Settings.replace(json)
+            if (Settings.instance === before) return false
+            Settings.instance.save()
+            emit()
+            return true
+        }
+
         override suspend fun resetToDefaults() {
             val s = Settings.instance
             s.appearance.themeMode = "AUTO"
@@ -366,6 +386,9 @@ class SettingsRepositoryImpl
             s.offlineMode = false
             s.autoPresetByNetwork = false
             s.bigSleepClock = false
+            s.rearChannelInfo = false
+            s.rearSwipeNav = false
+            s.rearSubtitles = false
             s.downloadCleanupDays = 0
             s.downloadFromHour = 0
             s.gestureSensitivity = 1f

@@ -90,4 +90,36 @@ class HomeFilterTest {
         assertEquals(true, away["dualScreenSleepWhilePlaying"])
         assertEquals(10, away["dualScreenSleepSeconds"])
     }
+
+    @Test
+    fun playlistOrderSortsAndKeepsUnknownLast() {
+        val o = com.tsutsen.platformplayer.core.data.util.PlaylistOrder
+        val items = listOf(5L, null, 1L, 9L)
+        assertEquals(listOf(1L, 5L, 9L, null), o.apply(items, o.OLDEST, 0) { it })
+        assertEquals(listOf(9L, 5L, 1L, null), o.apply(items, o.NEWEST, 0) { it })
+        assertEquals(items, o.apply(items, o.DEFAULT, 0) { it })
+        assertEquals(o.apply(items, o.SHUFFLE, 7) { it }, o.apply(items, o.SHUFFLE, 7) { it })
+    }
+
+    @Test
+    fun tagsParseCleanly() {
+        val t = com.tsutsen.platformplayer.core.data.util.VideoTags
+        assertEquals(listOf("funny", "cooking"), t.parse(" Funny, #cooking ,,funny"))
+    }
+
+    @Test
+    fun savedSearchToggles() {
+        val s = com.tsutsen.platformplayer.core.data.util.SavedSearches
+        val a = s.toggle(emptyList(), " lofi ")
+        assertEquals(listOf("lofi"), a)
+        assertEquals(emptyList<String>(), s.toggle(a, "LOFI"))
+    }
+
+    @Test
+    fun downloadQualityCycles() {
+        val q = com.tsutsen.platformplayer.core.data.util.ChannelDownloadQuality
+        assertEquals("Best", q.next(null))
+        assertEquals("720p", q.next("1080p"))
+        assertEquals(null, q.next("144p"))
+    }
 }

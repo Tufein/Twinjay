@@ -53,6 +53,11 @@ fun VideoOptionsSheetHost(
         .collectAsState(initial = emptySet())
     val queue by viewModel.queue.collectAsState(initial = emptyList())
     var showNewPlaylistDialog by remember { mutableStateOf(false) }
+    var showTagsDialog by remember { mutableStateOf(false) }
+    val tagContext = LocalContext.current
+    var tags by remember(video.url) {
+        mutableStateOf(com.tsutsen.platformplayer.core.data.util.VideoTags.get(tagContext, video.url))
+    }
 
     // One-shot feedback for download failures as a system toast (success
     // and stop are visible on the button itself).
@@ -120,7 +125,35 @@ fun VideoOptionsSheetHost(
         durationMs = video.durationMs,
         viewCount = video.viewCount,
         publishedAt = video.publishedAt,
+        tags = tags,
+        onEditTags = { showTagsDialog = true },
     )
+
+    if (showTagsDialog) {
+        var draft by remember { mutableStateOf(tags.joinToString(", ")) }
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { showTagsDialog = false },
+            title = { androidx.compose.material3.Text("Tags") },
+            text = {
+                androidx.compose.material3.OutlinedTextField(
+                    value = draft,
+                    onValueChange = { draft = it },
+                    label = { androidx.compose.material3.Text("Separated by commas") },
+                )
+            },
+            confirmButton = {
+                androidx.compose.material3.TextButton(onClick = {
+                    val parsed = com.tsutsen.platformplayer.core.data.util.VideoTags.parse(draft)
+                    com.tsutsen.platformplayer.core.data.util.VideoTags.set(tagContext, video.url, parsed)
+                    tags = parsed
+                    showTagsDialog = false
+                }) { androidx.compose.material3.Text("OK") }
+            },
+            dismissButton = {
+                androidx.compose.material3.TextButton(onClick = { showTagsDialog = false }) { androidx.compose.material3.Text("Cancel") }
+            },
+        )
+    }
 
     if (showNewPlaylistDialog) {
         NewPlaylistDialog(

@@ -43,4 +43,10 @@ interface SettingsRepository {
     suspend fun updateLibrarySectionOrder(order: List<String>)
     suspend fun updateLibrarySectionsEnabled(ids: List<String>)
     suspend fun resetToDefaults()
+
+    /** All settings as one shareable text. */
+    fun exportSettingsText(): String
+
+    /** Replaces the settings with a text from [exportSettingsText]; false when it is not valid. */
+    suspend fun importSettingsText(text: String): Boolean
 }

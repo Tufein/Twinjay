@@ -153,6 +153,9 @@ class Settings {
     var autoPresetByNetwork: Boolean = false
     // Show the clock big on the dimmed second screen.
     var bigSleepClock: Boolean = false
+    var rearChannelInfo: Boolean = false
+    var rearSwipeNav: Boolean = false
+    var rearSubtitles: Boolean = false
     var downloadOnlyCharging: Boolean = false
     var downloadCleanupDays: Int = 0
     // Downloads only run between these hours (equal = any time).
