@@ -19,6 +19,11 @@ object WhatsNew {
 
     private val notes: Map<String, String> =
         mapOf(
+            "0.19.0-thor.1" to
+                "- Couch mode, up next countdown and recent channels on the second screen\n" +
+                "- Even volume, subtitle options, daily watch goal, bookmarks\n" +
+                "- Saved library filters, subtitle search in downloads, channel trends\n" +
+                "- Settings as QR code, home screen widget, biggest downloads",
             "0.18.0-thor.1" to
                 "- Second screen: channel info, swipe to change video, big subtitles, layout profiles\n" +
                 "- Skip intro per channel, playlist order, tags, saved searches\n" +

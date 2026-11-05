@@ -34,6 +34,14 @@ class EngineDownloadsRepository
         private val progressSubs = linkedMapOf<VideoDownload, Any>()
 
         init {
+            com.tsutsen.platformplayer.core.data.util.SubtitleIndex.textFor = { url ->
+                runCatching {
+                    StateDownloads.instance.getDownloadedVideos()
+                        .firstOrNull { it.url == url }
+                        ?.videoSerialized?.subtitles
+                        ?.joinToString("\n") { it._subtitles }
+                }.getOrNull()
+            }
             refresh()
             StateDownloads.instance.onDownloadedChanged.subscribe { refresh() }
             StateDownloads.instance.onDownloadsChanged.subscribe { refresh() }

@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -107,3 +108,72 @@ private fun compact(n: Long): String =
         n >= 1_000 -> "%.1fK".format(n / 1_000.0)
         else -> n.toString()
     }
+
+/** "Up next" countdown with stop and play-now buttons. */
+@Composable
+internal fun BoxScope.RearUpNext(
+    upNext: com.tsutsen.platformplayer.core.data.repository.PlaybackQueueRepository.UpNext?,
+    onStop: () -> Unit,
+    onNow: () -> Unit,
+) {
+    if (upNext == null) return
+    Column(
+        modifier =
+            Modifier
+                .align(Alignment.Center)
+                .padding(24.dp)
+                .background(Color.Black.copy(alpha = 0.85f), RoundedCornerShape(16.dp))
+                .padding(20.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Text("Up next in ${upNext.seconds}", color = Color.White, style = MaterialTheme.typography.titleMedium)
+        Text(upNext.title, color = Color.White, maxLines = 2, textAlign = TextAlign.Center)
+        androidx.compose.foundation.layout.Row(
+            horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(12.dp),
+            modifier = Modifier.padding(top = 12.dp),
+        ) {
+            androidx.compose.material3.OutlinedButton(onClick = onStop) { Text("Stop") }
+            androidx.compose.material3.Button(onClick = onNow) { Text("Play now") }
+        }
+    }
+}
+
+/** Couch mode: only big buttons, for when the Thor lies on the table. */
+@Composable
+internal fun CouchControls(
+    title: String?,
+    isPlaying: Boolean,
+    onPlayPause: () -> Unit,
+    onSeekBy: (Long) -> Unit,
+    onPrevious: () -> Unit,
+    onNext: () -> Unit,
+) {
+    Column(
+        modifier = Modifier.fillMaxSize().padding(16.dp),
+        verticalArrangement = androidx.compose.foundation.layout.Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        if (title != null) {
+            Text(title, style = MaterialTheme.typography.titleLarge, maxLines = 2, textAlign = TextAlign.Center)
+        }
+        androidx.compose.foundation.layout.Spacer(Modifier.padding(12.dp))
+        androidx.compose.foundation.layout.Row(
+            horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            @Composable
+            fun big(label: String, size: Int, onClick: () -> Unit) {
+                androidx.compose.material3.FilledTonalButton(
+                    onClick = onClick,
+                    modifier = Modifier.size(size.dp),
+                    contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp),
+                ) { Text(label, fontSize = (size / 3).sp) }
+            }
+            big("⏮", 84, onPrevious)
+            big("-10", 84) { onSeekBy(-10_000L) }
+            big(if (isPlaying) "⏸" else "▶", 120, onPlayPause)
+            big("+10", 84) { onSeekBy(10_000L) }
+            big("⏭", 84, onNext)
+        }
+    }
+}

@@ -15,6 +15,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -107,6 +108,7 @@ fun DiagnosticsScreen() {
                 }
             }) { Text("Send bug report") }
         }
+        item { BiggestDownloads() }
         item { HorizontalDivider() }
         item { Text("Sources (${enabled.size} on of ${available.size})", style = MaterialTheme.typography.titleMedium) }
         items0(available.sortedBy { it.name.lowercase() }) { client ->
@@ -197,4 +199,42 @@ private fun BatteryGraph(samples: List<com.tsutsen.platformplayer.di.BatteryLog.
         }
     }
     Text("Now ${pts.last().percent}% · lowest ${pts.minOf { it.percent }}%", style = MaterialTheme.typography.bodySmall)
+}
+
+
+/** The biggest downloaded videos with a delete button, plus what the oldest ones would free. */
+@Composable
+private fun BiggestDownloads() {
+    val tick = androidx.compose.runtime.remember { androidx.compose.runtime.mutableIntStateOf(0) }
+    val downloads = com.tsutsen.platformplayer.states.StateDownloads.instance
+    val videos =
+        androidx.compose.runtime.remember(tick.intValue) {
+            downloads.getDownloadedVideos()
+                .map { v -> v to (v.videoSource.sumOf { it.fileSize } + v.audioSource.sumOf { it.fileSize }) }
+                .sortedByDescending { it.second }
+        }
+    if (videos.isEmpty()) return
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Text("Biggest downloads", style = MaterialTheme.typography.titleMedium)
+        val top = videos.take(8)
+        Text(
+            "The ${top.size} biggest take ${formatBytes(top.sumOf { it.second })} of ${formatBytes(videos.sumOf { it.second })}.",
+            style = MaterialTheme.typography.bodySmall,
+        )
+        top.forEach { (v, bytes) ->
+            Row(Modifier.fillMaxWidth(), verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+                Text(
+                    v.name,
+                    modifier = Modifier.weight(1f),
+                    maxLines = 1,
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+                Text(formatBytes(bytes), style = MaterialTheme.typography.bodySmall)
+                androidx.compose.material3.TextButton(onClick = {
+                    runCatching { downloads.deleteCachedVideo(v.id) }
+                    tick.intValue++
+                }) { Text("Delete") }
+            }
+        }
+    }
 }

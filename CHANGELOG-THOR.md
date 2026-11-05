@@ -1,5 +1,17 @@
 # TwinJay (Thor) changes
 
+## 0.19.0-thor.1 — round five
+
+- Second screen: couch mode (big buttons), up next countdown with stop, recent channels strip (Settings > Dual screen).
+- Main screen goes black while listening in audio only; tap to look (Settings > Dual screen).
+- Even volume (Settings > Playback), subtitle background and yellow subtitles.
+- Daily watch goal: a warning once you pass it (Settings > Playback).
+- Bookmarks with a note in a video (Controls tab on the second screen).
+- Library: saved filters (tag, time budget, search; tap a saved filter again to remove it) and searching inside the subtitles of downloads.
+- Watch stats: trend per channel and channels worth subscribing to.
+- Settings as QR code, and a home screen widget with the last video.
+- Diagnostics: biggest downloads with a delete button.
+
 ## 0.18.0-thor.1 — round four, part three
 
 - Second screen: channel info for a few seconds when a video starts, swipe the title block left or right

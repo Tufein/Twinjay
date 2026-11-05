@@ -8,6 +8,7 @@ object TwinjayExtras {
     private val FILES = listOf(
         "quiet_channels", "channel_speed", "channel_tracks", "download_priority",
         "paused_channels", "channel_intro", "channel_download_quality", "video_tags", "saved_searches", "playlist_order",
+        "video_bookmarks", "smart_lists",
     )
 
     fun export(context: Context): List<String> {

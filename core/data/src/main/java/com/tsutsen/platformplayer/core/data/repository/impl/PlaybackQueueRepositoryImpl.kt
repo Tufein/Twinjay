@@ -6,6 +6,8 @@ import android.util.Log
 import com.tsutsen.platformplayer.core.model.ContentItem
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -30,6 +32,13 @@ class PlaybackQueueRepositoryImpl
             scope.launch {
                 playerRepository.playerState.collect { state ->
                     val current = state.currentVideo ?: return@collect
+                    if (!state.isCompleted) {
+                        declinedUrl = null
+                        if (upNextJob?.isActive == true) {
+                            upNextJob?.cancel()
+                            _upNext.value = null
+                        }
+                    }
                     if (state.isCompleted) {
                         // Auto-advance: when the current video ends, play
                         // the next queued item.
@@ -60,9 +69,37 @@ class PlaybackQueueRepositoryImpl
             }
         }
 
+        private val _upNext = MutableStateFlow<PlaybackQueueRepository.UpNext?>(null)
+        override val upNext: StateFlow<PlaybackQueueRepository.UpNext?> = _upNext.asStateFlow()
+        private var upNextJob: Job? = null
+        private var declinedUrl: String? = null
+
+        override fun cancelUpNext() {
+            declinedUrl = playerRepository.playerState.value.currentVideo?.url
+            upNextJob?.cancel()
+            upNextJob = null
+            _upNext.value = null
+        }
+
         private fun advance() {
-            Log.i(TAG, "Auto-advancing queue")
-            playNext()
+            if (!com.tsutsen.platformplayer.core.data.util.TwinjayFlags.upNext) {
+                Log.i(TAG, "Auto-advancing queue")
+                playNext()
+                return
+            }
+            val currentUrl = playerRepository.playerState.value.currentVideo?.url
+            if (currentUrl != null && currentUrl == declinedUrl) return
+            if (upNextJob?.isActive == true) return
+            val next = _queue.value.filterNot { it.url == currentUrl }.firstOrNull() ?: return
+            upNextJob =
+                scope.launch {
+                    for (s in UP_NEXT_SECONDS downTo 1) {
+                        _upNext.value = PlaybackQueueRepository.UpNext(next.title, s)
+                        delay(1000)
+                    }
+                    _upNext.value = null
+                    playNext()
+                }
         }
 
         private fun play(item: ContentItem) {
@@ -137,5 +174,6 @@ class PlaybackQueueRepositoryImpl
 
         companion object {
             private const val TAG = "PlaybackQueue"
+            private const val UP_NEXT_SECONDS = 8
         }
     }

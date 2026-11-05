@@ -32,6 +32,8 @@ class SettingsRepositoryImpl
         private fun fromSettings(): AppPreferences {
             val s = Settings.instance
             com.tsutsen.platformplayer.core.data.power.BatterySaver.lowPercent = s.batterySaverPercent
+            com.tsutsen.platformplayer.core.data.util.TwinjayFlags.upNext = s.rearUpNext
+            com.tsutsen.platformplayer.core.data.util.TwinjayFlags.normalizeVolume = s.normalizeVolume
             return AppPreferences(
                 appearance =
                     AppearancePreferences(
@@ -107,6 +109,14 @@ class SettingsRepositoryImpl
                 rearChannelInfo = s.rearChannelInfo,
                 rearSwipeNav = s.rearSwipeNav,
                 rearSubtitles = s.rearSubtitles,
+                rearCouchMode = s.rearCouchMode,
+                rearUpNext = s.rearUpNext,
+                rearRecentChannels = s.rearRecentChannels,
+                blankMainOnAudio = s.blankMainOnAudio,
+                normalizeVolume = s.normalizeVolume,
+                subtitleBackground = s.subtitleBackground,
+                subtitleYellow = s.subtitleYellow,
+                dailyGoalMinutes = s.dailyGoalMinutes,
                 downloadCleanupDays = s.downloadCleanupDays,
                 downloadFromHour = s.downloadFromHour,
                 gestureSensitivity = s.gestureSensitivity,
@@ -178,6 +188,14 @@ class SettingsRepositoryImpl
                 "rearChannelInfo" -> s.rearChannelInfo = value as Boolean
                 "rearSwipeNav" -> s.rearSwipeNav = value as Boolean
                 "rearSubtitles" -> s.rearSubtitles = value as Boolean
+                "rearCouchMode" -> s.rearCouchMode = value as Boolean
+                "rearUpNext" -> s.rearUpNext = value as Boolean
+                "rearRecentChannels" -> s.rearRecentChannels = value as Boolean
+                "blankMainOnAudio" -> s.blankMainOnAudio = value as Boolean
+                "normalizeVolume" -> s.normalizeVolume = value as Boolean
+                "subtitleBackground" -> s.subtitleBackground = value as Boolean
+                "subtitleYellow" -> s.subtitleYellow = value as Boolean
+                "dailyGoalMinutes" -> s.dailyGoalMinutes = (value as Number).toInt()
                 "downloadCleanupDays" -> s.downloadCleanupDays = (value as Number).toInt()
                 "nightFromHour" -> s.nightFromHour = (value as Number).toInt()
                 "nightToHour" -> s.nightToHour = (value as Number).toInt()
@@ -346,10 +364,25 @@ class SettingsRepositoryImpl
 
         override fun exportSettingsText(): String = "TWINJAY-SETTINGS-1\n" + Settings.instance.encode()
 
+        override fun exportSettingsCompressed(): String {
+            val bytes = Settings.instance.encode().toByteArray(Charsets.UTF_8)
+            val out = java.io.ByteArrayOutputStream()
+            java.util.zip.GZIPOutputStream(out).use { it.write(bytes) }
+            return "TWINJAY-SETTINGS-Z1:" + android.util.Base64.encodeToString(out.toByteArray(), android.util.Base64.NO_WRAP)
+        }
+
         override suspend fun importSettingsText(text: String): Boolean {
             val trimmed = text.trim()
-            if (!trimmed.startsWith("TWINJAY-SETTINGS-1")) return false
-            val json = trimmed.removePrefix("TWINJAY-SETTINGS-1").trim()
+            val json =
+                when {
+                    trimmed.startsWith("TWINJAY-SETTINGS-Z1:") ->
+                        runCatching {
+                            val raw = android.util.Base64.decode(trimmed.removePrefix("TWINJAY-SETTINGS-Z1:"), android.util.Base64.NO_WRAP)
+                            java.util.zip.GZIPInputStream(raw.inputStream()).use { String(it.readBytes(), Charsets.UTF_8) }
+                        }.getOrNull() ?: return false
+                    trimmed.startsWith("TWINJAY-SETTINGS-1") -> trimmed.removePrefix("TWINJAY-SETTINGS-1").trim()
+                    else -> return false
+                }
             val before = Settings.instance
             Settings.replace(json)
             if (Settings.instance === before) return false
@@ -389,6 +422,14 @@ class SettingsRepositoryImpl
             s.rearChannelInfo = false
             s.rearSwipeNav = false
             s.rearSubtitles = false
+            s.rearCouchMode = false
+            s.rearUpNext = false
+            s.rearRecentChannels = false
+            s.blankMainOnAudio = false
+            s.normalizeVolume = false
+            s.subtitleBackground = false
+            s.subtitleYellow = false
+            s.dailyGoalMinutes = 0
             s.downloadCleanupDays = 0
             s.downloadFromHour = 0
             s.gestureSensitivity = 1f

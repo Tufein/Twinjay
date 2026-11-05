@@ -383,6 +383,7 @@ internal fun VideoPageTabs(
                         speed = speed,
                         onSetSpeed = onSetSpeed,
                         introChannelKey = video.author?.url ?: video.author?.id,
+                        videoUrl = video.url,
                         companionWindow = companionWindow,
                     )
                 } else if (activeTab == "queue") {
@@ -750,6 +751,7 @@ internal fun CompanionDashPage(
     onDiscard: (String) -> Unit,
     onStatsClick: () -> Unit,
     onChannelClick: (String) -> Unit,
+    showRecentChannels: Boolean = false,
 ) {
     // Staggered entrance: the sections fade + slide in as the page appears.
     var entered by remember { mutableStateOf(false) }
@@ -771,6 +773,28 @@ internal fun CompanionDashPage(
                 .padding(horizontal = Tokens.SpaceSm, vertical = Tokens.SpaceXs),
         verticalArrangement = Arrangement.spacedBy(Tokens.SpaceSm),
     ) {
+        if (showRecentChannels) {
+            val recent =
+                remember(history) {
+                    history
+                        .filter { !it.authorUrl.isNullOrBlank() && !it.author.isNullOrBlank() }
+                        .sortedByDescending { it.watchedAt }
+                        .distinctBy { it.authorUrl }
+                        .take(12)
+                }
+            if (recent.isNotEmpty()) {
+                androidx.compose.foundation.lazy.LazyRow(
+                    horizontalArrangement = Arrangement.spacedBy(Tokens.SpaceSm),
+                ) {
+                    items(recent, key = { it.authorUrl!! }) { h ->
+                        androidx.compose.material3.AssistChip(
+                            onClick = { onChannelClick(h.authorUrl!!) },
+                            label = { Text(h.author!!, maxLines = 1) },
+                        )
+                    }
+                }
+            }
+        }
         widgetKeys.forEach { key ->
             when (key) {
                 "stats" ->

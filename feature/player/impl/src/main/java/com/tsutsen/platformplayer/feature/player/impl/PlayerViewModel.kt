@@ -189,6 +189,9 @@ class PlayerViewModel
                         padding = prefs.subtitle.bottomPadding,
                         outline = prefs.subtitle.outline,
                     )
+                    SubtitleStyle.backdropEnabled = prefs.subtitleBackground
+                    SubtitleStyle.textColor =
+                        if (prefs.subtitleYellow) androidx.compose.ui.graphics.Color(0xFFFFEB3B) else androidx.compose.ui.graphics.Color.White
                 }
             }
         }

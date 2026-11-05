@@ -51,6 +51,14 @@ sealed interface SettingsUiState {
         val rearChannelInfo: Boolean = false,
         val rearSwipeNav: Boolean = false,
         val rearSubtitles: Boolean = false,
+        val rearCouchMode: Boolean = false,
+        val rearUpNext: Boolean = false,
+        val rearRecentChannels: Boolean = false,
+        val blankMainOnAudio: Boolean = false,
+        val normalizeVolume: Boolean = false,
+        val subtitleBackground: Boolean = false,
+        val subtitleYellow: Boolean = false,
+        val dailyGoalMinutes: Int = 0,
         val downloadCleanupDays: Int = 0,
         val gestureSensitivity: Float = 1f,
         val resumeRewindSeconds: Int = 5,
@@ -159,6 +167,14 @@ class SettingsViewModel
                                 rearChannelInfo = prefs.rearChannelInfo,
                                 rearSwipeNav = prefs.rearSwipeNav,
                                 rearSubtitles = prefs.rearSubtitles,
+                                rearCouchMode = prefs.rearCouchMode,
+                                rearUpNext = prefs.rearUpNext,
+                                rearRecentChannels = prefs.rearRecentChannels,
+                                blankMainOnAudio = prefs.blankMainOnAudio,
+                                normalizeVolume = prefs.normalizeVolume,
+                                subtitleBackground = prefs.subtitleBackground,
+                                subtitleYellow = prefs.subtitleYellow,
+                                dailyGoalMinutes = prefs.dailyGoalMinutes,
                                 downloadCleanupDays = prefs.downloadCleanupDays,
                                 gestureSensitivity = prefs.gestureSensitivity,
                                 resumeRewindSeconds = prefs.resumeRewindSeconds,
@@ -221,6 +237,8 @@ class SettingsViewModel
         }
 
         fun exportSettingsText(): String = settingsRepository.exportSettingsText()
+
+        fun exportSettingsCompressed(): String = settingsRepository.exportSettingsCompressed()
 
         fun importSettingsText(
             text: String,

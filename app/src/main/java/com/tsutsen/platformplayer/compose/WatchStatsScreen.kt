@@ -340,6 +340,47 @@ fun WatchStatsDetailScreen(
                 )
             }
 
+            if (stats.trends.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(Tokens.SpaceLg))
+                SectionTitle("Trend per channel")
+                stats.trends.forEach { t ->
+                    val delta = t.thisWeekMs - t.previousWeekMs
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(vertical = Tokens.SpaceXs),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            text = t.author,
+                            modifier = Modifier.weight(1f),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                        Text(
+                            text =
+                                (if (delta > 0) "\u25B2 " else if (delta < 0) "\u25BC " else "= ") +
+                                    humanDuration(t.thisWeekMs) + " (was " + humanDuration(t.previousWeekMs) + ")",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = if (delta >= 0) scheme.primary else scheme.onSurfaceVariant,
+                        )
+                    }
+                }
+            }
+            if (stats.suggestions.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(Tokens.SpaceLg))
+                SectionTitle("Maybe subscribe")
+                Text(
+                    text = "You watch these often but are not subscribed:",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = scheme.onSurfaceVariant,
+                )
+                stats.suggestions.forEach { c ->
+                    Text(
+                        text = c.author + " \u00B7 " + videosLabel(c.videoCount) + " \u00B7 " + humanDuration(c.ms),
+                        modifier = Modifier.padding(vertical = Tokens.SpaceXs),
+                    )
+                }
+            }
+
             Spacer(modifier = Modifier.height(Tokens.SpaceLg))
             SectionTitle("This week")
             Row(horizontalArrangement = Arrangement.spacedBy(Tokens.SpaceSm)) {

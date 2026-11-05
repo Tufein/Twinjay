@@ -122,4 +122,55 @@ class HomeFilterTest {
         assertEquals("720p", q.next("1080p"))
         assertEquals(null, q.next("144p"))
     }
+
+    @Test
+    fun bookmarksRoundTripAndSort() {
+        val b = com.tsutsen.platformplayer.core.data.util.VideoBookmarks
+        val text = b.encode(listOf(b.Bookmark(90_000, "later"), b.Bookmark(5_000, "start | here")))
+        val back = b.decode(text)
+        assertEquals(listOf(5_000L, 90_000L), back.map { it.positionMs })
+        assertEquals("start | here", back.first().note)
+    }
+
+    @Test
+    fun smartListRulesRoundTrip() {
+        val l = com.tsutsen.platformplayer.core.data.util.SmartLists
+        val rules = listOf(l.Rule("cooking", 20, ""), l.Rule("", 0, "lofi"))
+        assertEquals(rules, l.decode(l.encode(rules)))
+        assertEquals("#cooking 20 min", rules[0].label)
+    }
+
+    @Test
+    fun subtitleSearchNeedsThreeLetters() {
+        val i = com.tsutsen.platformplayer.core.data.util.SubtitleIndex
+        assertTrue(i.matches("Hello brave new world", "BRAVE"))
+        assertFalse(i.matches("Hello brave new world", "he"))
+        assertFalse(i.matches(null, "hello"))
+    }
+
+    @Test
+    fun trendsAndSuggestionsFromHistory() {
+        val now = java.time.LocalDate.of(2026, 11, 5)
+        fun ms(daysAgo: Long) =
+            now.minusDays(daysAgo).atStartOfDay(java.time.ZoneId.systemDefault()).plusHours(12).toInstant().toEpochMilli()
+        fun h(url: String, author: String, daysAgo: Long, watched: Long) =
+            com.tsutsen.platformplayer.core.database.entity.HistoryEntity(
+                contentUrl = url, title = url, author = author, thumbnailUrl = null,
+                watchedMs = watched, watchedAt = ms(daysAgo), authorUrl = "https://c/$author",
+            )
+        val history =
+            listOf(
+                h("1", "Ann", 1, 600_000), h("2", "Ann", 2, 600_000), h("3", "Ann", 3, 600_000),
+                h("4", "Bob", 9, 900_000),
+            )
+        val stats =
+            com.tsutsen.platformplayer.stats.WatchStatsBuilder.build(
+                history, now, channelAvatars = mapOf("https://c/Bob" to null),
+            )
+        val ann = stats.trends.first { it.author == "Ann" }
+        assertEquals(1_800_000L, ann.thisWeekMs)
+        assertEquals(0L, ann.previousWeekMs)
+        assertEquals(900_000L, stats.trends.first { it.author == "Bob" }.previousWeekMs)
+        assertEquals(listOf("Ann"), stats.suggestions.map { it.author })
+    }
 }

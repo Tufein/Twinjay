@@ -65,8 +65,8 @@ android {
         thor {
             dimension "buildType"
             applicationId "com.tufein.bluejay.thor"
-            versionCode 18001
-            versionName "0.18.0-thor.1"
+            versionCode 19001
+            versionName "0.19.0-thor.1"
             buildConfigField "boolean", "IS_THOR_BUILD", "true"
             buildConfigField "boolean", "IS_UNSTABLE_BUILD", "false"
             buildConfigField "boolean", "IS_PLAYSTORE_BUILD", "false"
