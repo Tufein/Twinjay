@@ -658,7 +658,7 @@ private fun BluejayMainActivity(
                 }
                 NightOverlay(p.nightFromHour, p.nightToHour)
                 BlankOnAudio(p.blankMainOnAudio, playerRepository)
-                DailyGoalWatcher(p.dailyGoalMinutes, historyTracker)
+                DailyGoalWatcher(p.dailyGoalMinutes, activity.historyTracker)
             }
         }
     }
