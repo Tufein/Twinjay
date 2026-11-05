@@ -93,6 +93,37 @@ fun SubscriptionGroupsScreen(focusId: String? = null) {
             }
         }
         item {
+            var qualityOpen by remember { mutableStateOf(false) }
+            var qVersion by remember { mutableStateOf(0) }
+            Column(Modifier.fillMaxWidth()) {
+                Column(Modifier.fillMaxWidth().clickable { qualityOpen = !qualityOpen }.padding(vertical = 8.dp)) {
+                    Text("Download quality per channel", style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        "Tap a channel's button to cycle: default, Best, 1080p, 720p, 480p, 360p, 144p.",
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                }
+                if (qualityOpen) {
+                    subs.forEach { sub ->
+                        val url = sub.channel.url
+                        val label = remember(qVersion) { com.tsutsen.platformplayer.core.data.util.ChannelDownloadQuality.get(context, url) }
+                        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                            Text(sub.channel.name, modifier = Modifier.weight(1f))
+                            androidx.compose.material3.TextButton(onClick = {
+                                com.tsutsen.platformplayer.core.data.util.ChannelDownloadQuality.put(
+                                    context,
+                                    url,
+                                    com.tsutsen.platformplayer.core.data.util.ChannelDownloadQuality.next(label),
+                                )
+                                qVersion++
+                            }) { Text(label ?: "Default") }
+                        }
+                    }
+                }
+                HorizontalDivider()
+            }
+        }
+        item {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedTextField(
                     value = newName,

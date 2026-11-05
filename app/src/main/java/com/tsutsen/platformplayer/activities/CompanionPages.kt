@@ -63,6 +63,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.composed
@@ -165,6 +167,7 @@ internal fun CompanionVideoPage(
     onMore: () -> Unit = {},
     companionWindow: Window?,
     onChannelClick: (String) -> Unit,
+    swipeNav: Boolean = false,
 ) {
     val context = LocalContext.current
     Column(
@@ -189,11 +192,28 @@ internal fun CompanionVideoPage(
 
                 "video" -> {
                     video?.let {
-                        CompanionVideoHeader(
-                            video = it,
-                            positionMs = playerState.currentPositionMs,
-                            durationMs = playerState.durationMs,
-                        )
+                        androidx.compose.foundation.layout.Box(
+                            modifier =
+                                if (swipeNav) {
+                                    Modifier.fillMaxWidth().pointerInput(onPrevious, onNext) {
+                                        var dx = 0f
+                                        detectHorizontalDragGestures(
+                                            onDragStart = { dx = 0f },
+                                            onDragEnd = {
+                                                if (dx > 120f) onPrevious() else if (dx < -120f) onNext()
+                                            },
+                                        ) { _, d -> dx += d }
+                                    }
+                                } else {
+                                    Modifier.fillMaxWidth()
+                                },
+                        ) {
+                            CompanionVideoHeader(
+                                video = it,
+                                positionMs = playerState.currentPositionMs,
+                                durationMs = playerState.durationMs,
+                            )
+                        }
                     }
                 }
 
@@ -362,6 +382,7 @@ internal fun VideoPageTabs(
                         onSeekTo = onSeekTo,
                         speed = speed,
                         onSetSpeed = onSetSpeed,
+                        introChannelKey = video.author?.url ?: video.author?.id,
                         companionWindow = companionWindow,
                     )
                 } else if (activeTab == "queue") {

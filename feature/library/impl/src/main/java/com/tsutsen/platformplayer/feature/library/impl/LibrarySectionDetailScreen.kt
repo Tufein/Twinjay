@@ -1,6 +1,7 @@
 package com.tsutsen.platformplayer.feature.library.impl
 
 import com.tsutsen.platformplayer.core.designsystem.theme.Tokens
+import androidx.compose.foundation.lazy.items as lazyItems
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -64,14 +65,26 @@ fun LibrarySectionDetailScreen(
     var budgetMinutes by remember { mutableStateOf(0) }
     // History filter: only entries added within the last N days (0 = all).
     var sinceDays by remember { mutableStateOf(0) }
+    // Tag filter: "" = all. The index is re-read when the options sheet closes.
+    val tagContext = androidx.compose.ui.platform.LocalContext.current
+    var tagFilter by remember { mutableStateOf("") }
+    var tagVersion by remember { mutableStateOf(0) }
+    val tagIndex = remember(items, tagVersion) { com.tsutsen.platformplayer.core.data.util.VideoTags.index(tagContext) }
     val shown =
-        remember(items, query, budgetMinutes, sinceDays) {
+        remember(items, query, budgetMinutes, sinceDays, tagFilter, tagIndex) {
             val cutoff = if (sinceDays > 0) System.currentTimeMillis() - sinceDays * 86_400_000L else 0L
-            val dated =
-                if (cutoff == 0L) {
+            val tagged =
+                if (tagFilter.isEmpty()) {
                     items
                 } else {
-                    items.filter { c -> ((c as? CoreVideoCard)?.addedAt ?: 0L) >= cutoff }
+                    val urls = tagIndex[tagFilter].orEmpty()
+                    items.filter { c -> (c as? CoreVideoCard)?.url in urls }
+                }
+            val dated =
+                if (cutoff == 0L) {
+                    tagged
+                } else {
+                    tagged.filter { c -> ((c as? CoreVideoCard)?.addedAt ?: 0L) >= cutoff }
                 }
             val searched =
                 if (query.isBlank()) {
@@ -169,6 +182,28 @@ fun LibrarySectionDetailScreen(
                 }
             }
 
+            if (tagIndex.isNotEmpty()) {
+                androidx.compose.foundation.lazy.LazyRow(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                    horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(8.dp),
+                ) {
+                    item {
+                        androidx.compose.material3.FilterChip(
+                            selected = tagFilter.isEmpty(),
+                            onClick = { tagFilter = "" },
+                            label = { Text("All tags") },
+                        )
+                    }
+                    lazyItems(tagIndex.keys.sorted()) { t ->
+                        androidx.compose.material3.FilterChip(
+                            selected = tagFilter == t,
+                            onClick = { tagFilter = if (tagFilter == t) "" else t },
+                            label = { Text("#$t") },
+                        )
+                    }
+                }
+            }
+
             if (items.size > 5 && items.any { it is CoreVideoCard && (it.durationMs ?: 0) > 0 }) {
                 androidx.compose.foundation.layout.Row(
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
@@ -240,7 +275,7 @@ fun LibrarySectionDetailScreen(
     optionsCard?.let { card ->
         VideoOptionsSheetHost(
             video = card,
-            onDismiss = { optionsCard = null },
+            onDismiss = { optionsCard = null; tagVersion++ },
             onPlay = { playerViewModel.play(card) },
             onGoToChannel = { navigator.navigateToChannel(it) },
             // Every item on the history page is a history entry.

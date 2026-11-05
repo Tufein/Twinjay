@@ -19,6 +19,10 @@ object WhatsNew {
 
     private val notes: Map<String, String> =
         mapOf(
+            "0.18.0-thor.1" to
+                "- Second screen: channel info, swipe to change video, big subtitles, layout profiles\n" +
+                "- Skip intro per channel, playlist order, tags, saved searches\n" +
+                "- Download quality per channel, share settings as text",
             "0.17.0-thor.1" to
                 "- New in-app update screen: download with progress and install without leaving TwinJay\n" +
                 "- Night mode: warm tint between chosen hours",

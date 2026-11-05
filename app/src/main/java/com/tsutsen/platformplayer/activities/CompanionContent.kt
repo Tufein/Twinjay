@@ -414,6 +414,7 @@ internal fun CompanionContent(
                                                 .coerceIn(0L, if (playerState.durationMs > 0) playerState.durationMs else Long.MAX_VALUE)
                                         scope.launch { playerRepository.seekTo(target) }
                                     },
+                                    swipeNav = prefs.rearSwipeNav,
                                     onPrevious = {
                                         val index = playerState.selectedIndex
                                         if (playerState.queue.isNotEmpty() && index > 0) {
@@ -490,6 +491,8 @@ internal fun CompanionContent(
                         }
                     }
                 }
+                if (prefs.rearSubtitles) RearSubtitles(playerState.subtitleText)
+                if (prefs.rearChannelInfo) RearChannelInfo(video, channelRepository)
                 if (scrimAlpha > 0.001f) {
                     Box(
                         modifier =

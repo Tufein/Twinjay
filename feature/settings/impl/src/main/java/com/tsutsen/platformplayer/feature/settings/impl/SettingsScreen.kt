@@ -639,6 +639,63 @@ fun SettingsSectionScreen(
             }
         }
 
+        Choice.LAYOUT_PROFILES -> {
+            loaded?.let { st ->
+                val profileContext = LocalContext.current
+                var version by remember { mutableStateOf(0) }
+                AlertDialog(
+                    onDismissRequest = { selectedChoice = null },
+                    title = { Text("Layout profiles") },
+                    text = {
+                        Column(verticalArrangement = Arrangement.spacedBy(Tokens.SpaceSm)) {
+                            Text(
+                                "Save the current pages, tabs and their order for the second screen, and bring it back with one tap.",
+                                style = MaterialTheme.typography.bodySmall,
+                            )
+                            LayoutProfiles.slots.forEachIndexed { i, name ->
+                                val saved = remember(version) { LayoutProfiles.load(profileContext, i) }
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    Text(
+                                        text = if (saved == null) "$name (empty)" else name,
+                                        modifier = Modifier.weight(1f),
+                                    )
+                                    TextButton(onClick = {
+                                        LayoutProfiles.save(
+                                            profileContext,
+                                            i,
+                                            LayoutProfile(
+                                                st.dualScreenPages,
+                                                st.dualScreenVideoTabs,
+                                                st.dualScreenVideoTabOrder,
+                                                st.dualScreenPageOrder,
+                                            ),
+                                        )
+                                        version++
+                                    }) { Text("Save now") }
+                                    TextButton(
+                                        enabled = saved != null,
+                                        onClick = {
+                                            saved?.let { p ->
+                                                viewModel.setDualScreenPages(p.pages)
+                                                viewModel.setDualScreenVideoTabs(p.tabs)
+                                                viewModel.setDualScreenVideoTabOrder(p.tabOrder)
+                                                viewModel.setDualScreenPageOrder(p.pageOrder)
+                                            }
+                                            selectedChoice = null
+                                        },
+                                    ) { Text("Use") }
+                                }
+                            }
+                        }
+                    },
+                    confirmButton = { TextButton(onClick = { selectedChoice = null }) { Text("Close") } },
+                )
+            }
+        }
+
         Choice.DUAL_TAB_ORDER -> {
             loaded?.let {
                 ReorderDialog(
@@ -1930,6 +1987,37 @@ private fun SectionItems(
                         title = "Video page order",
                         subtitle = dualOrderLabel(state.dualScreenPageOrder, dualPageOrderNames),
                         onClick = { onChoiceSelected(Choice.DUAL_PAGE_ORDER) },
+                        groupPosition = GroupPosition.Middle,
+                    )
+                    SettingsOptionCard(
+                        icon = Icons.Filled.Reorder,
+                        title = "Layout profiles",
+                        subtitle = "Save and switch between arrangements (home, couch, on the go)",
+                        onClick = { onChoiceSelected(Choice.LAYOUT_PROFILES) },
+                        groupPosition = GroupPosition.Middle,
+                    )
+                    SettingsSwitchCard(
+                        icon = Icons.Filled.Home,
+                        title = "Channel info on start",
+                        subtitle = "Shows the channel name and details for a few seconds on this screen",
+                        checked = state.rearChannelInfo,
+                        onCheckedChange = { viewModel.updateGeneral("rearChannelInfo", it) },
+                        groupPosition = GroupPosition.Middle,
+                    )
+                    SettingsSwitchCard(
+                        icon = Icons.Filled.Home,
+                        title = "Swipe to change video",
+                        subtitle = "Swipe left or right on the video page for previous or next video",
+                        checked = state.rearSwipeNav,
+                        onCheckedChange = { viewModel.updateGeneral("rearSwipeNav", it) },
+                        groupPosition = GroupPosition.Middle,
+                    )
+                    SettingsSwitchCard(
+                        icon = Icons.Filled.Home,
+                        title = "Big subtitles",
+                        subtitle = "Shows the subtitles large on this screen",
+                        checked = state.rearSubtitles,
+                        onCheckedChange = { viewModel.updateGeneral("rearSubtitles", it) },
                         groupPosition = GroupPosition.Last,
                     )
                 }
@@ -2173,6 +2261,38 @@ private fun BackupItems(viewModel: SettingsViewModel) {
                 title = "Restore from backup",
                 subtitle = "Load a backup file and restore the app state",
                 onClick = { confirmRestore = true },
+                groupPosition = GroupPosition.Middle,
+            )
+            val shareContext = LocalContext.current
+            SettingsOptionCard(
+                icon = Icons.Filled.Upload,
+                title = "Share settings",
+                subtitle = "Send only the settings as text to your other device",
+                onClick = {
+                    val intent =
+                        android.content.Intent(android.content.Intent.ACTION_SEND).apply {
+                            type = "text/plain"
+                            putExtra(android.content.Intent.EXTRA_TEXT, viewModel.exportSettingsText())
+                        }
+                    shareContext.startActivity(android.content.Intent.createChooser(intent, "Share settings"))
+                },
+                groupPosition = GroupPosition.Middle,
+            )
+            SettingsOptionCard(
+                icon = Icons.Filled.Restore,
+                title = "Import settings from clipboard",
+                subtitle = "Copy the shared text on this device first, then tap here",
+                onClick = {
+                    val cm = shareContext.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+                    val text = cm.primaryClip?.getItemAt(0)?.coerceToText(shareContext)?.toString().orEmpty()
+                    viewModel.importSettingsText(text) { ok ->
+                        android.widget.Toast.makeText(
+                            shareContext,
+                            if (ok) "Settings imported" else "No TwinJay settings found on the clipboard",
+                            android.widget.Toast.LENGTH_LONG,
+                        ).show()
+                    }
+                },
                 groupPosition = GroupPosition.Last,
             )
         }
@@ -2525,6 +2645,7 @@ private enum class Choice {
     SUBTITLE_OUTLINE,
     DUAL_PAGES,
     DUAL_TAB_ORDER,
+    LAYOUT_PROFILES,
     DUAL_PAGE_ORDER,
     DASH_TOP_CREATORS,
     DASH_PAGE_ORDER,

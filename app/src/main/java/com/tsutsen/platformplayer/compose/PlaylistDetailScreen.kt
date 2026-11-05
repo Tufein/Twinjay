@@ -89,6 +89,12 @@ fun PlaylistDetailScreen(
     }
 
     val loaded = uiState as? PlaylistDetailViewModel.UiState.Loaded
+    val orderContext = androidx.compose.ui.platform.LocalContext.current
+    val orderPrefs = remember { orderContext.getSharedPreferences("playlist_order", android.content.Context.MODE_PRIVATE) }
+    var orderMode by remember(playlistUrl) {
+        mutableStateOf(orderPrefs.getString(playlistUrl, com.tsutsen.platformplayer.core.data.util.PlaylistOrder.DEFAULT) ?: "default")
+    }
+    var shuffleSeed by remember(playlistUrl) { mutableStateOf(System.nanoTime()) }
 
     Column(modifier = Modifier.fillMaxSize()) {
         AppHeader(
@@ -191,9 +197,36 @@ fun PlaylistDetailScreen(
                         Box(modifier = Modifier.fillMaxSize())
                     }
                 } else {
+                    val shown =
+                        remember(state.cards, orderMode, shuffleSeed) {
+                            com.tsutsen.platformplayer.core.data.util.PlaylistOrder.apply(state.cards, orderMode, shuffleSeed) { c ->
+                                (c as? CoreVideoCard)?.publishedAt
+                            }
+                        }
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = Tokens.SpaceMd),
+                        horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(8.dp),
+                    ) {
+                        listOf(
+                            "default" to "Saved order",
+                            "oldest" to "Oldest first",
+                            "newest" to "Newest first",
+                            "shuffle" to "Shuffle",
+                        ).forEach { (key, label) ->
+                            androidx.compose.material3.FilterChip(
+                                selected = orderMode == key,
+                                onClick = {
+                                    if (key == "shuffle") shuffleSeed = System.nanoTime()
+                                    orderMode = key
+                                    orderPrefs.edit().putString(playlistUrl, key).apply()
+                                },
+                                label = { Text(label) },
+                            )
+                        }
+                    }
                     ContentCard(modifier = Modifier.fillMaxSize()) {
                         VideoContainer(
-                        items = state.cards,
+                        items = shown,
                         layout = if (isWide) ContainerLayout.Grid(gridColumns) else ContainerLayout.List,
                         isLoading = false,
                         hasMorePages = state.hasMore,

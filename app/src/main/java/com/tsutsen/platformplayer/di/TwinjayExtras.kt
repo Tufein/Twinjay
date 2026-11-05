@@ -5,7 +5,10 @@ import android.content.Context
 /** Backup of TwinJay's own small stores (quiet channels, per-channel speed/audio/subtitle, download priority). */
 object TwinjayExtras {
     const val STORE = "twinjay_extras"
-    private val FILES = listOf("quiet_channels", "channel_speed", "channel_tracks", "download_priority")
+    private val FILES = listOf(
+        "quiet_channels", "channel_speed", "channel_tracks", "download_priority",
+        "paused_channels", "channel_intro", "channel_download_quality", "video_tags", "saved_searches", "playlist_order",
+    )
 
     fun export(context: Context): List<String> {
         val out = mutableListOf<String>()
@@ -15,6 +18,7 @@ object TwinjayExtras {
                 when (v) {
                     is Float -> out.add(line(file, "f", k, v.toString()))
                     is Int -> out.add(line(file, "i", k, v.toString()))
+                    is Long -> out.add(line(file, "l", k, v.toString()))
                     is String -> out.add(line(file, "s", k, v))
                     is Set<*> -> out.add(line(file, "set", k, v.joinToString("\u0001")))
                 }
@@ -32,6 +36,7 @@ object TwinjayExtras {
             when (p[1]) {
                 "f" -> e.putFloat(p[2], p[3].toFloatOrNull() ?: continue)
                 "i" -> e.putInt(p[2], p[3].toIntOrNull() ?: continue)
+                "l" -> e.putLong(p[2], p[3].toLongOrNull() ?: continue)
                 "s" -> e.putString(p[2], p[3])
                 "set" -> e.putStringSet(p[2], p[3].split("\u0001").filter { it.isNotEmpty() }.toSet())
                 else -> continue

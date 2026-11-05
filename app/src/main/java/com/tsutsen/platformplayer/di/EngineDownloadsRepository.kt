@@ -92,10 +92,15 @@ class EngineDownloadsRepository
                     val (targetPx, targetBr) =
                         videoQuality?.let { it.targetPixelCount to it.targetBitrate }
                             ?: run {
+                                val channelLabel =
+                                    com.tsutsen.platformplayer.PlatformPlayerApp.context?.let {
+                                        com.tsutsen.platformplayer.core.data.util.ChannelDownloadQuality.get(it, video.author.url)
+                                    }
                                 val def =
                                     DownloadQuality.fromLabel(
-                                        com.tsutsen.platformplayer.Settings.instance.content
-                                            .defaultDownloadResolution,
+                                        channelLabel
+                                            ?: com.tsutsen.platformplayer.Settings.instance.content
+                                                .defaultDownloadResolution,
                                     )
                                 def.targetPixelCount to def.targetBitrate
                             }
