@@ -29,6 +29,10 @@ import kotlinx.coroutines.delay
 internal object CompanionSleepPolicy {
     const val IDLE_MS = 20_000L
 
+    /** True while the second screen is dimmed; brightness syncs must not undo the dim. */
+    @Volatile
+    var asleepNow: Boolean = false
+
     fun shouldSleep(
         enabled: Boolean,
         isPlaying: Boolean,
@@ -77,18 +81,23 @@ internal fun CompanionSleepLayer(
         lastTouch = SystemClock.elapsedRealtime()
         while (true) {
             asleep = CompanionSleepPolicy.shouldSleep(enabled, isPlaying, SystemClock.elapsedRealtime() - lastTouch, delayMs)
-            delay(1_000)
+            delay(250)
         }
     }
 
     DisposableEffect(asleep, window, levelPercent) {
         val w = window
+        // Read the state NOW: inside onDispose the delegate would already
+        // return the new value (false on wake) and the backlight never came back.
+        val wasAsleep = asleep
         val saved = w?.attributes?.screenBrightness
-        if (asleep && w != null) {
+        if (wasAsleep && w != null) {
+            CompanionSleepPolicy.asleepNow = true
             w.attributes = w.attributes.apply { screenBrightness = CompanionSleepPolicy.sleepBrightness(levelPercent) }
         }
         onDispose {
-            if (asleep && w != null) {
+            if (wasAsleep && w != null) {
+                CompanionSleepPolicy.asleepNow = false
                 w.attributes = w.attributes.apply { screenBrightness = CompanionSleepPolicy.wakeBrightness(saved, com.tsutsen.platformplayer.feature.player.impl.SystemControls.brightness.value) }
             }
         }

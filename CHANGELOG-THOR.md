@@ -1,5 +1,9 @@
 # TwinJay (Thor) changes
 
+## 0.19.1-thor.1 — fix
+
+- Second screen: the backlight now comes back properly when you leave the dimmed clock; brightness changes made elsewhere no longer break the dim; the screen wakes faster on a swipe.
+
 ## 0.19.0-thor.1 — round five
 
 - Second screen: couch mode (big buttons), up next countdown with stop, recent channels strip (Settings > Dual screen).
