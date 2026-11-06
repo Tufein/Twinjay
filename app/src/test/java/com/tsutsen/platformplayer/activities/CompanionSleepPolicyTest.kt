@@ -22,4 +22,12 @@ class CompanionSleepPolicyTest {
         assertTrue(CompanionSleepPolicy.sleepBrightness(15) == 0.15f)
         assertTrue(CompanionSleepPolicy.sleepBrightness(500) == 1f)
     }
+
+    @Test
+    fun wakeNeverStaysDark() {
+        // A saved value captured while dimmed (0) must not come back as 0.
+        assertTrue(CompanionSleepPolicy.wakeBrightness(0f, null) < 0f)
+        assertTrue(CompanionSleepPolicy.wakeBrightness(0.6f, null) == 0.6f)
+        assertTrue(CompanionSleepPolicy.wakeBrightness(0f, 0.8f) == 0.8f)
+    }
 }

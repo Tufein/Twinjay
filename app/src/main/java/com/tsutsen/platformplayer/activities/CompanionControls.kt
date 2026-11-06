@@ -649,7 +649,7 @@ internal fun CompanionControlsTab(
         SystemControls.brightness.collect { v ->
             v?.let {
                 brightness = it
-                companionWindow?.let { w -> SystemControls.setWindowBrightness(w, it) }
+                if (!CompanionSleepPolicy.asleepNow) companionWindow?.let { w -> SystemControls.setWindowBrightness(w, it) }
             }
         }
     }

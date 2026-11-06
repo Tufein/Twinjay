@@ -100,7 +100,7 @@ internal fun CompanionContent(
     // presentation lifetime, not just while the Controls tab is composed.
     LaunchedEffect(companionWindow) {
         SystemControls.brightness.collect { v ->
-            if (v != null && companionWindow != null) SystemControls.setWindowBrightness(companionWindow, v)
+            if (v != null && companionWindow != null && !CompanionSleepPolicy.asleepNow) SystemControls.setWindowBrightness(companionWindow, v)
         }
     }
 
