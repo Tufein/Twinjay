@@ -54,6 +54,7 @@ jobs:
           --tests '*CompanionSleepPolicyTest'
           --tests '*TakeoutCsvTest'
           --tests '*HomeFilterTest'
+          --tests '*StaleDownloadsTest'
           --tests '*SettingsExtrasTest'
           --tests '*HomeFeedCacheTest'
           --tests '*BatterySaverTest'

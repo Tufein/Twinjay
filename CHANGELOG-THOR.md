@@ -1,5 +1,12 @@
 # TwinJay (Thor) changes
 
+## 0.20.0-thor.1 — roadmap, part one
+
+- Stats overlay: lowest buffer seen while playing and dropped frames (roadmap item 9).
+- Diagnostics: cleanup suggestion with one confirm step for downloads older than 30 days (item 14).
+- Docs: device test checklist (`docs/validation/thor-device-checklist.md`, item 1) and upstream sync notes
+  (`docs/upstream-sync.md`, item 18). `ROADMAP.md` lists what is still open.
+
 ## 0.19.1-thor.1 — fix
 
 - Second screen: the backlight now comes back properly when you leave the dimmed clock; brightness changes made elsewhere no longer break the dim; the screen wakes faster on a swipe.

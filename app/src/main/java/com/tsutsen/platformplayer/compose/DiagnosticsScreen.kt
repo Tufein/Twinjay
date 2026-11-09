@@ -15,6 +15,8 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -109,6 +111,7 @@ fun DiagnosticsScreen() {
             }) { Text("Send bug report") }
         }
         item { BiggestDownloads() }
+        item { CleanupSuggestion() }
         item { HorizontalDivider() }
         item { Text("Sources (${enabled.size} on of ${available.size})", style = MaterialTheme.typography.titleMedium) }
         items0(available.sortedBy { it.name.lowercase() }) { client ->
@@ -236,5 +239,57 @@ private fun BiggestDownloads() {
                 }) { Text("Delete") }
             }
         }
+    }
+}
+
+
+/** One confirm step to remove downloads older than 30 days. */
+@Composable
+private fun CleanupSuggestion() {
+    val tick = androidx.compose.runtime.remember { androidx.compose.runtime.mutableIntStateOf(0) }
+    val downloads = com.tsutsen.platformplayer.states.StateDownloads.instance
+    val stale =
+        androidx.compose.runtime.remember(tick.intValue) {
+            val all = downloads.getDownloadedVideos()
+            val entries =
+                all.map { v ->
+                    com.tsutsen.platformplayer.core.data.downloads.StorageLimit.Entry(
+                        v.id.value ?: v.url,
+                        v.downloadDate?.toEpochSecond() ?: 0L,
+                        v.videoSource.sumOf { it.fileSize } + v.audioSource.sumOf { it.fileSize },
+                    )
+                }
+            val old =
+                com.tsutsen.platformplayer.core.data.downloads.StorageLimit
+                    .staleEntries(entries, System.currentTimeMillis() / 1000, 30)
+                    .map { it.key }
+                    .toSet()
+            all.filter { (it.id.value ?: it.url) in old }
+        }
+    if (stale.isEmpty()) return
+    val bytes = stale.sumOf { v -> v.videoSource.sumOf { it.fileSize } + v.audioSource.sumOf { it.fileSize } }
+    var confirm by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Text("Cleanup suggestion", style = MaterialTheme.typography.titleMedium)
+        Text(
+            "${stale.size} downloads are older than 30 days and take ${formatBytes(bytes)}.",
+            style = MaterialTheme.typography.bodySmall,
+        )
+        Button(onClick = { confirm = true }) { Text("Review and delete") }
+    }
+    if (confirm) {
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { confirm = false },
+            title = { Text("Delete ${stale.size} old downloads?") },
+            text = { Text("This frees ${formatBytes(bytes)}. The videos stay available online.") },
+            confirmButton = {
+                androidx.compose.material3.TextButton(onClick = {
+                    stale.forEach { runCatching { downloads.deleteCachedVideo(it.id) } }
+                    confirm = false
+                    tick.intValue++
+                }) { Text("Delete") }
+            },
+            dismissButton = { androidx.compose.material3.TextButton(onClick = { confirm = false }) { Text("Cancel") } },
+        )
     }
 }
