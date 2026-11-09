@@ -12,6 +12,10 @@
 - Widget: Play / pause and Next buttons (item 13).
 - Buffering follows the network: on mobile data the player waits for a bit more before it (re)starts and
   keeps more ahead. Chosen when the player is created; Wi-Fi is unchanged (item 8).
+- Offline playlists: "Keep offline" per playlist downloads every video (up to 1080p) and follows videos
+  added later; "Remove offline copy" undoes it (Import playlists screen, item 15).
+- Daily settings backup: one text file per day in `Android/data/<app>/files/backups`, last seven kept,
+  readable by "Import settings". Settings only, not subscriptions or playlists (item 16).
 - Docs: device test checklist (`docs/validation/thor-device-checklist.md`, item 1) and upstream sync notes
   (`docs/upstream-sync.md`, item 18). `ROADMAP.md` lists what is still open.
 

@@ -57,6 +57,7 @@ jobs:
           --tests '*StaleDownloadsTest'
           --tests '*SourceErrorsTest'
           --tests '*BufferProfileTest'
+          --tests '*DailySettingsBackupTest'
           --tests '*SettingsExtrasTest'
           --tests '*HomeFeedCacheTest'
           --tests '*BatterySaverTest'
