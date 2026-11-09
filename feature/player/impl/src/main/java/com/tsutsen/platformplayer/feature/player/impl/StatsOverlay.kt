@@ -40,6 +40,14 @@ internal object StatsFormat {
 
     fun seconds(ms: Long): String = String.format(java.util.Locale.US, "%.1f s", ms.coerceAtLeast(0L) / 1000.0)
 
+    /** Share of frames dropped, as "12 (0.4%)"; "0" when nothing was dropped or rendered. */
+    fun dropped(dropped: Int, rendered: Int): String {
+        if (dropped <= 0) return "0"
+        val total = dropped + rendered.coerceAtLeast(0)
+        val pct = dropped * 100.0 / total
+        return String.format(java.util.Locale.US, "%d (%.1f%%)", dropped, pct)
+    }
+
     fun codec(mime: String?, codecs: String?): String {
         val m = mime?.substringAfter('/')?.uppercase(java.util.Locale.US)
         return listOfNotNull(m, codecs?.takeIf { it.isNotBlank() }).joinToString(" ").ifBlank { "?" }
@@ -49,6 +57,7 @@ internal object StatsFormat {
 /** "Stats for nerds": what the player is really doing right now. */
 @Composable
 internal fun StatsOverlay(player: ExoPlayer?, selectedQuality: String, modifier: Modifier = Modifier) {
+    var lowestBuffer by remember { mutableStateOf(Long.MAX_VALUE) }
     var lines by remember { mutableStateOf(listOf("Waiting for the player...")) }
     LaunchedEffect(player) {
         while (true) {
@@ -59,6 +68,9 @@ internal fun StatsOverlay(player: ExoPlayer?, selectedQuality: String, modifier:
                 } else {
                     val v = p.videoFormat
                     val a = p.audioFormat
+                    val ahead = p.bufferedPosition - p.currentPosition
+                    if (p.isPlaying && ahead >= 0) lowestBuffer = minOf(lowestBuffer, ahead)
+                    val counters = p.videoDecoderCounters?.also { it.ensureUpdated() }
                     listOf(
                         "Quality    ${selectedQuality}",
                         "Video      ${StatsFormat.resolution(v?.width ?: 0, v?.height ?: 0, v?.frameRate ?: 0f)}",
@@ -67,6 +79,8 @@ internal fun StatsOverlay(player: ExoPlayer?, selectedQuality: String, modifier:
                         "A codec    ${StatsFormat.codec(a?.sampleMimeType, a?.codecs)}",
                         "A bitrate  ${StatsFormat.bitrate(a?.bitrate ?: 0)}",
                         "Buffer     ${StatsFormat.seconds(p.bufferedPosition - p.currentPosition)}",
+                        "Lowest buf ${if (lowestBuffer == Long.MAX_VALUE) "?" else StatsFormat.seconds(lowestBuffer)}",
+                        "Dropped    ${StatsFormat.dropped(counters?.droppedBufferCount ?: 0, counters?.renderedOutputBufferCount ?: 0)}",
                         "Speed      ${p.playbackParameters.speed}x",
                     )
                 }

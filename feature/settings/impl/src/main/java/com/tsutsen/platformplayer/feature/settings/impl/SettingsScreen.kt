@@ -280,6 +280,15 @@ fun SettingsScreen(
                     }
                     item {
                         SettingsOptionCard(
+                            icon = Icons.Filled.Info,
+                            title = "Search everything",
+                            subtitle = "History, downloads, subtitles, bookmarks and playlists",
+                            onClick = { navigator.navigateToSearchEverything() },
+                            groupPosition = GroupPosition.Middle,
+                        )
+                    }
+                    item {
+                        SettingsOptionCard(
                             icon = Icons.Filled.Upload,
                             title = "Import playlists",
                             subtitle = "Paste playlist links",
@@ -2209,6 +2218,7 @@ private val dualPageNames =
         "library" to "Library page",
         "home" to "Home page",
         "dash" to "Dash page",
+        "search" to "Search page",
     )
 
 private val dualTabNames =

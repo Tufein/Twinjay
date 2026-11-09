@@ -364,6 +364,10 @@ fun BluejayNavGraph(
                 ImportPlaylistsScreen()
             }
 
+            is NavDestination.SearchEverything -> {
+                SearchEverythingScreen()
+            }
+
             is NavDestination.Browser -> {
                 PlaceholderScreen("Browser", "Coming soon")
             }

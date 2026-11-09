@@ -747,6 +747,8 @@ class PlayerRepositoryImpl(
             withContext(Dispatchers.Main) {
                 if (_exoPlayer == null) {
                     Log.i(TAG, "Creating new ExoPlayer instance")
+                    val buffer = com.tsutsen.platformplayer.core.data.player.BufferProfile.current(context)
+                    Log.i(TAG, "Buffer profile: $buffer")
                     _exoPlayer =
                         ExoPlayer
                             .Builder(context)
@@ -755,7 +757,7 @@ class PlayerRepositoryImpl(
                                     // Resume only after 5 s is buffered (media3 default). A 1.5 s
                                     // threshold made a connection slower than the stream
                                     // play a few seconds, stall, and repeat.
-                                    .setBufferDurationsMs(30_000, 60_000, 1_500, 5_000)
+                                    .setBufferDurationsMs(buffer.minMs, buffer.maxMs, buffer.startMs, buffer.resumeMs)
                                     .setPrioritizeTimeOverSizeThresholds(true)
                                     .build(),
                             )

@@ -202,6 +202,11 @@ class BackgroundWorker(
             }
         }
 
+        // One settings backup per day in the app's own folder (last seven are kept).
+        com.tsutsen.platformplayer.di.DailySettingsBackup.run(appContext)?.let {
+            Logger.i("BackgroundWorker", "Settings backup written: ${it.name}")
+        }
+
         // Keep downloads under the size limit: oldest go first.
         val limitGb = Settings.instance.storageLimitGb
         if (limitGb > 0) {

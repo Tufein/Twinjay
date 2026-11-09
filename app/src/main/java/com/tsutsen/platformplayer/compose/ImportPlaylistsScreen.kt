@@ -125,5 +125,37 @@ fun ImportPlaylistsScreen() {
                 version++
             },
         ) { Text("Merge") }
+
+        HorizontalDivider()
+        Text("Offline playlists", style = MaterialTheme.typography.titleLarge)
+        Text(
+            "A playlist kept offline downloads all its videos (up to 1080p) and picks up videos added later.",
+            style = MaterialTheme.typography.bodySmall,
+        )
+        val downloads = com.tsutsen.platformplayer.states.StateDownloads.instance
+        playlists.forEach { pl ->
+            val offline = remember(version, pl.id) { downloads.hasCachedPlaylist(pl.id) }
+            Row(Modifier.fillMaxWidth(), verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+                Text("${pl.name} (${pl.videos.size})", modifier = Modifier.weight(1f))
+                androidx.compose.material3.TextButton(
+                    enabled = offline || pl.videos.isNotEmpty(),
+                    onClick = {
+                        try {
+                            if (offline) {
+                                downloads.deleteCachedPlaylist(pl.id)
+                                status = "\"${pl.name}\" is no longer kept offline."
+                            } else {
+                                downloads.download(pl, 1920L * 1080L, null)
+                                status = "Downloading \"${pl.name}\" (${pl.videos.size} videos)."
+                            }
+                        } catch (e: Throwable) {
+                            Logger.w("ImportPlaylists", "Offline playlist failed: ${e.message}")
+                            status = "That did not work: ${e.message}"
+                        }
+                        version++
+                    },
+                ) { Text(if (offline) "Remove offline copy" else "Keep offline") }
+            }
+        }
     }
 }

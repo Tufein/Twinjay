@@ -140,6 +140,8 @@ class Navigator
 
         fun navigateToDiagnostics() = navigate(NavDestination.Diagnostics)
 
+        fun navigateToSearchEverything() = navigate(NavDestination.SearchEverything)
+
         fun navigateToBrowser(url: String) = navigate(NavDestination.Browser(url))
 
         fun navigateToComments(url: String) = navigate(NavDestination.Comments(url))

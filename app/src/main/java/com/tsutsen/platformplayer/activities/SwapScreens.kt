@@ -90,6 +90,15 @@ object SwapScreens {
                 launchOn(activity, origin)
             } catch (e: Throwable) {
                 Log.w(TAG, "revert failed: ${e.message}")
+                // Last resort: let the system pick the display (the default one) instead of staying stranded.
+                try {
+                    activity.startActivity(
+                        Intent(activity, MainActivity::class.java)
+                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK),
+                    )
+                } catch (e2: Throwable) {
+                    Log.w(TAG, "fallback launch failed: ${e2.message}")
+                }
             }
         }
         dialog =
@@ -105,7 +114,14 @@ object SwapScreens {
                     handler.removeCallbacks(revert)
                     revert.run()
                 }.create()
-        dialog.show()
+        try {
+            dialog.show()
+        } catch (e: Throwable) {
+            // Nobody can confirm without the dialog, so go back right away.
+            Log.w(TAG, "confirm dialog failed: ${e.message}")
+            revert.run()
+            return
+        }
         handler.postDelayed(revert, ScreenSwap.CONFIRM_MS)
     }
 }

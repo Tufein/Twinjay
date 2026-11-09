@@ -54,11 +54,27 @@ jobs:
           --tests '*CompanionSleepPolicyTest'
           --tests '*TakeoutCsvTest'
           --tests '*HomeFilterTest'
+          --tests '*StaleDownloadsTest'
+          --tests '*SourceErrorsTest'
+          --tests '*BufferProfileTest'
+          --tests '*DailySettingsBackupTest'
+          --tests '*EverythingSearchTest'
+          --tests '*PluginRollbackRulesTest'
           --tests '*SettingsExtrasTest'
           --tests '*HomeFeedCacheTest'
           --tests '*BatterySaverTest'
           --tests '*SettingsRepositoryImplTest'
           --tests 'com.tsutsen.platformplayer.player.*'
+          -PtargetAbis=arm64-v8a
+          -Dorg.gradle.jvmargs="-Xmx4g -Dfile.encoding=UTF-8"
+          -Pkotlin.daemon.jvmargs=-Xmx3g
+          --stacktrace
+
+      # Smoke check: the same lint the signed release runs, so a release cannot fail on it later.
+      - name: Release lint (same as the signed release)
+        run: >
+          ./gradlew --init-script scripts/dependency-toolchain.init.gradle
+          :app:lintVitalThorRelease
           -PtargetAbis=arm64-v8a
           -Dorg.gradle.jvmargs="-Xmx4g -Dfile.encoding=UTF-8"
           -Pkotlin.daemon.jvmargs=-Xmx3g

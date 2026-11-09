@@ -15,4 +15,11 @@ object StorageLimit {
         }
         return out
     }
+
+    /** Entries downloaded more than [days] days before [nowSeconds], oldest first. A time of 0 means unknown and is kept. */
+    fun staleEntries(entries: List<Entry>, nowSeconds: Long, days: Int): List<Entry> {
+        if (days <= 0) return emptyList()
+        val cutoff = nowSeconds - days * 86_400L
+        return entries.filter { it.time in 1..cutoff }.sortedBy { it.time }
+    }
 }

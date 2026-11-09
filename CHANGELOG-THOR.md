@@ -1,5 +1,33 @@
 # TwinJay (Thor) changes
 
+## 0.20.0-thor.1 — roadmap, part one
+
+- Stats overlay: lowest buffer seen while playing and dropped frames (roadmap item 9).
+- Diagnostics: cleanup suggestion with one confirm step for downloads older than 30 days (item 14).
+- Diagnostics: "Source problems" shows the last failure per source with Share log next to it (item 4).
+- Swap screens: if going back fails the app relaunches on the default screen, and it goes back at once
+  when the confirm dialog cannot be shown (item 2).
+- The layout profile follows the network preset: "Home" on Wi-Fi, "On the go" on mobile data, when that
+  slot is saved and "preset by network" is on (item 10).
+- Widget: Play / pause and Next buttons (item 13).
+- Buffering follows the network: on mobile data the player waits for a bit more before it (re)starts and
+  keeps more ahead. Chosen when the player is created; Wi-Fi is unchanged (item 8).
+- Offline playlists: "Keep offline" per playlist downloads every video (up to 1080p) and follows videos
+  added later; "Remove offline copy" undoes it (Import playlists screen, item 15).
+- Daily settings backup: one text file per day in `Android/data/<app>/files/backups`, last seven kept,
+  readable by "Import settings". Settings only, not subscriptions or playlists (item 16).
+- Search everything (Settings): one box over history, downloads with their subtitles, bookmarks and
+  playlists; a tap plays the video (item 17).
+- Sources: when a plugin updates, the previous version is kept; Diagnostics shows "Back to v…" next to
+  that source to undo a broken update (item 20).
+- CI also runs the release lint, so a signed release cannot fail on it afterwards (item 5, lint part).
+- Diagnostics: the controller cheat sheet shows your own button mapping instead of the defaults (item 11;
+  remapping itself already lives in Settings > Controller).
+- Second screen: optional "Search page" (Settings > Dual screen > Pages) with the same search over your
+  own library; the result plays on the main screen. Queue reordering there already existed (item 12).
+- Docs: device test checklist (`docs/validation/thor-device-checklist.md`, item 1) and upstream sync notes
+  (`docs/upstream-sync.md`, item 18). `ROADMAP.md` lists what is still open.
+
 ## 0.19.1-thor.1 — fix
 
 - Second screen: the backlight now comes back properly when you leave the dimmed clock; brightness changes made elsewhere no longer break the dim; the screen wakes faster on a swipe.

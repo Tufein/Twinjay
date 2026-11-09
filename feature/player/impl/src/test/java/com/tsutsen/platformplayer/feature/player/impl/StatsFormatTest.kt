@@ -24,4 +24,10 @@ class StatsFormatTest {
         assertEquals("12.5 s", StatsFormat.seconds(12_500))
         assertEquals("0.0 s", StatsFormat.seconds(-3))
     }
+
+    @Test
+    fun formatsDroppedFrames() {
+        assertEquals("0", StatsFormat.dropped(0, 500))
+        assertEquals("10 (2.0%)", StatsFormat.dropped(10, 490))
+    }
 }

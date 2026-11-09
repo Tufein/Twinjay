@@ -15,6 +15,8 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -109,16 +111,39 @@ fun DiagnosticsScreen() {
             }) { Text("Send bug report") }
         }
         item { BiggestDownloads() }
+        item { CleanupSuggestion() }
         item { HorizontalDivider() }
         item { Text("Sources (${enabled.size} on of ${available.size})", style = MaterialTheme.typography.titleMedium) }
         items0(available.sortedBy { it.name.lowercase() }) { client ->
             val on = enabled.any { it.id == client.id }
-            Text(
-                "${if (on) "On " else "Off"}  ${client.name}",
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.fillMaxWidth(),
-            )
+            Row(Modifier.fillMaxWidth(), verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+                Text(
+                    "${if (on) "On " else "Off"}  ${client.name}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.weight(1f),
+                )
+                // After an update the previous plugin version can be put back.
+                val kept = androidx.compose.runtime.remember(client.id) { com.tsutsen.platformplayer.states.PluginRollback.keptVersion(context, client.id) }
+                if (kept != null) {
+                    androidx.compose.material3.TextButton(onClick = {
+                        scope.launch {
+                            val error =
+                                withContext(Dispatchers.IO) {
+                                    com.tsutsen.platformplayer.states.PluginRollback.restore(context, client.id)
+                                        ?: runCatching { StatePlatform.instance.updateAvailableClients(context) }
+                                            .exceptionOrNull()?.message
+                                }
+                            Toast.makeText(
+                                context,
+                                if (error == null) "${client.name}: version $kept is back. Restart TwinJay." else "Could not go back: $error",
+                                Toast.LENGTH_LONG,
+                            ).show()
+                        }
+                    }) { Text("Back to v$kept") }
+                }
+            }
         }
+        item { SourceProblems() }
         item { HorizontalDivider() }
         item { Text("Battery (last 24 h)", style = MaterialTheme.typography.titleMedium) }
         item { BatteryGraph(com.tsutsen.platformplayer.di.BatteryLog.read(context)) }
@@ -134,12 +159,16 @@ fun DiagnosticsScreen() {
             }
         }
         item { HorizontalDivider() }
-        item { Text("Controller buttons (defaults)", style = MaterialTheme.typography.titleMedium) }
+        item { Text("Controller buttons (your mapping)", style = MaterialTheme.typography.titleMedium) }
         items0(PlayerControllerActions.ALL) { action ->
             Row(Modifier.fillMaxWidth()) {
                 Text(action.label, modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)
                 Text(
-                    PlayerControllerActions.labelFor(action.defaultKeyCode),
+                    // Show what is bound now, not only the default.
+                    PlayerControllerActions.labelFor(
+                        runCatching { com.tsutsen.platformplayer.Settings.instance.controller.mappings[action.id]?.keyCode }
+                            .getOrNull() ?: action.defaultKeyCode,
+                    ),
                     style = MaterialTheme.typography.bodySmall,
                 )
             }
@@ -235,6 +264,98 @@ private fun BiggestDownloads() {
                     tick.intValue++
                 }) { Text("Delete") }
             }
+        }
+    }
+}
+
+
+/** One confirm step to remove downloads older than 30 days. */
+@Composable
+private fun CleanupSuggestion() {
+    val tick = androidx.compose.runtime.remember { androidx.compose.runtime.mutableIntStateOf(0) }
+    val downloads = com.tsutsen.platformplayer.states.StateDownloads.instance
+    val stale =
+        androidx.compose.runtime.remember(tick.intValue) {
+            val all = downloads.getDownloadedVideos()
+            val entries =
+                all.map { v ->
+                    com.tsutsen.platformplayer.core.data.downloads.StorageLimit.Entry(
+                        v.id.value ?: v.url,
+                        v.downloadDate?.toEpochSecond() ?: 0L,
+                        v.videoSource.sumOf { it.fileSize } + v.audioSource.sumOf { it.fileSize },
+                    )
+                }
+            val old =
+                com.tsutsen.platformplayer.core.data.downloads.StorageLimit
+                    .staleEntries(entries, System.currentTimeMillis() / 1000, 30)
+                    .map { it.key }
+                    .toSet()
+            all.filter { (it.id.value ?: it.url) in old }
+        }
+    if (stale.isEmpty()) return
+    val bytes = stale.sumOf { v -> v.videoSource.sumOf { it.fileSize } + v.audioSource.sumOf { it.fileSize } }
+    var confirm by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Text("Cleanup suggestion", style = MaterialTheme.typography.titleMedium)
+        Text(
+            "${stale.size} downloads are older than 30 days and take ${formatBytes(bytes)}.",
+            style = MaterialTheme.typography.bodySmall,
+        )
+        Button(onClick = { confirm = true }) { Text("Review and delete") }
+    }
+    if (confirm) {
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { confirm = false },
+            title = { Text("Delete ${stale.size} old downloads?") },
+            text = { Text("This frees ${formatBytes(bytes)}. The videos stay available online.") },
+            confirmButton = {
+                androidx.compose.material3.TextButton(onClick = {
+                    stale.forEach { runCatching { downloads.deleteCachedVideo(it.id) } }
+                    confirm = false
+                    tick.intValue++
+                }) { Text("Delete") }
+            },
+            dismissButton = { androidx.compose.material3.TextButton(onClick = { confirm = false }) { Text("Cancel") } },
+        )
+    }
+}
+
+
+/** Why a source failed most recently, with the share-log button right next to it. */
+@Composable
+private fun SourceProblems() {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val tick = androidx.compose.runtime.remember { androidx.compose.runtime.mutableIntStateOf(0) }
+    val errors =
+        androidx.compose.runtime.remember(tick.intValue) {
+            com.tsutsen.platformplayer.core.data.log.SourceErrors.all()
+        }
+    if (errors.isEmpty()) return
+    val now = System.currentTimeMillis()
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Text("Source problems", style = MaterialTheme.typography.titleMedium)
+        errors.forEach { e ->
+            Text(
+                "${e.source}: ${com.tsutsen.platformplayer.core.data.log.SourceErrors.describe(e, now)}",
+                style = MaterialTheme.typography.bodySmall,
+            )
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Button(onClick = {
+                scope.launch {
+                    val uri = withContext(Dispatchers.IO) { AppLogShare.save(context) }
+                    if (uri == null) {
+                        Toast.makeText(context, "Could not save the log", Toast.LENGTH_LONG).show()
+                    } else {
+                        context.startActivity(AppLogShare.shareIntent(uri))
+                    }
+                }
+            }) { Text("Share log") }
+            androidx.compose.material3.TextButton(onClick = {
+                com.tsutsen.platformplayer.core.data.log.SourceErrors.clear()
+                tick.intValue++
+            }) { Text("Clear") }
         }
     }
 }
