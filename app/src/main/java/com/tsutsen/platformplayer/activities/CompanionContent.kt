@@ -110,7 +110,7 @@ internal fun CompanionContent(
     val prefs = prefsState ?: return
     // Saved order wins (Settings > Dual screen > Pages); unknown keys are
     // dropped, missing pages are simply absent.
-    val pageKeys = prefs.dualScreenPages.filter { it in setOf("video", "library", "home", "dash") }
+    val pageKeys = prefs.dualScreenPages.filter { it in setOf("video", "library", "home", "dash", "search") }
     // Configured order wins; canonical keys appended as fallback (older
     // saves predate info/controls), then filtered to the enabled set.
     val allVideoTabKeys =
@@ -488,6 +488,11 @@ internal fun CompanionContent(
                                     onLongClick = onLongClick,
                                     onPlaylistClick = onPlaylistClick,
                                 )
+                            }
+
+                            "search" -> {
+                                // Type on the second screen, the video plays on the main one.
+                                com.tsutsen.platformplayer.compose.SearchEverythingContent(onPlay = onPlay)
                             }
 
                             "home" -> {

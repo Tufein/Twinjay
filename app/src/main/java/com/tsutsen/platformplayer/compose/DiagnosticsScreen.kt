@@ -159,12 +159,16 @@ fun DiagnosticsScreen() {
             }
         }
         item { HorizontalDivider() }
-        item { Text("Controller buttons (defaults)", style = MaterialTheme.typography.titleMedium) }
+        item { Text("Controller buttons (your mapping)", style = MaterialTheme.typography.titleMedium) }
         items0(PlayerControllerActions.ALL) { action ->
             Row(Modifier.fillMaxWidth()) {
                 Text(action.label, modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)
                 Text(
-                    PlayerControllerActions.labelFor(action.defaultKeyCode),
+                    // Show what is bound now, not only the default.
+                    PlayerControllerActions.labelFor(
+                        runCatching { com.tsutsen.platformplayer.Settings.instance.controller.mappings[action.id]?.keyCode }
+                            .getOrNull() ?: action.defaultKeyCode,
+                    ),
                     style = MaterialTheme.typography.bodySmall,
                 )
             }

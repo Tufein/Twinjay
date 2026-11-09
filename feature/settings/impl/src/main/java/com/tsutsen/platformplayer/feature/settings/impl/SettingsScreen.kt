@@ -2218,6 +2218,7 @@ private val dualPageNames =
         "library" to "Library page",
         "home" to "Home page",
         "dash" to "Dash page",
+        "search" to "Search page",
     )
 
 private val dualTabNames =

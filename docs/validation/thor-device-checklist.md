@@ -36,6 +36,8 @@ Instellingen > About > "Share app log" of Diagnostics > "Send bug report".
 - [ ] Na een plugin-update toont Diagnostics "Back to v…" en werkt de bron daarna nog
 - [ ] Op mobiele data start de video iets later maar hapert minder
 
+- [ ] Zoekpagina op het tweede scherm: toetsenbord verschijnt, resultaat speelt op het hoofdscherm
+
 ## Leesbaarheid (beide schermen)
 - [ ] Tekstgrootte op de grootste stand: geen afgekapte knoppen in Instellingen en op het tweede scherm
 - [ ] Knoppen op het tweede scherm zijn met de duim te raken (couch-modus aan en uit)

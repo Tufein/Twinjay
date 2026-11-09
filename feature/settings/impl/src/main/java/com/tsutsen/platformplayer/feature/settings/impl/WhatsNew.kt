@@ -24,7 +24,9 @@ object WhatsNew {
                 "- Diagnostics: cleanup suggestion for downloads older than 30 days\n" +
                 "- Diagnostics: why a source failed, and a safer screen swap\n" +
                 "- Layout profile follows the network preset; widget gets play/pause and next\n" +
-                "- Keep a playlist offline; daily settings backup; buffering adapts to mobile data",
+                "- Keep a playlist offline; daily settings backup; buffering adapts to mobile data\n" +
+                "- Search everything (Settings) and an optional Search page on the second screen\n" +
+                "- Undo a broken source update from Diagnostics",
             "0.19.0-thor.1" to
                 "- Couch mode, up next countdown and recent channels on the second screen\n" +
                 "- Even volume, subtitle options, daily watch goal, bookmarks\n" +

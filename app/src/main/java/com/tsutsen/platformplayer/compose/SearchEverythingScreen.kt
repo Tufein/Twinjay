@@ -37,13 +37,19 @@ import java.time.OffsetDateTime
 /** Search across history, downloads (with subtitles), bookmarks and playlists; a tap plays the video. */
 @Composable
 fun SearchEverythingScreen(playerViewModel: PlayerViewModel = hiltViewModel()) {
+    SearchEverythingContent(onPlay = { playerViewModel.play(it) })
+}
+
+/** The search box and results; also used as a page on the second screen. */
+@Composable
+internal fun SearchEverythingContent(onPlay: (String) -> Unit) {
     val context = LocalContext.current
     var query by remember { mutableStateOf("") }
     var items by remember { mutableStateOf<List<EverythingSearch.Item>?>(null) }
     var hits by remember { mutableStateOf(emptyList<EverythingSearch.Hit>()) }
 
     LaunchedEffect(Unit) {
-        items = withContext(Dispatchers.IO) { collectItems(context) }
+        items = withContext(Dispatchers.IO) { collectEverythingItems(context) }
     }
     LaunchedEffect(query, items) {
         delay(250)
@@ -72,7 +78,7 @@ fun SearchEverythingScreen(playerViewModel: PlayerViewModel = hiltViewModel()) {
         }
         LazyColumn(verticalArrangement = Arrangement.spacedBy(6.dp)) {
             items(hits) { hit ->
-                Column(Modifier.fillMaxWidth().clickable { playerViewModel.play(hit.url) }.padding(vertical = 4.dp)) {
+                Column(Modifier.fillMaxWidth().clickable { onPlay(hit.url) }.padding(vertical = 4.dp)) {
                     Text(hit.title, maxLines = 2, style = MaterialTheme.typography.bodyLarge)
                     Text(
                         listOf(hit.kind, hit.detail).filter { it.isNotBlank() }.joinToString(" · "),
@@ -85,7 +91,7 @@ fun SearchEverythingScreen(playerViewModel: PlayerViewModel = hiltViewModel()) {
     }
 }
 
-private fun collectItems(context: android.content.Context): List<EverythingSearch.Item> {
+internal fun collectEverythingItems(context: android.content.Context): List<EverythingSearch.Item> {
     val out = ArrayList<EverythingSearch.Item>()
     val titles = HashMap<String, String>()
     try {

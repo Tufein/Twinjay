@@ -21,6 +21,10 @@
 - Sources: when a plugin updates, the previous version is kept; Diagnostics shows "Back to v…" next to
   that source to undo a broken update (item 20).
 - CI also runs the release lint, so a signed release cannot fail on it afterwards (item 5, lint part).
+- Diagnostics: the controller cheat sheet shows your own button mapping instead of the defaults (item 11;
+  remapping itself already lives in Settings > Controller).
+- Second screen: optional "Search page" (Settings > Dual screen > Pages) with the same search over your
+  own library; the result plays on the main screen. Queue reordering there already existed (item 12).
 - Docs: device test checklist (`docs/validation/thor-device-checklist.md`, item 1) and upstream sync notes
   (`docs/upstream-sync.md`, item 18). `ROADMAP.md` lists what is still open.
 
