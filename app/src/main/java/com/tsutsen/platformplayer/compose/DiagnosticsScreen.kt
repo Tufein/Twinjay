@@ -122,6 +122,7 @@ fun DiagnosticsScreen() {
                 modifier = Modifier.fillMaxWidth(),
             )
         }
+        item { SourceProblems() }
         item { HorizontalDivider() }
         item { Text("Battery (last 24 h)", style = MaterialTheme.typography.titleMedium) }
         item { BatteryGraph(com.tsutsen.platformplayer.di.BatteryLog.read(context)) }
@@ -291,5 +292,45 @@ private fun CleanupSuggestion() {
             },
             dismissButton = { androidx.compose.material3.TextButton(onClick = { confirm = false }) { Text("Cancel") } },
         )
+    }
+}
+
+
+/** Why a source failed most recently, with the share-log button right next to it. */
+@Composable
+private fun SourceProblems() {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val tick = androidx.compose.runtime.remember { androidx.compose.runtime.mutableIntStateOf(0) }
+    val errors =
+        androidx.compose.runtime.remember(tick.intValue) {
+            com.tsutsen.platformplayer.core.data.log.SourceErrors.all()
+        }
+    if (errors.isEmpty()) return
+    val now = System.currentTimeMillis()
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Text("Source problems", style = MaterialTheme.typography.titleMedium)
+        errors.forEach { e ->
+            Text(
+                "${e.source}: ${com.tsutsen.platformplayer.core.data.log.SourceErrors.describe(e, now)}",
+                style = MaterialTheme.typography.bodySmall,
+            )
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Button(onClick = {
+                scope.launch {
+                    val uri = withContext(Dispatchers.IO) { AppLogShare.save(context) }
+                    if (uri == null) {
+                        Toast.makeText(context, "Could not save the log", Toast.LENGTH_LONG).show()
+                    } else {
+                        context.startActivity(AppLogShare.shareIntent(uri))
+                    }
+                }
+            }) { Text("Share log") }
+            androidx.compose.material3.TextButton(onClick = {
+                com.tsutsen.platformplayer.core.data.log.SourceErrors.clear()
+                tick.intValue++
+            }) { Text("Clear") }
+        }
     }
 }

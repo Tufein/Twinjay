@@ -21,7 +21,8 @@ object WhatsNew {
         mapOf(
             "0.20.0-thor.1" to
                 "- Stats overlay: lowest buffer and dropped frames\n" +
-                "- Diagnostics: cleanup suggestion for downloads older than 30 days",
+                "- Diagnostics: cleanup suggestion for downloads older than 30 days\n" +
+                "- Diagnostics: why a source failed, and a safer screen swap",
             "0.19.0-thor.1" to
                 "- Couch mode, up next countdown and recent channels on the second screen\n" +
                 "- Even volume, subtitle options, daily watch goal, bookmarks\n" +

@@ -55,6 +55,7 @@ jobs:
           --tests '*TakeoutCsvTest'
           --tests '*HomeFilterTest'
           --tests '*StaleDownloadsTest'
+          --tests '*SourceErrorsTest'
           --tests '*SettingsExtrasTest'
           --tests '*HomeFeedCacheTest'
           --tests '*BatterySaverTest'

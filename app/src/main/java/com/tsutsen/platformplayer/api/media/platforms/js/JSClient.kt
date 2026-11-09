@@ -824,6 +824,14 @@ open class JSClient : IPlatformClient {
                 return@busy handle();
 
             }
+            catch (ex: Throwable) {
+                // Remember why this source failed so Diagnostics can show it.
+                try {
+                    com.tsutsen.platformplayer.core.data.log.SourceErrors.record(config.name, actionName, ex)
+                } catch (_: Throwable) {
+                }
+                throw ex;
+            }
             finally {
                 _busyAction = "";
             }

@@ -4,6 +4,9 @@
 
 - Stats overlay: lowest buffer seen while playing and dropped frames (roadmap item 9).
 - Diagnostics: cleanup suggestion with one confirm step for downloads older than 30 days (item 14).
+- Diagnostics: "Source problems" shows the last failure per source with Share log next to it (item 4).
+- Swap screens: if going back fails the app relaunches on the default screen, and it goes back at once
+  when the confirm dialog cannot be shown (item 2).
 - Docs: device test checklist (`docs/validation/thor-device-checklist.md`, item 1) and upstream sync notes
   (`docs/upstream-sync.md`, item 18). `ROADMAP.md` lists what is still open.
 
