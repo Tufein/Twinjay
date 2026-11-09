@@ -16,6 +16,8 @@
   added later; "Remove offline copy" undoes it (Import playlists screen, item 15).
 - Daily settings backup: one text file per day in `Android/data/<app>/files/backups`, last seven kept,
   readable by "Import settings". Settings only, not subscriptions or playlists (item 16).
+- Search everything (Settings): one box over history, downloads with their subtitles, bookmarks and
+  playlists; a tap plays the video (item 17).
 - Docs: device test checklist (`docs/validation/thor-device-checklist.md`, item 1) and upstream sync notes
   (`docs/upstream-sync.md`, item 18). `ROADMAP.md` lists what is still open.
 
