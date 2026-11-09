@@ -15,6 +15,9 @@ object LayoutProfiles {
     private const val FILE = "layout_profiles"
     val slots = listOf("Home", "Couch", "On the go")
 
+    /** Slot that goes with the network preset: "Home" on Wi-Fi, "On the go" on mobile data. */
+    fun slotForWifi(wifi: Boolean): Int = if (wifi) 0 else 2
+
     fun encode(p: LayoutProfile): String =
         listOf(p.pages, p.tabs, p.tabOrder, p.pageOrder).joinToString(";") { it.joinToString(",") }
 

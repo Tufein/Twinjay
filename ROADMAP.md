@@ -4,6 +4,12 @@ Opgesteld op 2026-11-08, na release 0.19.1-thor.1. Dit is een voorstel, geen bel
 changelog, de PR-historie (#4 t/m #22), de projectnotities en de bekende "niet getest op de Thor"-punten.
 Er staan geen open issues of PR's. Formaat: S = enkele uren, M = een dag, L = meerdere dagen.
 
+## Stand per 2026-11-09 (0.20.0)
+
+- Gebouwd: 1, 2, 4, 9, 10, 13, 14, 18.
+- Bestond al of al gedekt: 3 (dim/wake-fix uit 0.19.1), 16 (automatische back-up zit al in de app).
+- Nog open: 5, 6, 7, 8, 11, 12, 15, 17, 19, 20, 21.
+
 ## Wat al staat (kort)
 
 Tweede scherm met presets, dimmen, klok, couch-modus en swipes. Downloads met venster, limiet en kwaliteit per

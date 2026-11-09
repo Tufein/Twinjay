@@ -527,6 +527,18 @@ class MainActivity :
                         if (!settingsRepository.preferences.value.autoPresetByNetwork) return
                         lifecycleScope.launch {
                             for ((k, v) in NetworkPreset.forWifi(wifi)) settingsRepository.updateGeneral(k, v)
+                            // The saved layout profile for this situation follows along, when there is one.
+                            try {
+                                val profiles = com.tsutsen.platformplayer.feature.settings.impl.LayoutProfiles
+                                profiles.load(this@MainActivity, profiles.slotForWifi(wifi))?.let { p ->
+                                    settingsRepository.updateDualScreenPages(p.pages)
+                                    settingsRepository.updateDualScreenVideoTabs(p.tabs)
+                                    settingsRepository.updateDualScreenVideoTabOrder(p.tabOrder)
+                                    settingsRepository.updateDualScreenPageOrder(p.pageOrder)
+                                }
+                            } catch (e: Throwable) {
+                                Log.w("MainActivity", "layout profile by network failed: ${e.message}")
+                            }
                         }
                     }
                 },

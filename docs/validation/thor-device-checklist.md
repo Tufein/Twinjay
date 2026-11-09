@@ -25,4 +25,6 @@ Instellingen > About > "Share app log" of Diagnostics > "Send bug report".
 - [ ] Download, auto-download en venster voor uren
 - [ ] Diagnostics: grootste downloads en opruimvoorstel (30 dagen)
 - [ ] Back-up naar tekst en QR, terugzetten
-- [ ] Widget toont laatste video
+- [ ] Widget toont laatste video; knoppen Play / pause en Next werken tijdens afspelen
+- [ ] Diagnostics: "Source problems" verschijnt na een bronfout
+- [ ] Lay-outprofiel wisselt mee met wifi/mobiel

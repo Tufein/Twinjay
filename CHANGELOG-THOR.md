@@ -7,6 +7,9 @@
 - Diagnostics: "Source problems" shows the last failure per source with Share log next to it (item 4).
 - Swap screens: if going back fails the app relaunches on the default screen, and it goes back at once
   when the confirm dialog cannot be shown (item 2).
+- The layout profile follows the network preset: "Home" on Wi-Fi, "On the go" on mobile data, when that
+  slot is saved and "preset by network" is on (item 10).
+- Widget: Play / pause and Next buttons (item 13).
 - Docs: device test checklist (`docs/validation/thor-device-checklist.md`, item 1) and upstream sync notes
   (`docs/upstream-sync.md`, item 18). `ROADMAP.md` lists what is still open.
 
