@@ -116,11 +116,32 @@ fun DiagnosticsScreen() {
         item { Text("Sources (${enabled.size} on of ${available.size})", style = MaterialTheme.typography.titleMedium) }
         items0(available.sortedBy { it.name.lowercase() }) { client ->
             val on = enabled.any { it.id == client.id }
-            Text(
-                "${if (on) "On " else "Off"}  ${client.name}",
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.fillMaxWidth(),
-            )
+            Row(Modifier.fillMaxWidth(), verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+                Text(
+                    "${if (on) "On " else "Off"}  ${client.name}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.weight(1f),
+                )
+                // After an update the previous plugin version can be put back.
+                val kept = androidx.compose.runtime.remember(client.id) { com.tsutsen.platformplayer.states.PluginRollback.keptVersion(context, client.id) }
+                if (kept != null) {
+                    androidx.compose.material3.TextButton(onClick = {
+                        scope.launch {
+                            val error =
+                                withContext(Dispatchers.IO) {
+                                    com.tsutsen.platformplayer.states.PluginRollback.restore(context, client.id)
+                                        ?: runCatching { StatePlatform.instance.updateAvailableClients(context) }
+                                            .exceptionOrNull()?.message
+                                }
+                            Toast.makeText(
+                                context,
+                                if (error == null) "${client.name}: version $kept is back. Restart TwinJay." else "Could not go back: $error",
+                                Toast.LENGTH_LONG,
+                            ).show()
+                        }
+                    }) { Text("Back to v$kept") }
+                }
+            }
         }
         item { SourceProblems() }
         item { HorizontalDivider() }

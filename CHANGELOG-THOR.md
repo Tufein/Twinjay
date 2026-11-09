@@ -18,6 +18,9 @@
   readable by "Import settings". Settings only, not subscriptions or playlists (item 16).
 - Search everything (Settings): one box over history, downloads with their subtitles, bookmarks and
   playlists; a tap plays the video (item 17).
+- Sources: when a plugin updates, the previous version is kept; Diagnostics shows "Back to v…" next to
+  that source to undo a broken update (item 20).
+- CI also runs the release lint, so a signed release cannot fail on it afterwards (item 5, lint part).
 - Docs: device test checklist (`docs/validation/thor-device-checklist.md`, item 1) and upstream sync notes
   (`docs/upstream-sync.md`, item 18). `ROADMAP.md` lists what is still open.
 

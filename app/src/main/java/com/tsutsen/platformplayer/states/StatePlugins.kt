@@ -603,7 +603,16 @@ class StatePlugins {
             if (existing != null) {
                 if(!reinstall)
                     throw IllegalStateException("Plugin with id ${config.id} already exists");
-                else deletePlugin(config.id);
+                else {
+                    // Keep the version being replaced so a broken update can be undone.
+                    try {
+                        val oldScript = getScript(config.id);
+                        val ctx = StateApp.instance.contextOrNull;
+                        if(ctx != null && !oldScript.isNullOrEmpty() && PluginRollback.shouldKeep(existing.config.version, config.version))
+                            PluginRollback.keep(ctx, existing.config, oldScript);
+                    } catch(_: Throwable) {}
+                    deletePlugin(config.id);
+                }
             }
             _pluginScripts.setScript(config.id, script);
 

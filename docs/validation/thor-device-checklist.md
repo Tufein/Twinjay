@@ -28,3 +28,15 @@ Instellingen > About > "Share app log" of Diagnostics > "Send bug report".
 - [ ] Widget toont laatste video; knoppen Play / pause en Next werken tijdens afspelen
 - [ ] Diagnostics: "Source problems" verschijnt na een bronfout
 - [ ] Lay-outprofiel wisselt mee met wifi/mobiel
+
+## Nieuw in 0.20.0
+- [ ] Afspeellijst "Keep offline" downloadt alle video's; "Remove offline copy" haalt ze weg
+- [ ] Na een dag staat er een bestand in Android/data/<app>/files/backups
+- [ ] "Search everything" vindt iets uit geschiedenis, downloads, ondertitels en bladwijzers; tik speelt af
+- [ ] Na een plugin-update toont Diagnostics "Back to v…" en werkt de bron daarna nog
+- [ ] Op mobiele data start de video iets later maar hapert minder
+
+## Leesbaarheid (beide schermen)
+- [ ] Tekstgrootte op de grootste stand: geen afgekapte knoppen in Instellingen en op het tweede scherm
+- [ ] Knoppen op het tweede scherm zijn met de duim te raken (couch-modus aan en uit)
+- [ ] Gedimde klok is leesbaar op armlengte

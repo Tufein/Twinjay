@@ -6,10 +6,10 @@ Er staan geen open issues of PR's. Formaat: S = enkele uren, M = een dag, L = me
 
 ## Stand per 2026-11-09 (0.20.0)
 
-- Gebouwd: 1, 2, 4, 8, 9, 10, 13, 14, 15, 16 (alleen instellingen), 17, 18.
+- Gebouwd: 1, 2, 4, 8, 9, 10, 13, 14, 15, 16 (alleen instellingen), 17, 18, 20, en van 5 het lint-deel (geen emulatortest).
 - Al gedekt: 3 (dim/wake-fix uit 0.19.1), 7 (de volgende video in de wachtrij en twee aanbevelingen
   worden al vooraf opgehaald).
-- Nog open: 5, 6, 11, 12, 19, 20, 21.
+- Nog open: 6, 11, 12, 19, 21.
 
 ## Wat al staat (kort)
 
