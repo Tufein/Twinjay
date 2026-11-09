@@ -10,6 +10,8 @@
 - The layout profile follows the network preset: "Home" on Wi-Fi, "On the go" on mobile data, when that
   slot is saved and "preset by network" is on (item 10).
 - Widget: Play / pause and Next buttons (item 13).
+- Buffering follows the network: on mobile data the player waits for a bit more before it (re)starts and
+  keeps more ahead. Chosen when the player is created; Wi-Fi is unchanged (item 8).
 - Docs: device test checklist (`docs/validation/thor-device-checklist.md`, item 1) and upstream sync notes
   (`docs/upstream-sync.md`, item 18). `ROADMAP.md` lists what is still open.
 
