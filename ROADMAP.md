@@ -7,8 +7,9 @@ Er staan geen open issues of PR's. Formaat: S = enkele uren, M = een dag, L = me
 ## Stand per 2026-11-09 (0.20.0)
 
 - Gebouwd: 1, 2, 4, 9, 10, 13, 14, 18.
-- Bestond al of al gedekt: 3 (dim/wake-fix uit 0.19.1), 16 (automatische back-up zit al in de app).
-- Nog open: 5, 6, 7, 8, 11, 12, 15, 17, 19, 20, 21.
+- Al gedekt: 3 (dim/wake-fix uit 0.19.1).
+- Nog open: 5, 6, 7, 8, 11, 12, 15, 16, 17, 19, 20, 21. Voor 16 bestaat code voor automatische back-up
+  (`StateBackup.startAutomaticBackup`), maar die staat uit (`shouldAutomaticBackup()` geeft altijd false).
 
 ## Wat al staat (kort)
 
