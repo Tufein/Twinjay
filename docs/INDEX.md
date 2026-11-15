@@ -13,7 +13,7 @@
 | [`ARCHITECTURE.md`](../ARCHITECTURE.md) | Module map, dependency graph, tech stack, file counts | Adding modules, understanding where code lives |
 | [`CONVENTIONS.md`](../CONVENTIONS.md) | Naming rules, directory layout, coding standards | Creating new files, code review |
 | [`DESIGN.md`](../DESIGN.md) | UI/UX design spec — all screens, components, layouts | Building or modifying any UI screen |
-| [`CONTRIBUTION.md`](../CONTRIBUTION.md) | How to contribute to the project | First-time contributors |
+| [`CONTRIBUTING.md`](../CONTRIBUTING.md) | How to contribute to the project | First-time contributors |
 
 ---
 

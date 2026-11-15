@@ -1,0 +1,28 @@
+name: Bug report
+description: Report playback, second-screen or controller problems with the preview build you installed.
+body:
+  - type: markdown
+    attributes:
+      value: Do not attach private account data, tokens or subscription exports. Say which source (plugin) you used.
+  - type: input
+    id: version
+    attributes:
+      label: Version and download source
+    validations:
+      required: true
+  - type: input
+    id: device
+    attributes:
+      label: Device (AYN Thor or other two-screen handheld), Android version and Twinjay preview version
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps, expected result, and actual result
+    validations:
+      required: true
+  - type: textarea
+    id: conditions
+    attributes:
+      label: Source and video, layout profile, and whether the problem is on the main or the second screen
