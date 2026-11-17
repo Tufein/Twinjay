@@ -21,8 +21,17 @@ jobs:
           set -euo pipefail
           prefix="${{ inputs.prefix }}"
           [ -n "$prefix" ] || { echo "empty prefix"; exit 1; }
-          gh release list --repo "$GITHUB_REPOSITORY" --limit 200 --json tagName --jq '.[].tagName' \
-            | grep -F -- "$prefix" | grep "^$prefix" | while read -r tag; do
+
+          tags="$(gh release list --repo "$GITHUB_REPOSITORY" --limit 200 --json tagName --jq '.[].tagName')"
+          found=0
+          while IFS= read -r tag; do
+            [ -n "$tag" ] || continue
+            case "$tag" in
+              "$prefix"*)
+                found=1
                 echo "Deleting $tag"
                 gh release delete "$tag" --repo "$GITHUB_REPOSITORY" --yes --cleanup-tag
-              done
+                ;;
+            esac
+          done <<< "$tags"
+          [ "$found" -eq 1 ] || echo "No releases found with prefix '$prefix'; nothing to delete."

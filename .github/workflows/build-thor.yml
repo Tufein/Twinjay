@@ -44,6 +44,7 @@ jobs:
           ./gradlew --init-script scripts/dependency-toolchain.init.gradle
           :app:assembleThorDebug
           :feature:player:impl:testDebugUnitTest
+          :core:database:testDebugUnitTest
           :app:testThorDebugUnitTest
           --tests 'com.tsutsen.platformplayer.activities.*'
           --tests '*SuccessorDefaultsTest'
@@ -96,5 +97,6 @@ jobs:
           path: |
             app/build/test-results/testThorDebugUnitTest/
             feature/player/impl/build/test-results/
+            core/database/build/test-results/
           if-no-files-found: warn
           retention-days: 14

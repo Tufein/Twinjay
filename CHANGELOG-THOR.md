@@ -2,8 +2,10 @@
 
 ## 0.20.1-thor.1 — maintenance
 
-- `scripts/build-thor.sh` now uses the same JVM test filter list as CI and also runs the Room
-  migration/DAO tests in `core:database`.
+- `scripts/build-thor.sh` and CI now use the same JVM test filter list, and both run the Room
+  migration/DAO tests in `core:database` that were previously never executed by CI.
+- The release-cleanup workflow no longer fails when no tag matches the requested prefix, and it
+  matches prefixes literally instead of as a regular expression.
 - Documentation index and cross-links no longer point at removed planning documents, developer
   home directories or absolute source paths.
 - `kotlin-reflect` is aligned with the Kotlin 2.4.0 toolchain; an unused internal reflection import
