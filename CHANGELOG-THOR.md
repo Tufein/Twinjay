@@ -1,5 +1,14 @@
 # TwinJay (Thor) changes
 
+## 0.20.1-thor.1 — maintenance
+
+- `scripts/build-thor.sh` now uses the same JVM test filter list as CI and also runs the Room
+  migration/DAO tests in `core:database`.
+- Documentation index and cross-links no longer point at removed planning documents, developer
+  home directories or absolute source paths.
+- `kotlin-reflect` is aligned with the Kotlin 2.4.0 toolchain; an unused internal reflection import
+  was removed.
+
 ## 0.20.0-thor.1 — roadmap, part one
 
 - Stats overlay: lowest buffer seen while playing and dropped frames (roadmap item 9).

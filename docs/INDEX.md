@@ -10,9 +10,7 @@
 | Doc | What it covers | Read when |
 |-----|----------------|-----------|
 | [`README.md`](../README.md) | Project overview, build instructions | Starting any session |
-| [`ARCHITECTURE.md`](../ARCHITECTURE.md) | Module map, dependency graph, tech stack, file counts | Adding modules, understanding where code lives |
 | [`CONVENTIONS.md`](../CONVENTIONS.md) | Naming rules, directory layout, coding standards | Creating new files, code review |
-| [`DESIGN.md`](../DESIGN.md) | UI/UX design spec — all screens, components, layouts | Building or modifying any UI screen |
 | [`CONTRIBUTING.md`](../CONTRIBUTING.md) | How to contribute to the project | First-time contributors |
 
 ---
@@ -88,13 +86,13 @@
 
 | Task | Primary doc | Also read |
 |------|-------------|-----------|
-| Add a new screen | `compose-architecture.md` | `CONVENTIONS.md`, `DESIGN.md` |
-| Modify player UI | `morph-transition-polish.md` | `DESIGN.md §10` |
+| Add a new screen | `compose-architecture.md` | `CONVENTIONS.md` |
+| Modify player UI | `morph-transition-polish.md` | `player-morph-overhaul-plan.md` |
 | Write a plugin | `plugin-development.md` | `example-plugin.md` |
 | Fix video playback | `video-playback-troubleshooting.md` | — |
-| Work on navigation | `compose-architecture.md` | `ARCHITECTURE.md §8` |
+| Work on navigation | `compose-architecture.md` | `CONVENTIONS.md` |
 | Add authentication | `authentication-plugin-login.md` | `http-package.md` |
-| Modify subscriptions | `subscriptions-tab.md` | `DESIGN.md §4` |
+| Modify subscriptions | `subscriptions-tab.md` | `CHANGELOG-THOR.md` |
 | Work on gestures | `gesture-system-handoff.md` | `morph-transition-polish.md §5` |
 | Add new content type | `content-types.md` | `CONVENTIONS.md` |
 | Refactor architecture | `refactoring-opportunities.md` | `CONVENTIONS.md §4` |
@@ -107,7 +105,7 @@ All docs use **kebab-case** filenames. No spaces, no PascalCase, no ALL_CAPS.
 
 | Category | Location |
 |----------|----------|
-| Project-wide | Root: `ARCHITECTURE.md`, `CONVENTIONS.md`, `DESIGN.md` |
+| Project-wide | Root: `CONVENTIONS.md` |
 | Compose/Architecture | `docs/*.md` |
 | Feature-specific | `docs/features/<area>/*.md` |
 | Plugin dev | `docs/plugins/*.md` |

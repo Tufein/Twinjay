@@ -26,7 +26,7 @@ During morph transition (`miniProgress ∈ [0.01, 0.98]`), **neither** the norma
 
 ## Solution
 
-**See full design:** [`gesture-system-handoff.md`](/home/leon/Downloads/gesture-system-handoff.md)
+**See full design:** [`gesture-system-handoff.md`](gesture-system-handoff.md)
 
 The handoff doc specifies:
 - Single `pointerInput` with `awaitEachGesture` per screen region
@@ -70,4 +70,4 @@ The handoff doc specifies:
 
 ## Reference
 
-- Full gesture system design: `gesture-system-handoff.md` (see `/home/leon/Downloads/gesture-system-handoff.md`)
+- Full gesture system design: `gesture-system-handoff.md` (see [`gesture-system-handoff.md`](gesture-system-handoff.md))

@@ -499,7 +499,7 @@ Phase 5 (gestures) — requires 2, recommended 3
 ```
 
 Phase 5 (gesture unification) is its own epic — the full design lives in
-[gesture-system-handoff.md](/home/leon/Downloads/gesture-system-handoff.md).
+[gesture-system-handoff.md](gesture-system-handoff.md).
 
 ## §6 — Cross-references
 

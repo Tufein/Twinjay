@@ -65,8 +65,8 @@ android {
         thor {
             dimension "buildType"
             applicationId "com.tufein.bluejay.thor"
-            versionCode 20001
-            versionName "0.20.0-thor.1"
+            versionCode 20101
+            versionName "0.20.1-thor.1"
             buildConfigField "boolean", "IS_THOR_BUILD", "true"
             buildConfigField "boolean", "IS_UNSTABLE_BUILD", "false"
             buildConfigField "boolean", "IS_PLAYSTORE_BUILD", "false"
@@ -242,7 +242,7 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.7'
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.8.7'
     implementation fileTree(dir: 'aar', include: ['*.aar'])
-    implementation 'org.jetbrains.kotlin:kotlin-reflect:2.2.0'
+    implementation 'org.jetbrains.kotlin:kotlin-reflect:2.4.0'
     implementation 'androidx.webkit:webkit:1.15.0'
 
     //Protobuf
