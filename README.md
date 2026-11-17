@@ -1,6 +1,6 @@
 # Bluejay Thor
 
-**[Download the ARM64 APK for the Thor](https://github.com/Tufein/Twinjay/releases/download/v0.20.0-thor.1/TwinJay-v0.20.0-thor.1-arm64.apk)** — unofficial preview `0.20.0-thor.1` ([release notes](https://github.com/Tufein/Twinjay/releases/tag/v0.20.0-thor.1), with `SHA256SUMS.txt` and `apk-signature.txt`).
+**[Download the ARM64 APK for the Thor](https://github.com/Tufein/Twinjay/releases/download/v0.20.1-thor.1/TwinJay-v0.20.1-thor.1-arm64.apk)** — unofficial preview `0.20.1-thor.1` ([release notes](https://github.com/Tufein/Twinjay/releases/tag/v0.20.1-thor.1), with `SHA256SUMS.txt` and `apk-signature.txt`).
 
 An unofficial continuation of [Bluejay](https://github.com/tsutsen/bluejay) for
 Android handhelds with two screens, including the AYN Thor.
@@ -46,7 +46,7 @@ preferences preserves explicit user choices and controller mappings.
 
 ## Development build
 
-The current preview version is **0.20.0-thor.1**. Its changes and validation are
+The current preview version is **0.20.1-thor.1**. Its changes and validation are
 listed in [CHANGELOG-THOR.md](CHANGELOG-THOR.md). This is an unofficial preview
 build of this continuation, not an official Bluejay release.
 
