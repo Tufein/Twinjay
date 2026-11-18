@@ -1,5 +1,16 @@
 # TwinJay (Thor) changes
 
+## 0.20.2-thor.1 — all fixes, full release
+
+- Same maintenance fixes as 0.20.1, now published as a full (non-prerelease) release so the
+  in-app update check (`releases/latest`) sees it and offers the update.
+- `scripts/build-thor.sh` and CI now use the same JVM test filter list, and both run the Room
+  migration/DAO tests in `core:database`.
+- The release-cleanup workflow no longer fails when no tag matches the requested prefix, and it
+  matches prefixes literally instead of as a regular expression.
+- Documentation index and cross-links no longer point at removed planning documents or absolute
+  source paths; `kotlin-reflect` is aligned with the Kotlin 2.4.0 toolchain.
+
 ## 0.20.1-thor.1 — maintenance
 
 - `scripts/build-thor.sh` and CI now use the same JVM test filter list, and both run the Room
