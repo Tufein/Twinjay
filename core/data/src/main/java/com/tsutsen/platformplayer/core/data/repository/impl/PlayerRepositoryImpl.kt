@@ -29,6 +29,7 @@ import androidx.media3.exoplayer.text.TextRenderer
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
 import com.tsutsen.platformplayer.core.data.BuildConfig
+import com.tsutsen.platformplayer.core.data.player.SleepFade
 import com.tsutsen.platformplayer.core.data.repository.CastingRepository
 import com.tsutsen.platformplayer.core.data.repository.CommentRepository
 import com.tsutsen.platformplayer.core.data.repository.ContentExtrasRepository
@@ -461,6 +462,9 @@ class PlayerRepositoryImpl(
     override fun setSleepTimer(minutes: Int) {
         sleepJob?.cancel()
         sleepJob = null
+        // A canceled fade must never leave the player silent: ExoPlayer's own
+        // volume normally stays at 1 (the device volume is the only volume).
+        _exoPlayer?.volume = 1f
         _exoPlayer?.pauseAtEndOfMediaItems = minutes < 0
         _playerState.update {
             it.copy(
@@ -475,8 +479,25 @@ class PlayerRepositoryImpl(
         if (minutes > 0) {
             sleepJob =
                 positionScope.launch {
-                    kotlinx.coroutines.delay(minutes * 60_000L)
-                    _exoPlayer?.playWhenReady = false
+                    try {
+                        // Fade the last stretch out instead of cutting the
+                        // sound off at the chosen time.
+                        val totalMs = minutes * 60_000L
+                        kotlinx.coroutines.delay((totalMs - SleepFade.DURATION_MS).coerceAtLeast(0L))
+                        val player = _exoPlayer
+                        if (player != null) {
+                            var elapsed = 0L
+                            while (elapsed < SleepFade.DURATION_MS) {
+                                player.volume = SleepFade.volumeAt(elapsed)
+                                kotlinx.coroutines.delay(SleepFade.STEP_MS)
+                                elapsed += SleepFade.STEP_MS
+                            }
+                            player.volume = 0f
+                            player.playWhenReady = false
+                        }
+                    } finally {
+                        _exoPlayer?.volume = 1f
+                    }
                     _playerState.update { it.copy(isPlaying = false, sleepTimerLabel = "") }
                 }
         }

@@ -19,6 +19,9 @@ object WhatsNew {
 
     private val notes: Map<String, String> =
         mapOf(
+            "0.21.0-thor.1" to
+                "- Queue: \"Play next\" puts a video directly after the current one\n" +
+                "- Sleep timer fades out over the last 20 seconds",
             "0.20.0-thor.1" to
                 "- Stats overlay: lowest buffer and dropped frames\n" +
                 "- Diagnostics: cleanup suggestion for downloads older than 30 days\n" +

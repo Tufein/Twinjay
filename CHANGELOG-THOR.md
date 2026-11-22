@@ -1,5 +1,14 @@
 # TwinJay (Thor) changes
 
+## 0.21.0-thor.1 — play next and a softer sleep timer
+
+- Queue: "Play next" in the video options sheet puts a video directly after the current one.
+  It appears everywhere the sheet is used (home, search, subscriptions, channel, library and the
+  second screen); an already-queued video moves up instead of being duplicated.
+- Sleep timer: the last 20 seconds fade the sound out instead of stopping abruptly. The device
+  volume is untouched, and canceling or replacing the timer restores the sound immediately.
+- The new queue ordering and fade curve have unit tests.
+
 ## 0.20.2-thor.1 — all fixes, full release
 
 - Same maintenance fixes as 0.20.1, now published as a full (non-prerelease) release so the

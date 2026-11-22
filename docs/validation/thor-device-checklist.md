@@ -29,6 +29,10 @@ Instellingen > About > "Share app log" of Diagnostics > "Send bug report".
 - [ ] Diagnostics: "Source problems" verschijnt na een bronfout
 - [ ] Lay-outprofiel wisselt mee met wifi/mobiel
 
+## Nieuw in 0.21.0
+- [ ] "Play next" in het optiesheet: de video staat daarna direct na de huidige in de wachtrij (ook op het tweede scherm)
+- [ ] Slaaptimer: de laatste 20 seconden faden, daarna pauze; de timer annuleren herstelt het volume meteen
+
 ## Nieuw in 0.20.0
 - [ ] Afspeellijst "Keep offline" downloadt alle video's; "Remove offline copy" haalt ze weg
 - [ ] Na een dag staat er een bestand in Android/data/<app>/files/backups

@@ -40,6 +40,7 @@ import com.tsutsen.platformplayer.core.designsystem.icon.Download
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.HistoryEdu
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.PlaylistPlay
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.QueueMusic
 import androidx.compose.material.icons.filled.Share
@@ -98,9 +99,8 @@ import com.tsutsen.platformplayer.core.ui.RelativeTime
  *
  * Leaf component: receives state (saved flags, playlists, video metadata)
  * and action lambdas; the screen wires them to PlayerViewModel / DAOs /
- * Navigator. "Play next" / "Add to queue" intentionally absent until the
- * player queue exists (PlayerViewModel still has TODOs for queue
- * navigation).
+ * Navigator. The queue actions are "Play next" (directly after the current
+ * video) and "Add to queue" (at the end).
  *
  * Layout: title + metadata row (views • duration • posted), then a grid of
  * action tiles (3 columns) so all actions fit without scrolling. The
@@ -124,6 +124,7 @@ fun VideoOptionsSheet(
     onDownloadWithQuality: ((DownloadQuality) -> Unit)? = null,
     onAddToPlaylist: (Long?) -> Unit,
     onAddToQueue: () -> Unit = {},
+    onPlayNext: () -> Unit = {},
     // Non-null = show a "Remove from history" tile (danger tone). Only the
     // history contexts pass it (the library's History strip, the history
     // page) so the tile never appears where the video isn't a history item.
@@ -221,7 +222,7 @@ fun VideoOptionsSheet(
             }
         }
 
-        // Action tiles: 3 columns, unrolled rows (max 7 tiles = 3 rows).
+        // Action tiles: 3 columns, unrolled rows (max 8 tiles = 3 rows).
         val tiles =
             buildList {
                 add(
@@ -275,6 +276,15 @@ fun VideoOptionsSheet(
                         },
                     ),
                 )
+                if (!isCurrentlyPlaying) {
+                    add(
+                        OptionTile(
+                            label = "Play next",
+                            icon = Icons.Filled.PlaylistPlay,
+                            onClick = onPlayNext,
+                        ),
+                    )
+                }
                 add(
                     OptionTile(
                         label =

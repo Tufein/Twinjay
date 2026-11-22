@@ -321,6 +321,11 @@ class PlayerViewModel
             playbackQueueRepository.add(item)
         }
 
+        /** Insert the given video directly after the current one. */
+        fun addNextToQueue(item: com.tsutsen.platformplayer.core.model.ContentItem) {
+            playbackQueueRepository.addNext(item)
+        }
+
         fun playQueueItem(index: Int) {
             playbackQueueRepository.playAt(index)
         }

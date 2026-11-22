@@ -56,29 +56,35 @@ class VideoOptionsViewModel
             _downloadMessage.value = null
         }
 
-        /** Enqueue [video] (starts playing if nothing is). */
+        /** Enqueue [video] at the end of the queue. */
         fun addToQueue(video: VideoCard) {
-            playbackQueueRepository.add(
-                ContentItem(
-                    id = video.id,
-                    url = video.url,
-                    title = video.title,
-                    author = video.author?.let { name ->
-                        Author(
-                            id = video.id,
-                            name = name,
-                            url = video.authorUrl,
-                            thumbnailUrl = null,
-                        )
-                    },
-                    thumbnailUrl = video.thumbnailUrl,
-                    contentType = ContentType.VIDEO,
-                    durationMs = video.durationMs,
-                    viewCount = video.viewCount,
-                    publishedAt = video.publishedAt,
-                )
-            )
+            playbackQueueRepository.add(video.toContentItem())
         }
+
+        /** Insert [video] directly after the current video. */
+        fun playNext(video: VideoCard) {
+            playbackQueueRepository.addNext(video.toContentItem())
+        }
+
+        private fun VideoCard.toContentItem() =
+            ContentItem(
+                id = id,
+                url = url,
+                title = title,
+                author = author?.let { name ->
+                    Author(
+                        id = id,
+                        name = name,
+                        url = authorUrl,
+                        thumbnailUrl = null,
+                    )
+                },
+                thumbnailUrl = thumbnailUrl,
+                contentType = ContentType.VIDEO,
+                durationMs = durationMs,
+                viewCount = viewCount,
+                publishedAt = publishedAt,
+            )
 
         /**
          * URLs with a download request in flight. Resolving the video

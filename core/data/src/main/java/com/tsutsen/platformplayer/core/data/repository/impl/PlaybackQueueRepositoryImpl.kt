@@ -1,5 +1,6 @@
 package com.tsutsen.platformplayer.core.data.repository.impl
 
+import com.tsutsen.platformplayer.core.data.player.PlaybackQueueOrder
 import com.tsutsen.platformplayer.core.data.repository.PlaybackQueueRepository
 import com.tsutsen.platformplayer.core.data.repository.PlayerRepository
 import android.util.Log
@@ -114,6 +115,12 @@ class PlaybackQueueRepositoryImpl
 
         override fun addAll(items: List<ContentItem>) {
             items.forEach { add(it) }
+        }
+
+        override fun addNext(item: ContentItem) {
+            val currentUrl = playerRepository.playerState.value.currentVideo?.url
+            if (item.url == currentUrl) return
+            _queue.value = PlaybackQueueOrder.insertNext(_queue.value, currentUrl, item)
         }
 
         override fun playAt(index: Int) {

@@ -191,6 +191,9 @@ internal fun CompanionVideoOptionsSheet(
             // choosing actions.
             playbackQueueRepository.add(card.toContentItem())
         },
+        onPlayNext = {
+            playbackQueueRepository.addNext(card.toContentItem())
+        },
         isInQueue = queue.any { it.url == card.url },
         isCurrentlyPlaying = currentVideoUrl != null && currentVideoUrl == card.url,
         onRemoveFromQueue = {

@@ -109,6 +109,7 @@ fun VideoOptionsSheetHost(
             // choosing actions.
             viewModel.addToQueue(video)
         },
+        onPlayNext = { viewModel.playNext(video) },
         isInQueue = queue.any { it.url == video.url },
         isCurrentlyPlaying = currentVideoUrl != null && currentVideoUrl == video.url,
         onRemoveFromQueue = { viewModel.removeFromQueue(video.url) },

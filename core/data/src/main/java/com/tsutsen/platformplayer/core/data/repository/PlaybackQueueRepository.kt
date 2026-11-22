@@ -22,6 +22,13 @@ interface PlaybackQueueRepository {
     fun addAll(items: List<ContentItem>)
 
     /**
+     * Insert [item] directly after the current video ("Play next"). An item
+     * that is already queued moves up instead of being duplicated. With
+     * nothing playing it becomes the first queued item.
+     */
+    fun addNext(item: ContentItem)
+
+    /**
      * Plays the item at [index]. The tapped item moves to the front of
      * the queue and the previously playing video is evicted from it
      * (replaced, not re-added). Tapping the already-playing video just
