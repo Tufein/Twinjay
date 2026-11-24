@@ -31,7 +31,7 @@ object TwinjayExtras {
     fun import(context: Context, lines: List<String>): Int {
         var n = 0
         for (l in lines) {
-            val p = l.split("\u0002")
+            val p = l.split("\u0002", limit = 4)
             if (p.size < 4 || p[0] !in FILES) continue
             val e = context.getSharedPreferences(p[0], Context.MODE_PRIVATE).edit()
             when (p[1]) {
@@ -48,6 +48,6 @@ object TwinjayExtras {
         return n
     }
 
-    private fun line(file: String, type: String, key: String, value: String) =
+    internal fun line(file: String, type: String, key: String, value: String) =
         listOf(file, type, key, value).joinToString("\u0002")
 }

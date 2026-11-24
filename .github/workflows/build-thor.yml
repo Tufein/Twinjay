@@ -38,6 +38,8 @@ jobs:
       - name: Fetch the pinned dependencies and plugins
         run: ./scripts/prepare-dependencies.sh
 
+      # No --tests allow-list any more: every unit test in these modules runs, so a new test
+      # can no longer be forgotten.
       # Same Gradle steps as scripts/build-thor.sh, arm64-v8a only to keep CI fast.
       - name: Build the Thor APK and run the unit tests
         run: >
@@ -46,26 +48,7 @@ jobs:
           :feature:player:impl:testDebugUnitTest
           :core:database:testDebugUnitTest
           :app:testThorDebugUnitTest
-          --tests 'com.tsutsen.platformplayer.activities.*'
-          --tests '*SuccessorDefaultsTest'
-          --tests '*PluginAppIdentityTest'
-          --tests '*SuccessorUpdateTest'
-          --tests '*GithubReleaseUpdateTest'
-          --tests '*SponsorBlockTest'
-          --tests '*CompanionSleepPolicyTest'
-          --tests '*TakeoutCsvTest'
-          --tests '*HomeFilterTest'
-          --tests '*StaleDownloadsTest'
-          --tests '*SourceErrorsTest'
-          --tests '*BufferProfileTest'
-          --tests '*DailySettingsBackupTest'
-          --tests '*EverythingSearchTest'
-          --tests '*PluginRollbackRulesTest'
-          --tests '*SettingsExtrasTest'
-          --tests '*HomeFeedCacheTest'
-          --tests '*BatterySaverTest'
-          --tests '*SettingsRepositoryImplTest'
-          --tests 'com.tsutsen.platformplayer.player.*'
+          --continue
           -PtargetAbis=arm64-v8a
           -Dorg.gradle.jvmargs="-Xmx4g -Dfile.encoding=UTF-8"
           -Pkotlin.daemon.jvmargs=-Xmx3g
