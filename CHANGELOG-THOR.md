@@ -1,5 +1,13 @@
 # TwinJay (Thor) changes
 
+## 0.21.1-thor.1 — cleartext scoped to local networks
+
+- Cleartext HTTP is no longer allowed app-wide: the manifest now uses a network security config
+  that denies cleartext except for loopback, and the OkHttp layer (plugin requests, casting)
+  blocks `http://`/`ws://` to public hosts while still allowing loopback, private (RFC 1918) and
+  link-local addresses. Developer mode gains an `allowCleartext` escape hatch for testing.
+- Signed release APKs are unchanged in behavior for HTTPS sources.
+
 ## 0.21.0-thor.1 — play next and a softer sleep timer
 
 - Queue: "Play next" in the video options sheet puts a video directly after the current one.

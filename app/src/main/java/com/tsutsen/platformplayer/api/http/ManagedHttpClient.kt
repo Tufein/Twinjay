@@ -9,6 +9,7 @@ import com.tsutsen.platformplayer.logging.Logger
 import com.tsutsen.platformplayer.states.StateApp
 import com.tsutsen.platformplayer.stores.FragmentedStorage
 import okhttp3.Call
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -19,6 +20,7 @@ import okhttp3.ResponseBody
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
 import java.io.File
+import java.io.IOException
 import java.security.KeyStore
 import java.security.SecureRandom
 import java.security.cert.CertificateException
@@ -116,6 +118,28 @@ open class ManagedHttpClient {
         return clonedClient;
     }
 
+    private fun checkCleartextAllowed(rawUrl: String) {
+        val url = rawUrl.toHttpUrlOrNull() ?: return
+        if (url.scheme != "http" && url.scheme != "ws") return
+        if (isLocalAddress(url.host)) return
+        if (FragmentedStorage.isInitialized && StateApp.instance.isMainActive &&
+            SettingsDev.instance.developerMode && SettingsDev.instance.networking.allowCleartext) return
+        throw IOException("Cleartext traffic is only allowed to local/private addresses: ${url.host}")
+    }
+
+    private fun isLocalAddress(host: String): Boolean {
+        val h = host.lowercase().removePrefix("[").removeSuffix("]")
+        if (h == "localhost" || h.endsWith(".localhost") || h.endsWith(".local")) return true
+        if (h.contains(':')) return h == "::1" || h.startsWith("fe80") || h.startsWith("fc") || h.startsWith("fd")
+        val parts = h.split('.')
+        if (parts.size != 4) return false
+        val octets = parts.map { it.toIntOrNull() ?: return false }
+        if (octets.any { it !in 0..255 }) return false
+        val a = octets[0]
+        val b = octets[1]
+        return a == 127 || a == 10 || (a == 172 && b in 16..31) || (a == 192 && b == 168) || (a == 169 && b == 254)
+    }
+
     private fun applyModifier(url: String, headers: MutableMap<String, String>, modifier: IRequestModifier?): Pair<String, MutableMap<String, String>> {
         if (modifier == null) return Pair(url, headers)
         val modified = modifier.modifyRequest(url, headers)
@@ -140,6 +164,7 @@ open class ManagedHttpClient {
 
     fun socket(url: String, headers: MutableMap<String, String> = HashMap(), listener: SocketListener): Socket {
         ensureNotMainThread()
+        checkCleartextAllowed(url)
         val requestBuilder: okhttp3.Request.Builder = okhttp3.Request.Builder()
             .url(url);
         if(user_agent.isNotEmpty() && !headers.any { it.key.lowercase() == "user-agent" })
@@ -205,6 +230,7 @@ open class ManagedHttpClient {
 
     fun execute(request : Request) : Response {
         ensureNotMainThread();
+        checkCleartextAllowed(request.url);
 
         //beforeRequest(request);
 
