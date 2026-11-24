@@ -25,6 +25,7 @@ class SettingsDev {
     @Serializable
     class NetworkingSettings {
         var allowAllCertificates: Boolean = false
+        var allowCleartext: Boolean = false
     }
     
     @Serializable
