@@ -26,13 +26,15 @@ class BackgroundTaskHandlerTest {
 
     @Test
     fun testRun() = runTest {
-        var result = 0
-        val taskHandler = BackgroundTaskHandler(this, { result = 1 })
+        // The task runs on a real background thread, so wait in real time (runTest's delay is virtual).
+        val result = java.util.concurrent.atomic.AtomicInteger(0)
+        val taskHandler = BackgroundTaskHandler(this, { result.set(1) })
 
         taskHandler.run()
-        delay(1000)
+        val deadline = System.currentTimeMillis() + 5000
+        while (result.get() != 1 && System.currentTimeMillis() < deadline) Thread.sleep(10)
 
-        assertEquals(1, result)
+        assertEquals(1, result.get())
     }
 
     @Test
