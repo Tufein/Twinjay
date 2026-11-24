@@ -1,5 +1,23 @@
 # TwinJay (Thor) changes
 
+## 0.22.0-thor.1 — safer updates and a stricter build
+
+- Updater: the GitHub release JSON is now read with a real parser (`MiniJson`) instead of regexes.
+  Only https `github.com/Tufein/Twinjay/` URLs are accepted for the APK, the release page and the
+  checksum file; anything else falls back to opening the release page.
+- In-app update: the download is checked against the release's `SHA256SUMS.txt` before it is
+  installed (a mismatch deletes the file). Android still enforces the signing key on top of that.
+- Release workflow: the tag must look like `v0.22.0-thor.1`, signed releases can only be built
+  from `main`, and the tag is passed through an environment variable instead of being pasted into shell
+  commands.
+- CI and `scripts/build-thor.sh` no longer use a hand-kept `--tests` list: every unit test in the
+  modules runs, so a new test cannot be forgotten.
+- Import of TwinJay extras no longer cuts off values that contain the separator character.
+- New unit tests: MiniJson, updater trust/checksum rules, download limit and window rules, dedupe,
+  network presets, device info and the extras line format.
+- Diagnostics: shows free storage and the SHA-256 of the key this build is signed with, so it can be
+  compared with `apk-signature.txt` of the release.
+
 ## 0.21.0-thor.1 — play next and a softer sleep timer
 
 - Queue: "Play next" in the video options sheet puts a video directly after the current one.

@@ -68,6 +68,20 @@ fun DiagnosticsScreen() {
             )
         }
         item {
+            val free = remember0 { com.tsutsen.platformplayer.di.DeviceInfo.storage(context) }
+            val fingerprint = remember0 { com.tsutsen.platformplayer.di.DeviceInfo.signingFingerprint(context) }
+            Text(
+                buildString {
+                    free?.let {
+                        append("Free storage: ${com.tsutsen.platformplayer.di.DeviceInfo.formatBytes(it.first)} of ")
+                        append(com.tsutsen.platformplayer.di.DeviceInfo.formatBytes(it.second))
+                    }
+                    fingerprint?.let { append("\nSigning key (SHA-256): $it") }
+                },
+                style = MaterialTheme.typography.bodySmall,
+            )
+        }
+        item {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Button(onClick = {
                     scope.launch {

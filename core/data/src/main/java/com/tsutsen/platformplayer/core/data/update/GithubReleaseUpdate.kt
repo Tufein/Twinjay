@@ -1,5 +1,6 @@
 package com.tsutsen.platformplayer.core.data.update
 
+import com.tsutsen.platformplayer.core.data.util.MiniJson
 import java.net.HttpURLConnection
 import java.net.URL
 
@@ -12,6 +13,8 @@ data class ReleaseInfo(
     val notes: String = "",
     /** Size of the APK asset in bytes, when GitHub reports it. */
     val apkSizeBytes: Long? = null,
+    /** The release's SHA256SUMS.txt asset, when it has one. */
+    val checksumsUrl: String? = null,
 )
 
 /**
@@ -39,52 +42,61 @@ object GithubReleaseUpdate {
         return false
     }
 
+    private const val TRUSTED_PREFIX = "https://github.com/Tufein/Twinjay/"
+
     /**
-     * Reads the fields we need from GitHub's release JSON. The release's own
-     * `html_url` is the first one in the document; asset URLs end in `.apk`.
+     * Only release assets and pages of this repository over https are trusted. The download itself
+     * may redirect to GitHub's CDN; the final file is still checked against SHA256SUMS.txt.
+     */
+    fun isTrustedUrl(url: String?): Boolean =
+        url != null && url.startsWith(TRUSTED_PREFIX) && !url.contains("..") && !url.contains('\\')
+
+    /**
+     * Reads the fields we need from GitHub's release JSON with a real JSON parser. Only trusted
+     * URLs (see [isTrustedUrl]) are kept; an untrusted APK URL is dropped, so the app falls back
+     * to opening the release page.
      */
     fun parse(json: String): ReleaseInfo? {
-        val tag = Regex("\"tag_name\"\\s*:\\s*\"([^\"]+)\"").find(json)?.groupValues?.get(1) ?: return null
-        val page = Regex("\"html_url\"\\s*:\\s*\"([^\"]+)\"").find(json)?.groupValues?.get(1)
-            ?: "https://github.com/Tufein/Twinjay/releases/tag/$tag"
-        val apk = Regex("\"browser_download_url\"\\s*:\\s*\"([^\"]+\\.apk)\"").findAll(json)
-            .map { it.groupValues[1] }
-            .let { all -> all.firstOrNull { it.contains("arm64") } ?: all.firstOrNull() }
-        val body = Regex("\"body\"\\s*:\\s*\"((?:[^\"\\\\]|\\\\.)*)\"").find(json)?.groupValues?.get(1)
-        val notes = body?.let { plainNotes(unescapeJson(it)) } ?: ""
-        val size = apk?.let { url ->
-            // The asset object holds "size" before its "browser_download_url".
-            val idx = json.indexOf(url)
-            if (idx < 0) null
-            else Regex("\"size\"\\s*:\\s*(\\d+)").findAll(json.substring(0, idx)).lastOrNull()
-                ?.groupValues?.get(1)?.toLongOrNull()
+        val root = MiniJson.asObject(MiniJson.parse(json)) ?: return null
+        val tag = (root["tag_name"] as? String)?.takeIf { it.isNotBlank() } ?: return null
+        val page = (root["html_url"] as? String)?.takeIf { isTrustedUrl(it) }
+            ?: "${TRUSTED_PREFIX}releases/tag/$tag"
+        val assets = MiniJson.asArray(root["assets"]).orEmpty().mapNotNull { MiniJson.asObject(it) }
+        val apks = assets.filter {
+            (it["browser_download_url"] as? String)?.let { u -> u.endsWith(".apk") && isTrustedUrl(u) } == true
         }
-        return ReleaseInfo(tag, page, apk, notes, size)
+        val apk = apks.firstOrNull { (it["browser_download_url"] as String).contains("arm64") } ?: apks.firstOrNull()
+        val sums = assets.firstOrNull {
+            (it["name"] as? String) == "SHA256SUMS.txt" && isTrustedUrl(it["browser_download_url"] as? String)
+        }
+        val notes = (root["body"] as? String)?.let { plainNotes(it) } ?: ""
+        return ReleaseInfo(
+            tag = tag,
+            pageUrl = page,
+            apkUrl = apk?.get("browser_download_url") as? String,
+            notes = notes,
+            apkSizeBytes = (apk?.get("size") as? Long)?.takeIf { it > 0 },
+            checksumsUrl = sums?.get("browser_download_url") as? String,
+        )
     }
 
-    private fun unescapeJson(s: String): String {
-        val out = StringBuilder()
-        var i = 0
-        while (i < s.length) {
-            val c = s[i]
-            if (c == '\\' && i + 1 < s.length) {
-                when (val n = s[i + 1]) {
-                    'n' -> out.append('\n')
-                    'r' -> {}
-                    't' -> out.append(' ')
-                    'u' -> if (i + 5 < s.length) {
-                        s.substring(i + 2, i + 6).toIntOrNull(16)?.let { out.append(it.toChar()) }
-                        i += 4
-                    }
-                    else -> out.append(n)
-                }
-                i += 2
-            } else {
-                out.append(c)
-                i++
-            }
+    /** Finds the SHA-256 of [fileName] in the text of a `sha256sum` file; null when absent or malformed. */
+    fun checksumFor(sumsText: String, fileName: String): String? =
+        sumsText.lineSequence()
+            .map { it.trim().split(Regex("\\s+"), limit = 2) }
+            .firstOrNull { it.size == 2 && it[1].trimStart('*') == fileName }
+            ?.get(0)?.lowercase()
+            ?.takeIf { Regex("[0-9a-f]{64}").matches(it) }
+
+    fun sha256Hex(bytes: java.io.InputStream): String {
+        val md = java.security.MessageDigest.getInstance("SHA-256")
+        val buf = ByteArray(64 * 1024)
+        while (true) {
+            val n = bytes.read(buf)
+            if (n < 0) break
+            md.update(buf, 0, n)
         }
-        return out.toString()
+        return md.digest().joinToString("") { "%02x".format(it) }
     }
 
     /**

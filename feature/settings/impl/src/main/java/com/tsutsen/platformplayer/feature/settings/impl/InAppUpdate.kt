@@ -10,6 +10,7 @@ import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import androidx.core.content.ContextCompat
+import com.tsutsen.platformplayer.core.data.update.GithubReleaseUpdate
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ensureActive
@@ -65,13 +66,21 @@ internal object InAppUpdate {
         tag: String,
         apkUrl: String,
         expectedSize: Long?,
+        checksumsUrl: String? = null,
         onProgress: (Long, Long?) -> Unit,
     ): File =
         withContext(Dispatchers.IO) {
+            if (!GithubReleaseUpdate.isTrustedUrl(apkUrl)) {
+                throw IllegalStateException("The update address is not a TwinJay release on GitHub")
+            }
+            // When the release publishes SHA256SUMS.txt the download must match it, or we stop.
+            val expectedSha = checksumsUrl?.let { fetchExpectedSha(it, apkUrl.substringAfterLast('/')) }
             val dir = updatesDir(context)
             val target = File(dir, "TwinJay-${tag.replace(Regex("[^A-Za-z0-9._-]"), "_")}.apk")
             dir.listFiles()?.filter { it != target }?.forEach { it.delete() }
-            if (target.exists() && expectedSize != null && expectedSize > 0 && target.length() == expectedSize) {
+            if (target.exists() && expectedSize != null && expectedSize > 0 && target.length() == expectedSize &&
+                (expectedSha == null || target.inputStream().use { GithubReleaseUpdate.sha256Hex(it) } == expectedSha)
+            ) {
                 onProgress(target.length(), expectedSize)
                 return@withContext target
             }
@@ -108,6 +117,10 @@ internal object InAppUpdate {
                 }
                 if (total != null && done != total) throw IllegalStateException("Download was cut off ($done of $total bytes)")
                 onProgress(done, total)
+                if (expectedSha != null) {
+                    val actual = part.inputStream().use { GithubReleaseUpdate.sha256Hex(it) }
+                    if (actual != expectedSha) throw IllegalStateException("The download does not match its checksum, so it was thrown away")
+                }
                 target.delete()
                 if (!part.renameTo(target)) throw IllegalStateException("Could not save the update")
                 target
@@ -121,6 +134,35 @@ internal object InAppUpdate {
                 conn?.disconnect()
             }
         }
+
+    /** Reads SHA256SUMS.txt and returns the hash listed for [fileName]; throws when it is missing. */
+    private fun fetchExpectedSha(checksumsUrl: String, fileName: String): String {
+        if (!GithubReleaseUpdate.isTrustedUrl(checksumsUrl)) throw IllegalStateException("Untrusted checksum address")
+        val conn = URL(checksumsUrl).openConnection() as HttpURLConnection
+        try {
+            conn.connectTimeout = 15_000
+            conn.readTimeout = 30_000
+            conn.instanceFollowRedirects = true
+            conn.setRequestProperty("User-Agent", "TwinJay-updater")
+            if (conn.responseCode !in 200..299) throw IllegalStateException("Checksum file answered ${conn.responseCode}")
+            val text = conn.inputStream.use { it.readBytes(64 * 1024) }.toString(Charsets.UTF_8)
+            return GithubReleaseUpdate.checksumFor(text, fileName)
+                ?: throw IllegalStateException("No checksum listed for $fileName")
+        } finally {
+            conn.disconnect()
+        }
+    }
+
+    private fun java.io.InputStream.readBytes(limit: Int): ByteArray {
+        val out = java.io.ByteArrayOutputStream()
+        val buf = ByteArray(4096)
+        while (out.size() < limit) {
+            val n = read(buf, 0, minOf(buf.size, limit - out.size()))
+            if (n < 0) break
+            out.write(buf, 0, n)
+        }
+        return out.toByteArray()
+    }
 
     /**
      * Streams [apk] into a PackageInstaller session and commits it. [onResult] is called from the

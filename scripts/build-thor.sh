@@ -15,24 +15,4 @@ fi
     :feature:player:impl:testDebugUnitTest \
     :core:database:testDebugUnitTest \
     :app:testThorDebugUnitTest \
-    --tests 'com.tsutsen.platformplayer.activities.*' \
-    --tests '*SuccessorDefaultsTest' \
-    --tests '*PluginAppIdentityTest' \
-    --tests '*SuccessorUpdateTest' \
-    --tests '*GithubReleaseUpdateTest' \
-    --tests '*SponsorBlockTest' \
-    --tests '*CompanionSleepPolicyTest' \
-    --tests '*TakeoutCsvTest' \
-    --tests '*HomeFilterTest' \
-    --tests '*StaleDownloadsTest' \
-    --tests '*SourceErrorsTest' \
-    --tests '*BufferProfileTest' \
-    --tests '*DailySettingsBackupTest' \
-    --tests '*EverythingSearchTest' \
-    --tests '*PluginRollbackRulesTest' \
-    --tests '*SettingsExtrasTest' \
-    --tests '*HomeFeedCacheTest' \
-    --tests '*BatterySaverTest' \
-    --tests '*SettingsRepositoryImplTest' \
-    --tests 'com.tsutsen.platformplayer.player.*' \
     -PtargetAbis=arm64-v8a,x86_64 --max-workers=4 "$@"

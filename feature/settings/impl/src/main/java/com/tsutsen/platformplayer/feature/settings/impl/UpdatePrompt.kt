@@ -173,7 +173,7 @@ internal fun UpdateScreen(
             scope.launch {
                 try {
                     val file =
-                        InAppUpdate.download(context, release.tag, url, release.apkSizeBytes) { d, t ->
+                        InAppUpdate.download(context, release.tag, url, release.apkSizeBytes, release.checksumsUrl) { d, t ->
                             done = d
                             if (t != null) total = t
                         }
