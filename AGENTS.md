@@ -1,4 +1,43 @@
-# AGENTS.md
+# AGENTS.md — TwinJay (Bluejay Thor)
+
+Instructions for coding agents (OpenCode, Claude Code, Codex and similar). Through `opencode.json`
+OpenCode also loads `DEVELOPMENT.md` (toolchain and build), `CONTRIBUTING.md` and `CONVENTIONS.md`
+(module, naming and architecture rules that all new code must follow).
+
+## Project
+
+Unofficial continuation of [Bluejay](https://github.com/tsutsen/bluejay) (FUTO video platform player)
+for two-screen Android handhelds such as the **AYN Thor**: companion-screen dashboard, controller
+support, source plugins, downloads and library.
+
+- Namespace `com.tsutsen.platformplayer`; the **Thor** flavor uses application id `com.tufein.bluejay.thor`
+- Version: `app/build.gradle`, currently `0.21.0-thor.1` / 21001 (versionCode = major*1e6 + minor*1e3 + patch)
+- compileSdk 37 (platform `android-37.0`, build tools 37.0.0), minSdk 28, targetSdk 36, **JDK 21**, Gradle 9.5.1 wrapper
+- Language: Kotlin (Compose, Hilt, Room, Media3), multi-module (`app/`, `core/`, `feature/`, `dep/`)
+- `HANDOFF.md` is an upstream snapshot from the original Bluejay author; its paths, branches and devices are not this repo's.
+
+## Build and test
+
+Dependencies must be prepared first and every Gradle call needs the init script:
+
+```sh
+./scripts/prepare-dependencies.sh
+./scripts/build-thor.sh                       # supported full build
+./gradlew --init-script scripts/dependency-toolchain.init.gradle \
+  :app:assembleThorDebug :feature:player:impl:testDebugUnitTest :core:database:testDebugUnitTest \
+  :app:testThorDebugUnitTest -PtargetAbis=arm64-v8a      # CI subset, see .github/workflows/build-thor.yml
+./gradlew --init-script scripts/dependency-toolchain.init.gradle :app:lintVitalThorRelease -PtargetAbis=arm64-v8a
+```
+
+APKs land in `app/build/outputs/apk/thor/debug/`. Never reset or delete local changes in `dep/` checkouts
+to force dependency preparation through.
+
+## Release process
+
+Run the **release-thor** workflow (`workflow_dispatch`, input `tag` like `v0.21.0-thor.1`, prerelease by
+default). It builds the signed ARM64 APK and publishes it with `SHA256SUMS.txt` and `apk-signature.txt`.
+Update `CHANGELOG-THOR.md` and the download link in `README.md`. The owner always wants work shipped as a
+GitHub release with notes that explain what changed in the code.
 
 ## LSP diagnostics: Gradle is the source of truth
 
