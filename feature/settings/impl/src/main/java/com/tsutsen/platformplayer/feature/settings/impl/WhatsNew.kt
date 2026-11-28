@@ -19,6 +19,10 @@ object WhatsNew {
 
     private val notes: Map<String, String> =
         mapOf(
+            "0.23.0-thor.1" to
+                "- The queue is kept after a restart\n" +
+                "- Queue: shuffle upcoming videos\n" +
+                "- Sleep timer: +15 min while it runs",
             "0.21.0-thor.1" to
                 "- Queue: \"Play next\" puts a video directly after the current one\n" +
                 "- Sleep timer fades out over the last 20 seconds",

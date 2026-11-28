@@ -1257,6 +1257,8 @@ fun PlayerView(
                         onClearAb = { viewModel.clearAbRepeat() },
                         sleepTimerLabel = state.sleepTimerLabel,
                         onSleepTimer = { viewModel.setSleepTimer(it) },
+                        onExtendSleepTimer = { viewModel.extendSleepTimer(it) },
+                        onShuffleQueue = { viewModel.shuffleQueue() },
                         audioOnly = state.audioOnly,
                         onAudioOnly = { viewModel.setAudioOnly(it) },
                         qualities = state.videoQualities,

@@ -29,6 +29,7 @@ import androidx.media3.exoplayer.text.TextRenderer
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
 import com.tsutsen.platformplayer.core.data.BuildConfig
+import com.tsutsen.platformplayer.core.data.player.SleepExtend
 import com.tsutsen.platformplayer.core.data.player.SleepFade
 import com.tsutsen.platformplayer.core.data.repository.CastingRepository
 import com.tsutsen.platformplayer.core.data.repository.CommentRepository
@@ -435,6 +436,7 @@ class PlayerRepositoryImpl(
     }
 
     private var sleepJob: Job? = null
+    @Volatile private var sleepEndsAtMs = 0L
     @Volatile private var audioOnly = false
 
     private fun repeatAbIfNeeded(player: ExoPlayer, position: Long) {
@@ -459,9 +461,15 @@ class PlayerRepositoryImpl(
         _playerState.update { it.copy(abStartMs = -1L, abEndMs = -1L) }
     }
 
+    override fun extendSleepTimer(minutes: Int) {
+        val remaining = if (sleepJob?.isActive == true) sleepEndsAtMs - android.os.SystemClock.elapsedRealtime() else 0L
+        setSleepTimer(SleepExtend.totalMinutes(remaining, minutes))
+    }
+
     override fun setSleepTimer(minutes: Int) {
         sleepJob?.cancel()
         sleepJob = null
+        sleepEndsAtMs = if (minutes > 0) android.os.SystemClock.elapsedRealtime() + minutes * 60_000L else 0L
         // A canceled fade must never leave the player silent: ExoPlayer's own
         // volume normally stays at 1 (the device volume is the only volume).
         _exoPlayer?.volume = 1f

@@ -974,6 +974,10 @@ class PlayerViewModel
 
         fun setSleepTimer(minutes: Int) = playerRepository.setSleepTimer(minutes)
 
+        fun extendSleepTimer(minutes: Int) = playerRepository.extendSleepTimer(minutes)
+
+        fun shuffleQueue() = playbackQueueRepository.shuffleUpcoming()
+
         fun setAudioOnly(enabled: Boolean) = playerRepository.setAudioOnly(enabled)
 
         fun toggleStats() {

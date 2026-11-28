@@ -3,7 +3,11 @@ package com.tsutsen.platformplayer.core.data.repository.impl
 import com.tsutsen.platformplayer.core.data.player.PlaybackQueueOrder
 import com.tsutsen.platformplayer.core.data.repository.PlaybackQueueRepository
 import com.tsutsen.platformplayer.core.data.repository.PlayerRepository
+import android.content.Context
 import android.util.Log
+import com.tsutsen.platformplayer.core.data.player.QueueShuffle
+import com.tsutsen.platformplayer.core.data.util.QueueStore
+import dagger.hilt.android.qualifiers.ApplicationContext
 import com.tsutsen.platformplayer.core.model.ContentItem
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -21,6 +25,7 @@ import javax.inject.Singleton
 class PlaybackQueueRepositoryImpl
     @Inject
     constructor(
+        @ApplicationContext private val context: Context,
         private val playerRepository: PlayerRepository,
     ) : PlaybackQueueRepository {
         private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
@@ -30,6 +35,17 @@ class PlaybackQueueRepositoryImpl
         override val queue: StateFlow<List<ContentItem>> = _queue.asStateFlow()
 
         init {
+            // The queue survives an app restart: restore it before anything
+            // can change it, then write every change back.
+            runCatching { QueueStore.load(context) }
+                .onSuccess { _queue.value = it }
+                .onFailure { Log.w(TAG, "Could not restore the queue", it) }
+            scope.launch {
+                _queue.collect { items ->
+                    runCatching { QueueStore.save(context, items) }
+                        .onFailure { Log.w(TAG, "Could not save the queue", it) }
+                }
+            }
             scope.launch {
                 playerRepository.playerState.collect { state ->
                     val current = state.currentVideo ?: return@collect
@@ -173,6 +189,11 @@ class PlaybackQueueRepositoryImpl
             val item = q.removeAt(from)
             q.add(to, item)
             _queue.value = q
+        }
+
+        override fun shuffleUpcoming() {
+            val currentUrl = playerRepository.playerState.value.currentVideo?.url
+            _queue.value = QueueShuffle.shuffleUpcoming(_queue.value, currentUrl)
         }
 
         override fun clear() {

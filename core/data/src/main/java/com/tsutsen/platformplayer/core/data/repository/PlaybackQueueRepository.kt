@@ -44,6 +44,9 @@ interface PlaybackQueueRepository {
     fun move(from: Int, to: Int)
     fun clear()
 
+    /** Puts everything after the current video in random order; what plays now stays put. */
+    fun shuffleUpcoming()
+
     /** Set while an "up next" countdown runs before the next video starts. */
     val upNext: kotlinx.coroutines.flow.StateFlow<UpNext?>
 
