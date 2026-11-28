@@ -11,6 +11,7 @@ Formaat: S = enkele uren, M = een dag, L = meerdere dagen. Alles is alleen door 
 | 1 | Wachtrij blijft bewaard na herstart | De wachtrij wordt opgeslagen (`QueueStore`) en bij het starten teruggezet. Er start niets vanzelf. |
 | 2 | Wachtrij husselen | Opties > Queue > "Shuffle upcoming": alles na de huidige video in willekeurige volgorde. |
 | 3 | Slaaptimer verlengen | Opties > Sleep timer > "+15 min" zolang een timer met minuten loopt. |
+| 4 | Wachtrij opslaan als afspeellijst | Opties > Queue > "Save as playlist" maakt een lokale afspeellijst. |
 
 ## Nog open uit de vorige roadmap
 
@@ -25,7 +26,6 @@ Formaat: S = enkele uren, M = een dag, L = meerdere dagen. Alles is alleen door 
 | # | Item | Waarom | Omvang |
 |---|------|--------|--------|
 | 7 | Downloads opnieuw proberen met toenemende wachttijd | Mislukte downloads blijven nu liggen tot je ze handmatig herstart. | M |
-| 8 | Wachtrij opslaan als afspeellijst | De wachtrij overleeft nu een herstart, maar niet als vaste lijst. | S |
 | 9 | Hoofdstuk vooruit/terug op de schouderknoppen | Hoofdstukken bestaan al; alleen de knoppenkoppeling ontbreekt. | S |
 | 10 | Wachtrij op het tweede scherm: husselen en wissen | Zelfde acties als in het optiesheet, maar op het bedieningsscherm. | S |
 | 11 | Kleur van het tweede scherm uit de thumbnail | Retro-arcade gevoel; raakt de Compose-thema's, dus eerst op het toestel proberen. | M |

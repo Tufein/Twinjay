@@ -1259,6 +1259,7 @@ fun PlayerView(
                         onSleepTimer = { viewModel.setSleepTimer(it) },
                         onExtendSleepTimer = { viewModel.extendSleepTimer(it) },
                         onShuffleQueue = { viewModel.shuffleQueue() },
+                        onSaveQueue = { viewModel.saveQueueAsPlaylist() },
                         audioOnly = state.audioOnly,
                         onAudioOnly = { viewModel.setAudioOnly(it) },
                         qualities = state.videoQualities,

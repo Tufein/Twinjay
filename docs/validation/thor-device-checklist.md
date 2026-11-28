@@ -32,6 +32,7 @@ Instellingen > About > "Share app log" of Diagnostics > "Send bug report".
 ## Nieuw in 0.23.0
 - [ ] Zet een paar video's in de wachtrij, sluit de app helemaal af en open hem opnieuw: de wachtrij staat er nog, er start niets vanzelf
 - [ ] Opties > Queue > "Shuffle upcoming": de volgorde na de huidige video verandert, de huidige video blijft spelen
+- [ ] Opties > Queue > "Save as playlist": er komt een afspeellijst "Queue <datum tijd>" in de bibliotheek met alle video's
 - [ ] Slaaptimer 15 min aanzetten, daarna "+15 min": het label wordt ongeveer 30 min; bij "End of video" staat de knop er niet
 
 ## Nieuw in 0.21.0

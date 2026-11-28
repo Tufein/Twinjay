@@ -59,6 +59,7 @@ internal fun OptionsModal(
     onSleepTimer: (Int) -> Unit = {},
     onExtendSleepTimer: (Int) -> Unit = {},
     onShuffleQueue: () -> Unit = {},
+    onSaveQueue: () -> Unit = {},
     audioOnly: Boolean = false,
     onAudioOnly: (Boolean) -> Unit = {},
     onToggleStats: () -> Unit = {},
@@ -181,6 +182,13 @@ internal fun OptionsModal(
                     selected = false,
                     onClick = onShuffleQueue,
                     label = { Text("Shuffle upcoming") },
+                    shapes = tokenizedChipShapes(),
+                )
+                Spacer(modifier = Modifier.width(Tokens.SpaceSm))
+                FilterChip(
+                    selected = false,
+                    onClick = onSaveQueue,
+                    label = { Text("Save as playlist") },
                     shapes = tokenizedChipShapes(),
                 )
             }

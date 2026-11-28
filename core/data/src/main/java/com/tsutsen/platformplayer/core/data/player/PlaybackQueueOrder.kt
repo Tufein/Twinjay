@@ -59,3 +59,10 @@ object SleepExtend {
         return left + addMinutes
     }
 }
+
+/** Naming for "Save queue as playlist". */
+object QueuePlaylistName {
+    /** "Queue 2026-11-28 14:05"; the time comes in as numbers so this stays testable. */
+    fun of(year: Int, month: Int, day: Int, hour: Int, minute: Int): String =
+        "Queue %04d-%02d-%02d %02d:%02d".format(java.util.Locale.US, year, month, day, hour, minute)
+}

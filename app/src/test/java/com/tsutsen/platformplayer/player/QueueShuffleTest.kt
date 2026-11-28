@@ -1,5 +1,6 @@
 package com.tsutsen.platformplayer.player
 
+import com.tsutsen.platformplayer.core.data.player.QueuePlaylistName
 import com.tsutsen.platformplayer.core.data.player.QueueShuffle
 import com.tsutsen.platformplayer.core.data.player.SleepExtend
 import com.tsutsen.platformplayer.core.model.ContentItem
@@ -52,5 +53,11 @@ class QueueShuffleTest {
         assertEquals(15, SleepExtend.totalMinutes(0L, 15))
         assertEquals(15, SleepExtend.totalMinutes(-500L, 15))
         assertEquals(0, SleepExtend.totalMinutes(5 * 60_000L, 0))
+    }
+
+    @Test
+    fun playlistNamePadsTheNumbers() {
+        assertEquals("Queue 2026-01-05 07:09", QueuePlaylistName.of(2026, 1, 5, 7, 9))
+        assertEquals("Queue 2026-11-28 14:05", QueuePlaylistName.of(2026, 11, 28, 14, 5))
     }
 }

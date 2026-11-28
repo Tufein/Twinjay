@@ -8,6 +8,8 @@
   The video that is playing keeps its place.
 - Sleep timer: "+15 min" in the video options adds time to a running timer (rounded up to whole
   minutes). It is not shown for "End of video".
+- Queue: "Save as playlist" (video options > Queue) stores the queue as a new local playlist named
+  "Queue <date time>".
 - New unit tests for the queue store, the shuffle and the sleep timer arithmetic.
 - `ROADMAP.md` is replaced by a new roadmap (round 7).
 

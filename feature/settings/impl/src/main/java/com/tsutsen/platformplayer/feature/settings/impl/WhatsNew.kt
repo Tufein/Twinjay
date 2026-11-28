@@ -21,7 +21,7 @@ object WhatsNew {
         mapOf(
             "0.23.0-thor.1" to
                 "- The queue is kept after a restart\n" +
-                "- Queue: shuffle upcoming videos\n" +
+                "- Queue: shuffle upcoming videos, or save it as a playlist\n" +
                 "- Sleep timer: +15 min while it runs",
             "0.21.0-thor.1" to
                 "- Queue: \"Play next\" puts a video directly after the current one\n" +
