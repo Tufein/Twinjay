@@ -1,5 +1,18 @@
 # TwinJay (Thor) changes
 
+## 0.23.0-thor.1 — queue that lasts, shuffle and a longer sleep timer
+
+- Queue: the queue is saved and restored after the app restarts (up to 200 items). Nothing starts
+  playing by itself; the restored queue just waits.
+- Queue: "Shuffle upcoming" (video options > Queue) randomizes everything after the current video.
+  The video that is playing keeps its place.
+- Sleep timer: "+15 min" in the video options adds time to a running timer (rounded up to whole
+  minutes). It is not shown for "End of video".
+- Queue: "Save as playlist" (video options > Queue) stores the queue as a new local playlist named
+  "Queue <date time>".
+- New unit tests for the queue store, the shuffle and the sleep timer arithmetic.
+- `ROADMAP.md` is replaced by a new roadmap (round 7).
+
 ## 0.21.0-thor.1 — play next and a softer sleep timer
 
 - Queue: "Play next" in the video options sheet puts a video directly after the current one.

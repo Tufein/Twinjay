@@ -974,6 +974,29 @@ class PlayerViewModel
 
         fun setSleepTimer(minutes: Int) = playerRepository.setSleepTimer(minutes)
 
+        fun extendSleepTimer(minutes: Int) = playerRepository.extendSleepTimer(minutes)
+
+        fun shuffleQueue() = playbackQueueRepository.shuffleUpcoming()
+
+        /** Saves the current queue (now-playing video included) as a new local playlist. */
+        fun saveQueueAsPlaylist() {
+            val items = playbackQueueRepository.queue.value
+            if (items.isEmpty()) return
+            val now = java.util.Calendar.getInstance()
+            val name =
+                com.tsutsen.platformplayer.core.data.player.QueuePlaylistName.of(
+                    now.get(java.util.Calendar.YEAR),
+                    now.get(java.util.Calendar.MONTH) + 1,
+                    now.get(java.util.Calendar.DAY_OF_MONTH),
+                    now.get(java.util.Calendar.HOUR_OF_DAY),
+                    now.get(java.util.Calendar.MINUTE),
+                )
+            viewModelScope.launch {
+                val id = libraryRepository.createPlaylist(name)
+                items.forEach { libraryRepository.addVideoToPlaylist(id, it.toVideoCard()) }
+            }
+        }
+
         fun setAudioOnly(enabled: Boolean) = playerRepository.setAudioOnly(enabled)
 
         fun toggleStats() {

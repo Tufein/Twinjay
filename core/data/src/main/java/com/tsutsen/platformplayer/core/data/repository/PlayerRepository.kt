@@ -87,6 +87,9 @@ interface PlayerRepository {
     /** Sleep timer: [minutes] > 0 pauses after that long, -1 at the end of the video, 0 turns it off. */
     fun setSleepTimer(minutes: Int) {}
 
+    /** Adds [minutes] to the running sleep timer, or starts one with that length when none runs. */
+    fun extendSleepTimer(minutes: Int) {}
+
     /** Audio only: switches the video track off (saves data and battery). */
     fun setAudioOnly(enabled: Boolean) {}
 

@@ -57,6 +57,9 @@ internal fun OptionsModal(
     onClearAb: () -> Unit = {},
     sleepTimerLabel: String = "",
     onSleepTimer: (Int) -> Unit = {},
+    onExtendSleepTimer: (Int) -> Unit = {},
+    onShuffleQueue: () -> Unit = {},
+    onSaveQueue: () -> Unit = {},
     audioOnly: Boolean = false,
     onAudioOnly: (Boolean) -> Unit = {},
     onToggleStats: () -> Unit = {},
@@ -164,6 +167,30 @@ internal fun OptionsModal(
                     )
                     Spacer(modifier = Modifier.width(Tokens.SpaceSm))
                 }
+                // Only while a timed timer runs: "End of video" has no minutes to extend.
+                if (sleepTimerLabel.endsWith(" min")) {
+                    FilterChip(
+                        selected = false,
+                        onClick = { onExtendSleepTimer(15) },
+                        label = { Text("+15 min") },
+                        shapes = tokenizedChipShapes(),
+                    )
+                }
+            }
+            OptionCard(title = "Queue") {
+                FilterChip(
+                    selected = false,
+                    onClick = onShuffleQueue,
+                    label = { Text("Shuffle upcoming") },
+                    shapes = tokenizedChipShapes(),
+                )
+                Spacer(modifier = Modifier.width(Tokens.SpaceSm))
+                FilterChip(
+                    selected = false,
+                    onClick = onSaveQueue,
+                    label = { Text("Save as playlist") },
+                    shapes = tokenizedChipShapes(),
+                )
             }
             OptionCard(title = "Audio only") {
                 FilterChip(
