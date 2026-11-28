@@ -222,7 +222,7 @@ dependencies {
     implementation "com.squareup.okhttp3:okhttp:5.3.0"
 
     //JSON
-    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0" //Used for structured json
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.13.0" //Used for structured json
     implementation 'com.google.code.gson:gson:2.13.2' //Used for complex/anonymous cases like during development conversions (eg. V8RemoteObject)
 
     //JS
